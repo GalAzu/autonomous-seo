@@ -3,7 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Autonomous SEO — All-in-One SEO Management Tool</title>
+<title>Autonomous SEO — כלי SEO חינמי לעסקים ישראליים</title>
+<meta name="description" content="כלי SEO חינמי ומקיף בעברית. סרקו את האתר שלכם, קבלו ציון SEO, מצאו בעיות ותקנו אותן — בלי רישום, בלי תשלום. מבית Autonomous.">
+<meta name="keywords" content="בדיקת SEO, כלי SEO בעברית, SEO חינמי, בדיקת SEO לאתר, ניהול SEO, שיפור דירוג גוגל">
+<meta name="author" content="Autonomous — Building Systems, Creating Habits">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://autonomous-seo.vercel.app">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Autonomous SEO — כלי SEO חינמי לעסקים">
+<meta property="og:description" content="סרקו את האתר שלכם בחינם. ציון SEO, ניתוח כותרות, מטא, סכמות, מפת אתר, מילות מפתח ועוד — הכל במקום אחד.">
+<meta property="og:url" content="https://autonomous-seo.vercel.app">
+<meta property="og:site_name" content="Autonomous SEO">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Autonomous SEO — כלי SEO חינמי לעסקים">
+<meta name="twitter:description" content="סרקו את האתר שלכם בחינם וקבלו ציון SEO מיידי עם המלצות לשיפור.">
+<meta name="theme-color" content="#2f55c7">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232f55c7'/><text x='50' y='68' font-size='55' font-weight='900' fill='white' text-anchor='middle' font-family='sans-serif'>A</text></svg>">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=Assistant:wght@300;400;500;600;700;800&display=swap');
   :root {
@@ -294,6 +310,25 @@
   }
   .print-header, .print-pages-summary { display: none; }
 
+  /* CTA Banner */
+  .cta-banner { background: linear-gradient(135deg, var(--primary-glow), var(--accent-glow)); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .cta-banner .cta-text strong { color: var(--text); font-size: 14px; }
+  .cta-banner .cta-text p { color: var(--text-dim); font-size: 12px; margin-top: 3px; }
+  .cta-banner .btn-cta { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 10px 22px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; transition: var(--transition); font-family: var(--font-body); text-decoration: none; display: inline-block; }
+  .cta-banner .btn-cta:hover { box-shadow: 0 4px 20px rgba(47,85,199,0.4); transform: translateY(-1px); }
+
+  .powered-footer { text-align: center; padding: 24px; margin-top: 40px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); }
+  .powered-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .powered-footer a:hover { text-decoration: underline; }
+
+  .low-score-alert { background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(234,179,8,0.06)); border: 1px solid rgba(234,179,8,0.2); border-radius: var(--radius); padding: 18px 22px; margin-top: 16px; display: flex; align-items: flex-start; gap: 14px; }
+  .low-score-alert .alert-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  .low-score-alert .alert-text strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 14px; }
+  .low-score-alert .alert-text p { color: var(--text-dim); font-size: 12px; }
+  .low-score-alert .alert-text a { color: var(--accent); font-weight: 600; text-decoration: none; }
+
+  @media print { .cta-banner, .powered-footer, .low-score-alert { display: none !important; } }
+
   /* Feature 4: Content textarea */
   .content-textarea { min-height: 150px; resize: vertical; }
 
@@ -545,7 +580,8 @@
       </div>
     </div>
     <div class="sidebar-footer">
-      <a href="#">Autonomous SEO v1.0</a>
+      <a href="https://autonomous-seo.vercel.app" target="_blank" style="display:block;margin-bottom:6px;">Autonomous SEO v1.0</a>
+      <a href="https://autonomous.co.il" target="_blank" style="font-size:10px;opacity:0.7;">by Autonomous &#x2192;</a>
     </div>
   </nav>
 
@@ -575,6 +611,14 @@
       </div>
       <div style="margin-top:16px;">
         <button class="btn btn-primary" onclick="printReport()">&#x1f4c4; הורדת דוח PDF</button>
+      </div>
+      <div id="low-score-cta" style="display:none;"></div>
+      <div class="cta-banner">
+        <div class="cta-text">
+          <strong>צריכים עזרה ביישום השינויים?</strong>
+          <p>בדיקת SEO חינמית עם מומחה מ-Autonomous — נראה לכם בדיוק מה לשפר ואיך</p>
+        </div>
+        <a href="https://autonomous.co.il/contact" target="_blank" class="btn-cta">קבעו שיחה חינם &#x2192;</a>
       </div>
       <div class="print-header" id="print-header"></div>
       <div class="print-pages-summary" id="print-pages-summary"></div>
@@ -1108,6 +1152,10 @@
       </div>
     </div>
 
+    <div class="powered-footer">
+      Powered by <a href="https://autonomous.co.il" target="_blank">Autonomous</a> &mdash; Building Systems, Creating Habits
+    </div>
+
   </div>
 </div>
 
@@ -1144,6 +1192,10 @@
       <button class="btn btn-primary" onclick="copyExport()">&#x1f4cb; העתקה</button>
       <button class="btn btn-accent" onclick="downloadExport()">&#x1f4e5; הורדה</button>
       <button class="btn btn-ghost" onclick="closeModal('export-modal')">סגירה</button>
+    </div>
+    <div style="margin-top:16px;padding:14px 18px;background:linear-gradient(135deg,var(--primary-glow),var(--accent-glow));border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span style="font-size:13px;color:var(--text-dim);">רוצים שניישם את השינויים עבורכם?</span>
+      <a href="https://autonomous.co.il/contact" target="_blank" style="font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;text-decoration:none;">דברו איתנו &#x2192;</a>
     </div>
   </div>
 </div>
@@ -1243,7 +1295,7 @@ const CORS_PROXIES = [
 function scanLog(msg, type = '') {
   const log = document.getElementById('scan-log');
   const cls = type ? ` class="log-${type}"` : '';
-  log.innerHTML += `<div${cls}>${msg}</div>`;
+  log.innerHTML += `<div${cls}>${escapeHtml(msg)}</div>`;
   log.scrollTop = log.scrollHeight;
 }
 
@@ -1677,7 +1729,6 @@ function finishSetup() {
     robots,
     schemas: projectSchemas,
     checklist: {},
-    changes: {},
     redirects: [],
     gscHistory: [],
     hreflang: { languages: [], mappings: [] },
@@ -1804,7 +1855,7 @@ function scoreProject() {
     // Title
     maxScore += 20;
     if (pg.title && pg.title.length > 0) { details.titles++; totalScore += 10; }
-    if (pg.title && pg.title.length >= 30 && pg.title.length <= 60) totalScore += 10;
+    if (pg.title && pg.title.length >= 50 && pg.title.length <= 60) totalScore += 10;
     else if (pg.title && pg.title.length > 0) totalScore += 5;
 
     // Description
@@ -1847,7 +1898,7 @@ function scoreProject() {
 
 function scorePage(pg) {
   let s = 0, max = 0;
-  max += 25; if (pg.title && pg.title.length >= 30 && pg.title.length <= 60) s += 25; else if (pg.title) s += 10;
+  max += 25; if (pg.title && pg.title.length >= 50 && pg.title.length <= 60) s += 25; else if (pg.title) s += 10;
   max += 25; if (pg.description && pg.description.length >= 120 && pg.description.length <= 160) s += 25; else if (pg.description) s += 10;
   max += 15; if (pg.canonical) s += 15;
   max += 15; if (pg.schema && pg.schema.length > 0) s += 15;
@@ -1909,7 +1960,7 @@ function renderDashboard() {
 
   // Priority improvements
   const priorities = [];
-  if (details.titles < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.titles} עמודים חסרי כותרת אופטימלית`, sub: 'כותרת צריכה להיות בין 30-60 תווים' });
+  if (details.titles < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.titles} עמודים חסרי כותרת אופטימלית`, sub: 'כותרת צריכה להיות בין 50-60 תווים' });
   if (details.descriptions < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.descriptions} עמודים חסרי תיאור מטא אופטימלי`, sub: 'תיאור צריך להיות בין 120-160 תווים' });
   if (p.schemas.length === 0) priorities.push({ icon: 'missing', text: 'אין נתונים מובנים (Schema)', sub: 'הוסיפו לפחות סכמת ' + p.businessType });
   if (details.keywords < p.pages.length) priorities.push({ icon: 'todo', text: `${p.pages.length - details.keywords} עמודים ללא מילות מפתח ממוקדות`, sub: 'מפו מילות מפתח לכל עמוד' });
@@ -1926,6 +1977,25 @@ function renderDashboard() {
       <div class="checklist-text"><div><strong>${pr.text}</strong></div><div class="sub">${pr.sub}</div></div>
     </div>
   `).join('');
+
+  // Low score CTA
+  const lowScoreCta = document.getElementById('low-score-cta');
+  if (lowScoreCta) {
+    if (score < 60 && p.pages.length > 0) {
+      lowScoreCta.style.display = 'block';
+      lowScoreCta.innerHTML = `
+        <div class="low-score-alert">
+          <div class="alert-icon">&#x1f4a1;</div>
+          <div class="alert-text">
+            <strong>הציון שלכם (${score}%) מצביע על פוטנציאל משמעותי לשיפור</strong>
+            <p>שיפור ה-SEO יכול להביא יותר לקוחות מגוגל בלי לשלם על פרסום. רוצים שמומחה מ-Autonomous יסתכל על זה ביחד איתכם?
+            <a href="https://autonomous.co.il/contact" target="_blank">שיחת ייעוץ חינמית &#x2192;</a></p>
+          </div>
+        </div>`;
+    } else {
+      lowScoreCta.style.display = 'none';
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -1938,7 +2008,7 @@ function renderPagesTable() {
   tbody.innerHTML = p.pages.map(pg => {
     const tl = (pg.title || '').length;
     const dl = (pg.description || '').length;
-    const tb = tl >= 30 && tl <= 60 ? '<span class="badge green">OK</span>' : tl > 60 ? '<span class="badge yellow">&#x2191;</span>' : tl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
+    const tb = tl >= 50 && tl <= 60 ? '<span class="badge green">OK</span>' : tl > 60 ? '<span class="badge yellow">&#x2191;</span>' : tl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
     const db = dl >= 120 && dl <= 160 ? '<span class="badge green">OK</span>' : dl > 160 ? '<span class="badge yellow">&#x2191;</span>' : dl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
     const sb = pg.schema && pg.schema.length > 0 ? `<span class="badge green">${pg.schema.join(', ')}</span>` : '<span class="badge red">-</span>';
     const indexBadge = pg.noindex ? '<span class="badge red">Noindex</span>' : '<span class="badge green">Index</span>';
@@ -2082,7 +2152,7 @@ function updatePreview() {
 
   const tc = document.getElementById('title-count');
   tc.textContent = `${t.length} / 60 characters`;
-  tc.className = 'char-count' + (t.length > 60 ? ' over' : t.length >= 30 && t.length <= 60 ? ' good' : t.length > 0 ? ' warn' : '');
+  tc.className = 'char-count' + (t.length > 60 ? ' over' : t.length >= 50 && t.length <= 60 ? ' good' : t.length > 0 ? ' warn' : '');
 
   const dc = document.getElementById('desc-count');
   dc.textContent = `${d.length} / 160 characters`;
@@ -2092,7 +2162,7 @@ function updatePreview() {
 function updatePageChecklist(page) {
   const el = document.getElementById('page-checklist');
   const checks = [
-    { ok: (page.title || '').length >= 30 && (page.title || '').length <= 60, text: `כותרת: ${(page.title || '').length} תווים`, sub: 'אופטימלי: 30-60 תווים' },
+    { ok: (page.title || '').length >= 50 && (page.title || '').length <= 60, text: `כותרת: ${(page.title || '').length} תווים`, sub: 'אופטימלי: 50-60 תווים' },
     { ok: (page.description || '').length >= 120 && (page.description || '').length <= 160, text: `תיאור: ${(page.description || '').length} תווים`, sub: 'אופטימלי: 120-160 תווים' },
     { ok: !!page.canonical, text: 'Canonical מוגדר', sub: page.canonical || 'חסר' },
     { ok: page.schema && page.schema.length > 0, text: 'נתונים מובנים', sub: page.schema && page.schema.length > 0 ? page.schema.join(', ') : 'אין סכמה' },
