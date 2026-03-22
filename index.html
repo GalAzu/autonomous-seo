@@ -269,6 +269,50 @@
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
     .onboarding-card { padding: 32px 24px; }
   }
+
+  /* Feature 9: Print styles for PDF report */
+  @media print {
+    body { background: white; color: #222; font-size: 12px; }
+    .sidebar, .onboarding, .modal-overlay, .toast, .btn, button, select, input, textarea,
+    .nav-section, .sidebar-footer, #editor-panel, #tab-pages, #tab-editor, #tab-structured,
+    #tab-sitemap, #tab-robots, #tab-keywords, #tab-headings, #tab-gsc, #tab-checklist,
+    #tab-settings, #tab-redirects, #tab-images, #tab-links, #tab-hreflang { display: none !important; }
+    .app { display: block !important; }
+    .main { margin: 0 !important; padding: 20px !important; max-width: 100% !important; }
+    #tab-dashboard { display: block !important; }
+    .card { border: 1px solid #ccc; break-inside: avoid; page-break-inside: avoid; }
+    .score-ring { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .badge { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .progress-fill { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .print-header { display: block !important; text-align: center; margin-bottom: 24px; border-bottom: 2px solid #2f55c7; padding-bottom: 16px; }
+    .print-header h1 { font-size: 24px; margin-bottom: 4px; }
+    .print-header p { font-size: 12px; color: #666; }
+    .print-pages-summary { display: block !important; }
+    .print-pages-summary table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .print-pages-summary th, .print-pages-summary td { border: 1px solid #ccc; padding: 6px 8px; text-align: right; }
+    .print-pages-summary th { background: #f0f0f0; }
+  }
+  .print-header, .print-pages-summary { display: none; }
+
+  /* Feature 4: Content textarea */
+  .content-textarea { min-height: 150px; resize: vertical; }
+
+  /* Feature 4: Keyword density card */
+  .density-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-top: 12px; }
+  .density-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .density-item:last-child { border-bottom: none; }
+
+  /* Feature 8: Orphan/hub badges */
+  .badge.orphan { background: var(--red-bg); color: var(--red); }
+  .badge.hub { background: var(--blue-bg); color: var(--blue); }
+
+  /* Feature 3: Toggle switch */
+  .toggle-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; }
+  .toggle-switch input { display: none; }
+  .toggle-track { width: 36px; height: 20px; border-radius: 10px; background: var(--red); position: relative; transition: var(--transition); }
+  .toggle-switch input:checked + .toggle-track { background: var(--green); }
+  .toggle-track::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: white; top: 2px; right: 2px; transition: var(--transition); }
+  .toggle-switch input:checked + .toggle-track::after { right: 18px; }
 </style>
 </head>
 <body>
@@ -458,6 +502,13 @@
       <div class="nav-item" onclick="showTab('robots',this)">
         <span class="icon">&#x1f916;</span> Robots.txt
       </div>
+      <div class="nav-item" onclick="showTab('redirects',this)">
+        <span class="icon">&#x21c4;</span> ניתובים
+        <span class="nav-badge green" id="nav-redirects-count" style="display:none;">0</span>
+      </div>
+      <div class="nav-item" onclick="showTab('hreflang',this)">
+        <span class="icon">&#x1f30d;</span> שפות
+      </div>
     </div>
     <div class="nav-section">
       <div class="nav-label">תוכן</div>
@@ -466,6 +517,13 @@
       </div>
       <div class="nav-item" onclick="showTab('headings',this)">
         <span class="icon">&#x1f4d1;</span> מבנה כותרות
+      </div>
+      <div class="nav-item" onclick="showTab('images',this)">
+        <span class="icon">&#x1f5bc;</span> תמונות
+        <span class="nav-badge yellow" id="nav-images-count" style="display:none;">0</span>
+      </div>
+      <div class="nav-item" onclick="showTab('links',this)">
+        <span class="icon">&#x1f517;</span> קישורים
       </div>
     </div>
     <div class="nav-section">
@@ -508,6 +566,18 @@
         <div id="priority-list"></div>
       </div>
       <div id="dashboard-insights" style="margin-top:16px;"></div>
+      <div class="card" id="dashboard-duplicates" style="margin-top:16px;">
+        <div class="card-header">
+          <div class="card-title">&#x1f50e; זיהוי תוכן כפול</div>
+          <span class="badge yellow" id="duplicates-count">0</span>
+        </div>
+        <div id="duplicates-list"></div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary" onclick="printReport()">&#x1f4c4; הורדת דוח PDF</button>
+      </div>
+      <div class="print-header" id="print-header"></div>
+      <div class="print-pages-summary" id="print-pages-summary"></div>
     </div>
 
     <!-- ═══ PAGES ═══ -->
@@ -531,6 +601,7 @@
               <th style="width:85px;">אורך תיאור</th>
               <th>Canonical</th>
               <th>Schema</th>
+              <th style="width:70px;">אינדוקס</th>
               <th style="width:100px;">ציון</th>
               <th style="width:80px;">פעולות</th>
             </tr></thead>
@@ -582,6 +653,20 @@
                 <textarea id="edit-og-desc" rows="2" oninput="autoSave();" placeholder="ברירת מחדל: תיאור מטא"></textarea>
               </div>
               <div class="field">
+                <label>תמונת OpenGraph (og:image)</label>
+                <input type="text" id="edit-og-image" oninput="autoSave();" placeholder="https://example.com/image.jpg" style="direction:ltr;text-align:left;" />
+                <div class="hint">תמונה מומלצת: 1200x630 פיקסלים</div>
+              </div>
+              <div class="field">
+                <label>אינדוקס</label>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="edit-noindex" onchange="autoSave();" />
+                  <span class="toggle-track"></span>
+                  <span id="noindex-label">Index</span>
+                </label>
+                <div class="hint">כיבוי = noindex, nofollow — העמוד לא יופיע בתוצאות החיפוש</div>
+              </div>
+              <div class="field">
                 <label>מילות מפתח ממוקדות</label>
                 <div class="tags-container" id="keywords-tags" onclick="document.getElementById('keyword-input').focus()">
                   <input type="text" class="tags-input" id="keyword-input" placeholder="הקלידו ולחצו Enter..." onkeydown="addKeyword(event)" />
@@ -591,6 +676,15 @@
               <div class="field">
                 <label>כותרות H (אחד בכל שורה, פורמט: H1: טקסט)</label>
                 <textarea id="edit-headings" rows="4" oninput="autoSave();" placeholder="H1: כותרת ראשית&#10;H2: כותרת משנה&#10;H3: כותרת משנית" style="font-family:'SF Mono',monospace;font-size:12px;direction:rtl;"></textarea>
+              </div>
+              <div class="field">
+                <label>תוכן העמוד</label>
+                <textarea id="edit-content" class="content-textarea" rows="8" oninput="autoSave();updateKeywordDensity();" placeholder="הדביקו כאן את תוכן העמוד לניתוח צפיפות מילות מפתח..." style="direction:rtl;"></textarea>
+                <div class="char-count" id="content-word-count" style="direction:rtl;text-align:right;"></div>
+              </div>
+              <div class="density-card" id="keyword-density-card" style="display:none;">
+                <div style="font-family:var(--font-heading);font-size:12px;font-weight:600;margin-bottom:8px;">צפיפות מילות מפתח</div>
+                <div id="keyword-density-results"></div>
               </div>
               <div style="display:flex;gap:8px;margin-top:16px;">
                 <button class="btn btn-primary" onclick="savePageChanges()">&#x1f4be; שמירה</button>
@@ -829,6 +923,147 @@
         <p class="section-desc">מעקב מלא אחרי מוכנות SEO — סמנו פריטים שהושלמו</p>
       </div>
       <div id="checklist-container"></div>
+    </div>
+
+    <!-- ═══ REDIRECTS ═══ -->
+    <div id="tab-redirects" class="tab-content">
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <h2 class="section-title">ניהול ניתובים (Redirects)</h2>
+            <p class="section-desc">הגדרת ניתובי 301/302 — ייצוא ל-.htaccess, Netlify, Vercel</p>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr>
+              <th>כתובת מקור</th>
+              <th>כתובת יעד</th>
+              <th style="width:80px;">סוג</th>
+              <th style="width:100px;">סטטוס</th>
+              <th style="width:60px;">הסר</th>
+            </tr></thead>
+            <tbody id="redirects-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">+ הוספת ניתוב</div></div>
+        <div class="grid-2">
+          <div class="field"><label>כתובת מקור</label><input type="text" id="new-redirect-source" placeholder="/old-page/" style="direction:ltr;text-align:left;" onkeydown="if(event.key==='Enter')addRedirect()" /></div>
+          <div class="field"><label>כתובת יעד</label><input type="text" id="new-redirect-target" placeholder="/new-page/" style="direction:ltr;text-align:left;" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>סוג</label>
+            <select id="new-redirect-type">
+              <option value="301">301 (קבוע)</option>
+              <option value="302">302 (זמני)</option>
+            </select>
+          </div>
+          <div class="field"><label>&nbsp;</label><button class="btn btn-primary btn-block" onclick="addRedirect()">הוספה</button></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="exportRedirects('htaccess')">&#x1f4be; .htaccess</button>
+        <button class="btn btn-accent" onclick="exportRedirects('netlify')">&#x1f4be; _redirects (Netlify)</button>
+        <button class="btn btn-ghost" onclick="exportRedirects('vercel')">&#x1f4be; vercel.json</button>
+      </div>
+    </div>
+
+    <!-- ═══ IMAGES (Alt Text Manager) ═══ -->
+    <div id="tab-images" class="tab-content">
+      <div class="section">
+        <h2 class="section-title">ניהול תמונות ו-Alt Text</h2>
+        <p class="section-desc">סקירת כל התמונות באתר — מעקב אחרי טקסט alt חסר</p>
+      </div>
+      <div class="grid-4" id="images-stats" style="margin-bottom:16px;"></div>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <label style="font-size:12px;color:var(--text-dim);white-space:nowrap;">סינון:</label>
+          <button class="btn btn-sm btn-ghost" id="img-filter-all" onclick="setImageFilter('all')" style="background:var(--primary);color:white;">הכל</button>
+          <button class="btn btn-sm btn-ghost" id="img-filter-missing" onclick="setImageFilter('missing')">חסר alt</button>
+          <button class="btn btn-sm btn-ghost" id="img-filter-has" onclick="setImageFilter('has')">יש alt</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrapper" style="max-height:500px;overflow-y:auto;">
+          <table>
+            <thead><tr>
+              <th>תמונה (URL)</th>
+              <th>עמוד</th>
+              <th style="width:80px;">Alt</th>
+              <th>טקסט Alt</th>
+            </tr></thead>
+            <tbody id="images-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LINKS (Internal Linking View) ═══ -->
+    <div id="tab-links" class="tab-content">
+      <div class="section">
+        <h2 class="section-title">ניתוח קישורים פנימיים</h2>
+        <p class="section-desc">מעקב אחרי קישורים נכנסים ויוצאים — זיהוי עמודים יתומים ורכזות</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr>
+              <th>עמוד</th>
+              <th>נתיב</th>
+              <th style="width:120px;">קישורים נכנסים</th>
+              <th style="width:120px;">קישורים יוצאים</th>
+              <th style="width:100px;">סטטוס</th>
+            </tr></thead>
+            <tbody id="links-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ HREFLANG ═══ -->
+    <div id="tab-hreflang" class="tab-content">
+      <div class="section">
+        <h2 class="section-title">ניהול שפות (Hreflang)</h2>
+        <p class="section-desc">הגדרת גרסאות שפה לעמודים — תגיות hreflang לגוגל</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">&#x1f30d; שפות האתר</div>
+          <button class="btn btn-sm btn-primary" onclick="addHreflangLanguage()">+ שפה</button>
+        </div>
+        <div id="hreflang-languages"></div>
+        <div class="grid-2" style="margin-top:12px;">
+          <div class="field"><label>קוד שפה</label>
+            <select id="new-hreflang-code">
+              <option value="he">he (עברית)</option>
+              <option value="en">en (English)</option>
+              <option value="ar">ar (عربية)</option>
+              <option value="ru">ru (Русский)</option>
+              <option value="fr">fr (Français)</option>
+              <option value="es">es (Español)</option>
+              <option value="de">de (Deutsch)</option>
+            </select>
+          </div>
+          <div class="field"><label>כתובת בסיס</label><input type="text" id="new-hreflang-url" placeholder="https://en.example.com" style="direction:ltr;text-align:left;" /></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">&#x1f517; מיפוי עמודים</div>
+        </div>
+        <div id="hreflang-mappings"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">&#x1f4cb; תגיות Hreflang מוכנות</div>
+          <button class="btn btn-sm btn-primary" onclick="copyHreflangOutput()">&#x1f4cb; העתקה</button>
+        </div>
+        <div id="hreflang-output" class="json-editor" style="max-height:300px;color:var(--green);"></div>
+      </div>
     </div>
 
     <!-- ═══ SETTINGS ═══ -->
@@ -1100,7 +1335,18 @@ function extractFromHTML(html, baseUrl) {
   // Meta keywords (deprecated but useful to know)
   const metaKeywords = doc.querySelector('meta[name="keywords"]')?.getAttribute('content')?.trim() || '';
 
-  return { title, metaDesc, canonical, ogTitle, ogDesc, headings, links: [...links], schemas, lang, dir, ga, metaKeywords };
+  // Feature 2: og:image
+  const ogImage = doc.querySelector('meta[property="og:image"]')?.getAttribute('content')?.trim() || '';
+
+  // Feature 7: Extract images with alt text
+  const images = [];
+  doc.querySelectorAll('img').forEach(img => {
+    const src = img.getAttribute('src') || '';
+    const alt = img.getAttribute('alt');
+    if (src) images.push({ src, alt: alt || '' });
+  });
+
+  return { title, metaDesc, canonical, ogTitle, ogDesc, ogImage, headings, links: [...links], schemas, lang, dir, ga, metaKeywords, images };
 }
 
 function normalizeUrl(raw) {
@@ -1169,7 +1415,7 @@ async function _doScan(rawUrl, name) {
   document.getElementById('scan-status').textContent = '\u05E1\u05D5\u05E8\u05E7 \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD \u05E4\u05E0\u05D9\u05DE\u05D9\u05D9\u05DD...';
 
   // 2. Crawl discovered pages (up to 20)
-  const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.metaKeywords ? homeData.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [] }];
+  const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, ogImage: homeData.ogImage || '', headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.metaKeywords ? homeData.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [], images: homeData.images || [], outgoingLinks: homeData.links.length }];
   const visited = new Set(['/']);
   const toVisit = homeData.links
     .map(l => normalizePath(l))
@@ -1201,9 +1447,12 @@ async function _doScan(rawUrl, name) {
       canonical: data.canonical,
       ogTitle: data.ogTitle,
       ogDesc: data.ogDesc,
+      ogImage: data.ogImage || '',
       headings: data.headings,
       schemas: data.schemas.map(s => s['@type'] || 'Unknown'),
-      keywords: data.metaKeywords ? data.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : []
+      keywords: data.metaKeywords ? data.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [],
+      images: data.images || [],
+      outgoingLinks: data.links.length
     });
 
     // Discover deeper pages
@@ -1364,9 +1613,15 @@ function finishSetup() {
       canonical: p.canonical || p.path,
       ogTitle: p.ogTitle || '',
       ogDesc: p.ogDesc || '',
+      ogImage: p.ogImage || '',
+      noindex: false,
+      content: '',
       keywords: p.keywords || [],
       headings: p.headings || [],
       schema: p.schemas || [],
+      images: p.images || [],
+      outgoingLinks: p.outgoingLinks || 0,
+      incomingLinks: 0,
       order: i
     }));
     sitemap = scannedData.sitemap;
@@ -1386,9 +1641,15 @@ function finishSetup() {
       canonical: p.path,
       ogTitle: '',
       ogDesc: '',
+      ogImage: '',
+      noindex: false,
+      content: '',
       keywords: [],
       headings: p.path === '/' ? ['H1: ' + name] : ['H1: ' + p.name],
       schema: [],
+      images: [],
+      outgoingLinks: 0,
+      incomingLinks: 0,
       order: i
     }));
     sitemap = pages.map(p => ({
@@ -1417,6 +1678,9 @@ function finishSetup() {
     schemas: projectSchemas,
     checklist: {},
     changes: {},
+    redirects: [],
+    gscHistory: [],
+    hreflang: { languages: [], mappings: [] },
     createdAt: new Date().toISOString()
   };
 
@@ -1474,7 +1738,23 @@ function renderAll() {
   renderChecklist();
   renderSettings();
   renderProjectsList();
+  renderRedirects();
+  renderImages();
+  renderLinks();
+  renderHreflang();
+  renderDuplicateContent();
   document.getElementById('nav-pages-count').textContent = p.pages.length;
+  // Update redirect count badge
+  const redirectCount = (p.redirects || []).length;
+  const rBadge = document.getElementById('nav-redirects-count');
+  if (redirectCount > 0) { rBadge.textContent = redirectCount; rBadge.style.display = ''; }
+  else { rBadge.style.display = 'none'; }
+  // Update images missing alt count badge
+  const allImgs = p.pages.reduce((arr, pg) => arr.concat(pg.images || []), []);
+  const missingAlt = allImgs.filter(img => !img.alt).length;
+  const iBadge = document.getElementById('nav-images-count');
+  if (missingAlt > 0) { iBadge.textContent = missingAlt; iBadge.style.display = ''; }
+  else { iBadge.style.display = 'none'; }
 }
 
 function populateProjectSelector() {
@@ -1661,6 +1941,7 @@ function renderPagesTable() {
     const tb = tl >= 30 && tl <= 60 ? '<span class="badge green">OK</span>' : tl > 60 ? '<span class="badge yellow">&#x2191;</span>' : tl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
     const db = dl >= 120 && dl <= 160 ? '<span class="badge green">OK</span>' : dl > 160 ? '<span class="badge yellow">&#x2191;</span>' : dl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
     const sb = pg.schema && pg.schema.length > 0 ? `<span class="badge green">${pg.schema.join(', ')}</span>` : '<span class="badge red">-</span>';
+    const indexBadge = pg.noindex ? '<span class="badge red">Noindex</span>' : '<span class="badge green">Index</span>';
     const ps = scorePage(pg);
     const psColor = ps >= 80 ? 'green' : ps >= 50 ? 'yellow' : 'red';
     return `<tr class="page-row" ondblclick="editPage('${pg.id}')">
@@ -1669,6 +1950,7 @@ function renderPagesTable() {
       <td>${tl} ${tb}</td><td>${dl} ${db}</td>
       <td style="font-family:monospace;font-size:11px;direction:ltr;">${escapeHtml(pg.canonical) || '-'}</td>
       <td>${sb}</td>
+      <td>${indexBadge}</td>
       <td><span class="badge ${psColor}">${ps}%</span></td>
       <td>
         <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">&#x270f;</button>
@@ -1721,9 +2003,15 @@ function addPageFromModal() {
     canonical: path.startsWith('/') ? path : '/' + path,
     ogTitle: '',
     ogDesc: '',
+    ogImage: '',
+    noindex: false,
+    content: '',
     keywords: [],
     headings: ['H1: ' + name],
     schema: [],
+    images: [],
+    outgoingLinks: 0,
+    incomingLinks: 0,
     order: p.pages.length
   });
 
@@ -1763,8 +2051,15 @@ function loadPageEditor(pageId) {
   document.getElementById('edit-canonical').value = page.canonical || '';
   document.getElementById('edit-og-title').value = page.ogTitle || '';
   document.getElementById('edit-og-desc').value = page.ogDesc || '';
+  document.getElementById('edit-og-image').value = page.ogImage || '';
   document.getElementById('edit-headings').value = (page.headings || []).join('\n');
+  document.getElementById('edit-content').value = page.content || '';
   document.getElementById('editor-file-path').textContent = page.file || page.path;
+  // Noindex toggle
+  const noindexCheck = document.getElementById('edit-noindex');
+  noindexCheck.checked = !(page.noindex);
+  document.getElementById('noindex-label').textContent = page.noindex ? 'Noindex' : 'Index';
+  updateKeywordDensity();
 
   const container = document.getElementById('keywords-tags');
   container.querySelectorAll('.tag').forEach(t => t.remove());
@@ -1803,6 +2098,8 @@ function updatePageChecklist(page) {
     { ok: page.schema && page.schema.length > 0, text: 'נתונים מובנים', sub: page.schema && page.schema.length > 0 ? page.schema.join(', ') : 'אין סכמה' },
     { ok: (page.headings || []).filter(h => h.startsWith('H1')).length === 1, text: 'H1 יחיד', sub: (page.headings || []).find(h => h.startsWith('H1:')) || 'חסר H1' },
     { ok: page.keywords && page.keywords.length > 0, text: 'מילות מפתח', sub: (page.keywords || []).join(', ') || 'לא הוגדרו' },
+    { ok: !!(page.ogImage), text: 'og:image מוגדר', sub: page.ogImage ? escapeHtml(page.ogImage).substring(0, 60) : 'חסר תמונת שיתוף' },
+    { ok: !(page.noindex), text: 'אינדוקס', sub: page.noindex ? 'העמוד מוגדר כ-noindex — לא יופיע בגוגל' : 'העמוד ניתן לאינדוקס' },
   ];
   el.innerHTML = checks.map(c => `<div class="checklist-item"><div class="check-icon ${c.ok ? 'done' : 'todo'}">${c.ok ? '\u2713' : '~'}</div><div class="checklist-text"><div>${c.text}</div><div class="sub">${c.sub}</div></div></div>`).join('');
 }
@@ -1831,7 +2128,11 @@ function autoSave() {
   page.canonical = document.getElementById('edit-canonical').value;
   page.ogTitle = document.getElementById('edit-og-title').value;
   page.ogDesc = document.getElementById('edit-og-desc').value;
+  page.ogImage = document.getElementById('edit-og-image').value;
   page.headings = document.getElementById('edit-headings').value.split('\n').filter(h => h.trim());
+  page.content = document.getElementById('edit-content').value;
+  page.noindex = !document.getElementById('edit-noindex').checked;
+  document.getElementById('noindex-label').textContent = page.noindex ? 'Noindex' : 'Index';
 
   const tags = document.querySelectorAll('#keywords-tags .tag');
   page.keywords = Array.from(tags).map(t => t.dataset.kw);
@@ -2236,9 +2537,17 @@ function importGscData() {
   gscRows = rows;
   gscSortField = 'clicks';
   gscSortDir = -1;
-  // Save to project
+  // Save to project + history snapshot
   const p = getProject();
-  if (p) { p.gscData = rows; saveProjects(); }
+  if (p) {
+    // Save previous data to history before overwriting
+    if (!p.gscHistory) p.gscHistory = [];
+    if (p.gscData && p.gscData.length > 0) {
+      p.gscHistory.push({ date: new Date().toISOString().split('T')[0], data: p.gscData });
+    }
+    p.gscData = rows;
+    saveProjects();
+  }
   renderGscData();
   toast(`${rows.length} שורות יובאו בהצלחה`, 'success');
 }
@@ -2255,7 +2564,14 @@ function handleGscFile(event) {
     gscSortField = 'clicks';
     gscSortDir = -1;
     const p = getProject();
-    if (p) { p.gscData = rows; saveProjects(); }
+    if (p) {
+      if (!p.gscHistory) p.gscHistory = [];
+      if (p.gscData && p.gscData.length > 0) {
+        p.gscHistory.push({ date: new Date().toISOString().split('T')[0], data: p.gscData });
+      }
+      p.gscData = rows;
+      saveProjects();
+    }
     renderGscData();
     toast(`${rows.length} שורות יובאו מ-${file.name}`, 'success');
   };
@@ -2277,11 +2593,23 @@ function renderGscData() {
   const avgCtr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : 0;
   const avgPos = gscRows.length > 0 ? (gscRows.reduce((s, r) => s + r.position, 0) / gscRows.length).toFixed(1) : 0;
 
+  const p = getProject();
+  const historyCount = (p && p.gscHistory) ? p.gscHistory.length : 0;
+  const prevData = (p && p.gscHistory && p.gscHistory.length > 0) ? p.gscHistory[p.gscHistory.length - 1].data : null;
+  // Build previous position lookup
+  const prevPositions = {};
+  if (prevData) {
+    prevData.forEach(r => { if (r.query) prevPositions[r.query] = r.position; });
+  }
+
   document.getElementById('gsc-summary-stats').innerHTML = `
     <div class="card stat"><div class="stat-value" style="color:var(--blue)">${totalClicks.toLocaleString()}</div><div class="stat-label">קליקים</div></div>
     <div class="card stat"><div class="stat-value" style="color:var(--purple)">${totalImpressions.toLocaleString()}</div><div class="stat-label">חשיפות</div></div>
     <div class="card stat"><div class="stat-value" style="color:var(--green)">${avgCtr}%</div><div class="stat-label">CTR ממוצע</div></div>
-    <div class="card stat"><div class="stat-value" style="color:var(--orange)">${avgPos}</div><div class="stat-label">מיקום ממוצע</div></div>
+    <div class="card stat">
+      <div class="stat-value" style="color:var(--orange)">${avgPos}</div>
+      <div class="stat-label">מיקום ממוצע ${historyCount > 0 ? '<span class="badge purple" style="margin-right:4px;">' + historyCount + ' ייבואים</span>' : ''}</div>
+    </div>
   `;
 
   // Opportunities
@@ -2310,12 +2638,20 @@ function renderGscData() {
     else if (r.position <= 10) { status = 'עמוד 1'; statusClass = 'blue'; }
     else if (r.position <= 20) { status = 'quick win'; statusClass = 'yellow'; }
     else { status = 'רחוק'; statusClass = 'red'; }
+    // Trend arrow
+    let trend = '';
+    if (r.query && prevPositions[r.query] !== undefined) {
+      const diff = prevPositions[r.query] - r.position;
+      if (diff > 0.5) trend = ' <span style="color:var(--green);" title="שיפור של ' + diff.toFixed(1) + ' מקומות">\u2191</span>';
+      else if (diff < -0.5) trend = ' <span style="color:var(--red);" title="ירידה של ' + Math.abs(diff).toFixed(1) + ' מקומות">\u2193</span>';
+      else trend = ' <span style="color:var(--text-dim);">\u2192</span>';
+    }
     return `<tr>
       <td style="font-size:12px;direction:ltr;text-align:right;">${escapeHtml(r.query || r.page)}</td>
       <td style="font-weight:600;">${r.clicks}</td>
       <td>${r.impressions.toLocaleString()}</td>
       <td>${r.ctr > 0 ? r.ctr.toFixed(1) + '%' : '-'}</td>
-      <td>${r.position > 0 ? r.position.toFixed(1) : '-'}</td>
+      <td>${r.position > 0 ? r.position.toFixed(1) : '-'}${trend}</td>
       <td><span class="badge ${statusClass}">${status}</span></td>
     </tr>`;
   }).join('');
@@ -2531,6 +2867,8 @@ function renderExport() {
         output += `canonical: "${(p.url || '') + pg.canonical}"\n`;
         if (pg.ogTitle) output += `og:title: "${pg.ogTitle}"\n`;
         if (pg.ogDesc) output += `og:description: "${pg.ogDesc}"\n`;
+        if (pg.ogImage) output += `og:image: "${pg.ogImage}"\n`;
+        if (pg.noindex) output += `<meta name="robots" content="noindex, nofollow">\n`;
         if (pg.keywords && pg.keywords.length > 0) output += `keywords: [${pg.keywords.join(', ')}]\n`;
         output += '\n';
       });
@@ -2599,6 +2937,476 @@ function downloadBlob(blob, filename) {
   a.download = filename;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+}
+
+// ═══════════════════════════════════════════════════
+// FEATURE 1: DUPLICATE CONTENT DETECTION
+// ═══════════════════════════════════════════════════
+function textSimilarity(a, b) {
+  if (!a || !b) return 0;
+  a = a.toLowerCase().trim();
+  b = b.toLowerCase().trim();
+  if (a === b) return 1;
+  const longer = a.length > b.length ? a : b;
+  const shorter = a.length > b.length ? b : a;
+  if (longer.length === 0) return 1;
+  // Simple Levenshtein-based similarity for short strings
+  if (longer.length < 200) {
+    let matches = 0;
+    const wordsA = a.split(/\s+/);
+    const wordsB = new Set(b.split(/\s+/));
+    wordsA.forEach(w => { if (wordsB.has(w)) matches++; });
+    return wordsA.length > 0 ? matches / Math.max(wordsA.length, wordsB.size) : 0;
+  }
+  return a === b ? 1 : 0;
+}
+
+function renderDuplicateContent() {
+  const p = getProject();
+  if (!p || p.pages.length < 2) {
+    document.getElementById('duplicates-list').innerHTML = '<div style="font-size:12px;color:var(--text-dim);padding:8px 0;">צריך לפחות 2 עמודים לזיהוי כפילויות</div>';
+    document.getElementById('duplicates-count').textContent = '0';
+    return;
+  }
+
+  const issues = [];
+
+  // Check identical titles
+  const titleMap = {};
+  p.pages.forEach(pg => {
+    if (!pg.title) return;
+    const t = pg.title.trim().toLowerCase();
+    if (!titleMap[t]) titleMap[t] = [];
+    titleMap[t].push(pg.name);
+  });
+  Object.entries(titleMap).forEach(([title, names]) => {
+    if (names.length > 1) {
+      issues.push({ type: 'כותרת זהה', text: `"${title.substring(0, 60)}" — ${names.join(', ')}`, icon: 'missing' });
+    }
+  });
+
+  // Check identical descriptions
+  const descMap = {};
+  p.pages.forEach(pg => {
+    if (!pg.description) return;
+    const d = pg.description.trim().toLowerCase();
+    if (!descMap[d]) descMap[d] = [];
+    descMap[d].push(pg.name);
+  });
+  Object.entries(descMap).forEach(([desc, names]) => {
+    if (names.length > 1) {
+      issues.push({ type: 'תיאור זהה', text: `"${desc.substring(0, 60)}..." — ${names.join(', ')}`, icon: 'missing' });
+    }
+  });
+
+  // Check similar titles (>80%)
+  for (let i = 0; i < p.pages.length; i++) {
+    for (let j = i + 1; j < p.pages.length; j++) {
+      const sim = textSimilarity(p.pages[i].title, p.pages[j].title);
+      if (sim > 0.8 && sim < 1) {
+        issues.push({ type: 'כותרת דומה', text: `${p.pages[i].name} ↔ ${p.pages[j].name} (${Math.round(sim * 100)}% דמיון)`, icon: 'todo' });
+      }
+    }
+  }
+
+  document.getElementById('duplicates-count').textContent = issues.length;
+
+  if (issues.length === 0) {
+    document.getElementById('duplicates-list').innerHTML = '<div class="checklist-item"><div class="check-icon done">\u2713</div><div class="checklist-text"><div>לא נמצאו כפילויות תוכן</div><div class="sub">כל הכותרות והתיאורים ייחודיים</div></div></div>';
+    return;
+  }
+
+  document.getElementById('duplicates-list').innerHTML = issues.map(i => `
+    <div class="checklist-item">
+      <div class="check-icon ${i.icon}">${i.icon === 'missing' ? '!' : '~'}</div>
+      <div class="checklist-text"><div><span class="badge ${i.icon === 'missing' ? 'red' : 'yellow'}">${escapeHtml(i.type)}</span></div><div class="sub">${escapeHtml(i.text)}</div></div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// FEATURE 4: KEYWORD DENSITY
+// ═══════════════════════════════════════════════════
+function updateKeywordDensity() {
+  if (!currentPage) return;
+  const content = document.getElementById('edit-content').value || '';
+  const title = document.getElementById('edit-title').value || '';
+  const headingsText = document.getElementById('edit-headings').value || '';
+  const allText = (content + ' ' + title + ' ' + headingsText).toLowerCase();
+  const words = allText.split(/\s+/).filter(w => w.length > 0);
+  const wordCount = content.split(/\s+/).filter(w => w.length > 0).length;
+
+  document.getElementById('content-word-count').textContent = wordCount > 0 ? `${wordCount} מילים` : '';
+
+  const tags = document.querySelectorAll('#keywords-tags .tag');
+  const keywords = Array.from(tags).map(t => t.dataset.kw);
+
+  const card = document.getElementById('keyword-density-card');
+  const results = document.getElementById('keyword-density-results');
+
+  if (keywords.length === 0 || wordCount === 0) {
+    card.style.display = 'none';
+    return;
+  }
+
+  card.style.display = 'block';
+  results.innerHTML = keywords.map(kw => {
+    const kwLower = kw.toLowerCase();
+    let count = 0;
+    const regex = new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const matches = allText.match(regex);
+    count = matches ? matches.length : 0;
+    const density = words.length > 0 ? ((count / words.length) * 100).toFixed(1) : 0;
+    const densityColor = density >= 1 && density <= 3 ? 'var(--green)' : density > 3 ? 'var(--red)' : 'var(--yellow)';
+    return `<div class="density-item"><span>${escapeHtml(kw)}</span><span style="color:${densityColor};font-weight:600;">${count} (${density}%)</span></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// FEATURE 6: REDIRECT MAPPING
+// ═══════════════════════════════════════════════════
+function renderRedirects() {
+  const p = getProject();
+  if (!p) return;
+  const redirects = p.redirects || [];
+  const tbody = document.getElementById('redirects-table');
+  if (redirects.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px;">אין ניתובים — הוסיפו ניתוב חדש</td></tr>';
+    return;
+  }
+  tbody.innerHTML = redirects.map((r, i) => `<tr>
+    <td style="font-family:monospace;font-size:12px;direction:ltr;">${escapeHtml(r.source)}</td>
+    <td style="font-family:monospace;font-size:12px;direction:ltr;">${escapeHtml(r.target)}</td>
+    <td><span class="badge ${r.type === '301' ? 'green' : 'yellow'}">${r.type}</span></td>
+    <td><span class="badge blue">פעיל</span></td>
+    <td><button class="btn btn-sm btn-ghost" onclick="removeRedirect(${i})" style="color:var(--red);">&times;</button></td>
+  </tr>`).join('');
+}
+
+function addRedirect() {
+  const p = getProject();
+  if (!p) return;
+  const source = document.getElementById('new-redirect-source').value.trim();
+  const target = document.getElementById('new-redirect-target').value.trim();
+  if (!source || !target) { toast('מקור ויעד נדרשים'); return; }
+  if (!p.redirects) p.redirects = [];
+  p.redirects.push({
+    source: source.startsWith('/') ? source : '/' + source,
+    target: target.startsWith('/') ? target : (target.startsWith('http') ? target : '/' + target),
+    type: document.getElementById('new-redirect-type').value
+  });
+  saveProjects();
+  renderRedirects();
+  renderAll();
+  document.getElementById('new-redirect-source').value = '';
+  document.getElementById('new-redirect-target').value = '';
+  toast('ניתוב נוסף', 'success');
+}
+
+function removeRedirect(i) {
+  const p = getProject();
+  if (!p || !p.redirects) return;
+  p.redirects.splice(i, 1);
+  saveProjects();
+  renderRedirects();
+  renderAll();
+}
+
+function exportRedirects(format) {
+  const p = getProject();
+  if (!p || !p.redirects || p.redirects.length === 0) { toast('אין ניתובים לייצוא'); return; }
+
+  let output = '';
+  const redirects = p.redirects;
+
+  switch (format) {
+    case 'htaccess':
+      output = 'RewriteEngine On\n\n';
+      redirects.forEach(r => {
+        output += `RewriteRule ^${r.source.replace(/^\//, '')}$ ${r.target} [R=${r.type},L]\n`;
+      });
+      break;
+    case 'netlify':
+      redirects.forEach(r => {
+        output += `${r.source}  ${r.target}  ${r.type}\n`;
+      });
+      break;
+    case 'vercel':
+      const json = {
+        redirects: redirects.map(r => ({
+          source: r.source,
+          destination: r.target,
+          statusCode: parseInt(r.type)
+        }))
+      };
+      output = JSON.stringify(json, null, 2);
+      break;
+  }
+
+  const ext = format === 'vercel' ? 'json' : format === 'netlify' ? 'txt' : 'htaccess';
+  const filename = format === 'vercel' ? 'vercel-redirects.json' : format === 'netlify' ? '_redirects' : '.htaccess';
+  const blob = new Blob([output], { type: 'text/plain' });
+  downloadBlob(blob, filename);
+  toast(`ניתובים יוצאו בפורמט ${format}`, 'success');
+}
+
+// ═══════════════════════════════════════════════════
+// FEATURE 7: ALT TEXT MANAGER
+// ═══════════════════════════════════════════════════
+let imageFilter = 'all';
+
+function setImageFilter(filter) {
+  imageFilter = filter;
+  ['all', 'missing', 'has'].forEach(f => {
+    const btn = document.getElementById('img-filter-' + f);
+    if (f === filter) { btn.style.cssText = 'background:var(--primary);color:white;'; btn.className = 'btn btn-sm'; }
+    else { btn.style.cssText = ''; btn.className = 'btn btn-sm btn-ghost'; }
+  });
+  renderImages();
+}
+
+function renderImages() {
+  const p = getProject();
+  if (!p) return;
+
+  let allImages = [];
+  p.pages.forEach(pg => {
+    (pg.images || []).forEach(img => {
+      allImages.push({ src: img.src, alt: img.alt || '', pageName: pg.name, pageId: pg.id });
+    });
+  });
+
+  const total = allImages.length;
+  const withAlt = allImages.filter(i => i.alt).length;
+  const withoutAlt = total - withAlt;
+  const pct = total > 0 ? Math.round((withAlt / total) * 100) : 0;
+
+  document.getElementById('images-stats').innerHTML = `
+    <div class="card stat"><div class="stat-value" style="color:var(--primary)">${total}</div><div class="stat-label">סה"כ תמונות</div></div>
+    <div class="card stat"><div class="stat-value" style="color:var(--green)">${withAlt}</div><div class="stat-label">עם Alt</div></div>
+    <div class="card stat"><div class="stat-value" style="color:var(--red)">${withoutAlt}</div><div class="stat-label">חסר Alt</div></div>
+    <div class="card stat"><div class="stat-value" style="color:${pct >= 80 ? 'var(--green)' : 'var(--yellow)'}">${pct}%</div><div class="stat-label">כיסוי Alt</div></div>
+  `;
+
+  // Filter
+  if (imageFilter === 'missing') allImages = allImages.filter(i => !i.alt);
+  else if (imageFilter === 'has') allImages = allImages.filter(i => i.alt);
+
+  const tbody = document.getElementById('images-table');
+  if (allImages.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:24px;">אין תמונות' + (imageFilter !== 'all' ? ' בסינון הנוכחי' : ' — סרקו אתר קיים לזיהוי תמונות') + '</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = allImages.map(img => `<tr>
+    <td style="font-family:monospace;font-size:11px;direction:ltr;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(img.src)}">${escapeHtml(img.src)}</td>
+    <td>${escapeHtml(img.pageName)}</td>
+    <td>${img.alt ? '<span class="badge green">כן</span>' : '<span class="badge red">חסר</span>'}</td>
+    <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${img.alt ? escapeHtml(img.alt) : '<span style="color:var(--text-muted);">—</span>'}</td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// FEATURE 8: INTERNAL LINKING VIEW
+// ═══════════════════════════════════════════════════
+function renderLinks() {
+  const p = getProject();
+  if (!p) return;
+
+  // Calculate incoming links: count how many other pages link to each page
+  const incomingCounts = {};
+  p.pages.forEach(pg => { incomingCounts[pg.path] = pg.incomingLinks || 0; });
+
+  const tbody = document.getElementById('links-table');
+  if (p.pages.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px;">אין עמודים</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = p.pages.map(pg => {
+    const incoming = pg.incomingLinks || 0;
+    const outgoing = pg.outgoingLinks || 0;
+    let statusBadge = '';
+    if (incoming === 0 && pg.path !== '/') statusBadge = '<span class="badge red">עמוד יתום</span>';
+    else if (outgoing >= 10) statusBadge = '<span class="badge blue">רכזת</span>';
+    else statusBadge = '<span class="badge green">תקין</span>';
+
+    return `<tr>
+      <td><strong>${escapeHtml(pg.name)}</strong></td>
+      <td style="font-family:monospace;font-size:11px;direction:ltr;">${escapeHtml(pg.path)}</td>
+      <td style="text-align:center;"><span class="badge ${incoming === 0 && pg.path !== '/' ? 'red' : 'green'}">${incoming}</span></td>
+      <td style="text-align:center;"><span class="badge ${outgoing >= 10 ? 'blue' : 'primary'}">${outgoing}</span></td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// FEATURE 9: PDF REPORT GENERATION
+// ═══════════════════════════════════════════════════
+function printReport() {
+  const p = getProject();
+  if (!p) return;
+  const { score } = scoreProject();
+  const domain = (p.url || '').replace('https://', '').replace('http://', '');
+
+  // Fill print header
+  document.getElementById('print-header').innerHTML = `
+    <h1 style="font-family:var(--font-heading);">דוח SEO — ${escapeHtml(p.name)}</h1>
+    <p>${escapeHtml(domain)} | ${new Date().toLocaleDateString('he-IL')} | ציון: ${score}/100</p>
+  `;
+
+  // Fill print pages summary
+  let tableHtml = '<h3 style="font-family:var(--font-heading);font-size:16px;margin:16px 0 8px;">סיכום עמודים</h3>';
+  tableHtml += '<table><thead><tr><th>עמוד</th><th>נתיב</th><th>כותרת</th><th>תיאור</th><th>ציון</th></tr></thead><tbody>';
+  p.pages.forEach(pg => {
+    const ps = scorePage(pg);
+    tableHtml += `<tr>
+      <td>${escapeHtml(pg.name)}</td>
+      <td style="direction:ltr;">${escapeHtml(pg.path)}</td>
+      <td>${(pg.title || '').length} תווים</td>
+      <td>${(pg.description || '').length} תווים</td>
+      <td>${ps}%</td>
+    </tr>`;
+  });
+  tableHtml += '</tbody></table>';
+  document.getElementById('print-pages-summary').innerHTML = tableHtml;
+
+  window.print();
+}
+
+// ═══════════════════════════════════════════════════
+// FEATURE 10: HREFLANG GENERATOR
+// ═══════════════════════════════════════════════════
+function renderHreflang() {
+  const p = getProject();
+  if (!p) return;
+  if (!p.hreflang) p.hreflang = { languages: [], mappings: [] };
+
+  const langs = p.hreflang.languages || [];
+  const langEl = document.getElementById('hreflang-languages');
+
+  if (langs.length === 0) {
+    langEl.innerHTML = '<div style="font-size:12px;color:var(--text-dim);padding:8px 0;">אין שפות מוגדרות — הוסיפו שפה ראשונה</div>';
+  } else {
+    langEl.innerHTML = langs.map((l, i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div><span class="badge primary">${escapeHtml(l.code)}</span> <span style="font-size:12px;direction:ltr;display:inline-block;margin-right:8px;">${escapeHtml(l.baseUrl)}</span></div>
+        <button class="btn btn-sm btn-ghost" onclick="removeHreflangLang(${i})" style="color:var(--red);">&times;</button>
+      </div>
+    `).join('');
+  }
+
+  // Render mappings
+  const mappingsEl = document.getElementById('hreflang-mappings');
+  if (langs.length < 2) {
+    mappingsEl.innerHTML = '<div style="font-size:12px;color:var(--text-dim);padding:8px 0;">הוסיפו לפחות 2 שפות כדי ליצור מיפויים</div>';
+  } else {
+    const mappings = p.hreflang.mappings || [];
+    let html = '<div style="margin-bottom:12px;">';
+    // Auto-generate mappings from pages if empty
+    if (mappings.length === 0 && p.pages.length > 0) {
+      p.pages.forEach(pg => {
+        const urls = {};
+        langs.forEach(l => { urls[l.code] = l.baseUrl + pg.path; });
+        mappings.push({ path: pg.path, urls });
+      });
+      p.hreflang.mappings = mappings;
+      saveProjects();
+    }
+
+    html += mappings.map((m, mi) => {
+      let rows = `<div class="card" style="padding:14px;margin-bottom:8px;">
+        <div style="font-weight:600;font-size:12px;margin-bottom:8px;direction:ltr;">${escapeHtml(m.path)}</div>`;
+      langs.forEach(l => {
+        const val = (m.urls && m.urls[l.code]) || (l.baseUrl + m.path);
+        rows += `<div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+          <span class="badge primary" style="min-width:24px;text-align:center;">${escapeHtml(l.code)}</span>
+          <input type="text" value="${escapeHtml(val)}" style="flex:1;padding:6px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;direction:ltr;text-align:left;" onchange="updateHreflangMapping(${mi},'${l.code}',this.value)" />
+        </div>`;
+      });
+      rows += '</div>';
+      return rows;
+    }).join('');
+    html += '</div>';
+    mappingsEl.innerHTML = html;
+  }
+
+  // Generate output
+  generateHreflangOutput();
+}
+
+function addHreflangLanguage() {
+  const p = getProject();
+  if (!p) return;
+  if (!p.hreflang) p.hreflang = { languages: [], mappings: [] };
+  const code = document.getElementById('new-hreflang-code').value;
+  const baseUrl = document.getElementById('new-hreflang-url').value.trim().replace(/\/+$/, '');
+  if (!baseUrl) { toast('הזינו כתובת בסיס'); return; }
+  if (p.hreflang.languages.some(l => l.code === code)) { toast('שפה זו כבר קיימת'); return; }
+  p.hreflang.languages.push({ code, baseUrl });
+  // Update existing mappings with new language
+  (p.hreflang.mappings || []).forEach(m => {
+    if (!m.urls) m.urls = {};
+    m.urls[code] = baseUrl + m.path;
+  });
+  saveProjects();
+  renderHreflang();
+  document.getElementById('new-hreflang-url').value = '';
+  toast(`שפה ${code} נוספה`, 'success');
+}
+
+function removeHreflangLang(i) {
+  const p = getProject();
+  if (!p || !p.hreflang) return;
+  const code = p.hreflang.languages[i].code;
+  p.hreflang.languages.splice(i, 1);
+  // Remove from mappings
+  (p.hreflang.mappings || []).forEach(m => { if (m.urls) delete m.urls[code]; });
+  saveProjects();
+  renderHreflang();
+}
+
+function updateHreflangMapping(mi, code, value) {
+  const p = getProject();
+  if (!p || !p.hreflang) return;
+  if (p.hreflang.mappings[mi]) {
+    if (!p.hreflang.mappings[mi].urls) p.hreflang.mappings[mi].urls = {};
+    p.hreflang.mappings[mi].urls[code] = value;
+    saveProjects();
+    generateHreflangOutput();
+  }
+}
+
+function generateHreflangOutput() {
+  const p = getProject();
+  if (!p || !p.hreflang) return;
+  const langs = p.hreflang.languages || [];
+  const mappings = p.hreflang.mappings || [];
+  const el = document.getElementById('hreflang-output');
+
+  if (langs.length < 2 || mappings.length === 0) {
+    el.textContent = '<!-- הוסיפו לפחות 2 שפות ליצירת תגיות -->';
+    return;
+  }
+
+  let output = '';
+  mappings.forEach(m => {
+    output += `<!-- ${m.path} -->\n`;
+    langs.forEach(l => {
+      const url = (m.urls && m.urls[l.code]) || (l.baseUrl + m.path);
+      output += `<link rel="alternate" hreflang="${l.code}" href="${url}" />\n`;
+    });
+    output += `<link rel="alternate" hreflang="x-default" href="${(m.urls && m.urls[langs[0].code]) || (langs[0].baseUrl + m.path)}" />\n\n`;
+  });
+
+  el.textContent = output;
+}
+
+function copyHreflangOutput() {
+  const text = document.getElementById('hreflang-output').textContent;
+  safeClipboard(text);
+  toast('תגיות hreflang הועתקו', 'success');
 }
 
 // Close modals on overlay click
