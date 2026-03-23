@@ -681,12 +681,12 @@
                 <span class="badge primary" id="editor-file-path"></span>
               </div>
               <div class="field">
-                <label>כותרת העמוד <span style="color:var(--yellow)">(50-60 תווים)</span></label>
+                <label>כותרת העמוד <span style="color:var(--yellow)">(30-60 תווים)</span></label>
                 <input type="text" id="edit-title" oninput="updatePreview();autoSave();" />
                 <div class="char-count" id="title-count"></div>
               </div>
               <div class="field">
-                <label>תיאור מטא <span style="color:var(--yellow)">(120-160 תווים)</span></label>
+                <label>תיאור מטא <span style="color:var(--yellow)">(100-160 תווים)</span></label>
                 <textarea id="edit-description" rows="3" oninput="updatePreview();autoSave();"></textarea>
                 <div class="char-count" id="desc-count"></div>
               </div>
@@ -1851,68 +1851,205 @@ function showTab(tabId, el) {
 // ═══════════════════════════════════════════════════
 // SEO SCORING ENGINE
 // ═══════════════════════════════════════════════════
-function scoreProject() {
-  const p = getProject();
-  if (!p || p.pages.length === 0) return { score: 0, details: {} };
-
-  let totalScore = 0;
-  let maxScore = 0;
-  const details = { titles: 0, descriptions: 0, canonicals: 0, schemas: 0, keywords: 0, headings: 0 };
-
-  p.pages.forEach(pg => {
-    // Title
-    maxScore += 20;
-    if (pg.title && pg.title.length > 0) { details.titles++; totalScore += 10; }
-    if (pg.title && pg.title.length >= 50 && pg.title.length <= 60) totalScore += 10;
-    else if (pg.title && pg.title.length > 0) totalScore += 5;
-
-    // Description
-    maxScore += 20;
-    if (pg.description && pg.description.length > 0) { details.descriptions++; totalScore += 10; }
-    if (pg.description && pg.description.length >= 120 && pg.description.length <= 160) totalScore += 10;
-    else if (pg.description && pg.description.length > 0) totalScore += 5;
-
-    // Canonical
-    maxScore += 10;
-    if (pg.canonical) { details.canonicals++; totalScore += 10; }
-
-    // Schema
-    maxScore += 15;
-    if (pg.schema && pg.schema.length > 0) { details.schemas++; totalScore += 15; }
-
-    // Keywords
-    maxScore += 10;
-    if (pg.keywords && pg.keywords.length > 0) { details.keywords++; totalScore += 10; }
-
-    // Headings
-    maxScore += 10;
-    const headings = pg.headings || [];
-    const h1s = headings.filter(h => h.startsWith('H1'));
-    if (h1s.length === 1) { details.headings++; totalScore += 10; }
-    else if (h1s.length > 0) totalScore += 5;
-  });
-
-  // Sitemap bonus
-  maxScore += 15;
-  if (p.sitemap && p.sitemap.length > 0) totalScore += 15;
-
-  // Schemas bonus
-  maxScore += 15;
-  if (p.schemas && p.schemas.length > 0) totalScore += 15;
-
-  const score = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
-  return { score, details, totalPages: p.pages.length };
-}
+// Weights: Content (35%) > Technical (20%) > Schema (15%) > Headings (10%) > Social (10%) > Media & Links (10%)
 
 function scorePage(pg) {
-  let s = 0, max = 0;
-  max += 25; if (pg.title && pg.title.length >= 50 && pg.title.length <= 60) s += 25; else if (pg.title) s += 10;
-  max += 25; if (pg.description && pg.description.length >= 120 && pg.description.length <= 160) s += 25; else if (pg.description) s += 10;
-  max += 15; if (pg.canonical) s += 15;
-  max += 15; if (pg.schema && pg.schema.length > 0) s += 15;
-  max += 10; if (pg.keywords && pg.keywords.length > 0) s += 10;
-  max += 10; const h1s = (pg.headings || []).filter(h => h.startsWith('H1')); if (h1s.length === 1) s += 10;
-  return max > 0 ? Math.round((s / max) * 100) : 0;
+  let s = 0;
+  const breakdown = {};
+
+  // ── Content Quality (35 pts) ──────────────────────
+  // Title (20 pts) — strongest ranking signal
+  const tl = (pg.title || '').length;
+  const kws = pg.keywords || [];
+  const titleLower = (pg.title || '').toLowerCase();
+  let titlePts = 0;
+  if (tl === 0) titlePts = 0;
+  else if (tl >= 30 && tl <= 60) {
+    titlePts = 14;
+    // Bonus: keyword appears in title
+    if (kws.length > 0 && kws.some(k => titleLower.includes(k.toLowerCase()))) titlePts = 20;
+  } else if (tl > 0 && tl < 30) titlePts = 6;    // too short
+  else if (tl > 60 && tl <= 70) titlePts = 10;    // slightly long
+  else titlePts = 5;                                // way off
+  s += titlePts;
+  breakdown.title = { score: titlePts, max: 20 };
+
+  // Description (15 pts)
+  const dl = (pg.description || '').length;
+  const descLower = (pg.description || '').toLowerCase();
+  let descPts = 0;
+  if (dl === 0) descPts = 0;
+  else if (dl >= 100 && dl <= 160) {
+    descPts = 10;
+    if (kws.length > 0 && kws.some(k => descLower.includes(k.toLowerCase()))) descPts = 15;
+  } else if (dl > 0 && dl < 100) descPts = 5;
+  else if (dl > 160 && dl <= 200) descPts = 7;
+  else descPts = 3;
+  s += descPts;
+  breakdown.description = { score: descPts, max: 15 };
+
+  // ── Technical SEO (20 pts) ────────────────────────
+  // Canonical (7 pts)
+  const canonPts = pg.canonical ? 7 : 0;
+  s += canonPts;
+  breakdown.canonical = { score: canonPts, max: 7 };
+
+  // Keywords mapped (8 pts)
+  let kwPts = 0;
+  if (kws.length >= 3) kwPts = 8;
+  else if (kws.length === 2) kwPts = 6;
+  else if (kws.length === 1) kwPts = 4;
+  s += kwPts;
+  breakdown.keywords = { score: kwPts, max: 8 };
+
+  // Not accidentally noindex (5 pts)
+  const noindexPts = pg.noindex ? 0 : 5;
+  s += noindexPts;
+  breakdown.indexable = { score: noindexPts, max: 5 };
+
+  // ── Structured Data (15 pts) ──────────────────────
+  let schemaPts = 0;
+  const schemaCount = (pg.schema || []).length;
+  if (schemaCount >= 2) schemaPts = 15;
+  else if (schemaCount === 1) schemaPts = 10;
+  s += schemaPts;
+  breakdown.schema = { score: schemaPts, max: 15 };
+
+  // ── Heading Structure (10 pts) ────────────────────
+  const headings = pg.headings || [];
+  const h1s = headings.filter(h => h.startsWith('H1'));
+  const h2s = headings.filter(h => h.startsWith('H2'));
+  let headPts = 0;
+  if (h1s.length === 1) {
+    headPts = 6;
+    // Bonus: has H2 sub-headings (proper hierarchy)
+    if (h2s.length >= 1) headPts = 10;
+  } else if (h1s.length > 1) headPts = 3;
+  s += headPts;
+  breakdown.headings = { score: headPts, max: 10 };
+
+  // ── Social / Sharing (10 pts) ─────────────────────
+  let socialPts = 0;
+  if (pg.ogTitle && pg.ogTitle.length > 0) socialPts += 4;
+  if (pg.ogDesc && pg.ogDesc.length > 0) socialPts += 4;
+  if (pg.ogImage && pg.ogImage.length > 0) socialPts += 2;
+  s += socialPts;
+  breakdown.social = { score: socialPts, max: 10 };
+
+  // ── Media & Links (10 pts) ────────────────────────
+  // Images: alt text coverage (5 pts)
+  const images = pg.images || [];
+  let imgPts = 0;
+  if (images.length === 0) imgPts = 5; // no images = no problem
+  else {
+    const withAlt = images.filter(img => img.alt && img.alt.length > 0).length;
+    imgPts = Math.round((withAlt / images.length) * 5);
+  }
+  s += imgPts;
+  breakdown.images = { score: imgPts, max: 5 };
+
+  // Internal linking (5 pts)
+  let linkPts = 0;
+  if ((pg.outgoingLinks || 0) > 0) linkPts += 3;
+  if ((pg.incomingLinks || 0) > 0) linkPts += 2;
+  s += linkPts;
+  breakdown.links = { score: linkPts, max: 5 };
+
+  return { score: s, max: 100, breakdown };
+}
+
+function scoreProject() {
+  const p = getProject();
+  if (!p || p.pages.length === 0) return { score: 0, details: {}, breakdown: {} };
+
+  // ── Page scores (65% of final) ────────────────────
+  const details = { titles: 0, descriptions: 0, canonicals: 0, schemas: 0, keywords: 0, headings: 0, social: 0, images: 0 };
+  let pageScoreSum = 0;
+
+  p.pages.forEach(pg => {
+    const ps = scorePage(pg);
+    pageScoreSum += ps.score;
+
+    // Count pages meeting each criterion (for health cards)
+    if (pg.title && pg.title.length >= 30 && pg.title.length <= 60) details.titles++;
+    else if (pg.title && pg.title.length > 0) details.titles += 0.5; // partial — has title but not optimal
+    if (pg.description && pg.description.length >= 100 && pg.description.length <= 160) details.descriptions++;
+    else if (pg.description && pg.description.length > 0) details.descriptions += 0.5;
+    if (pg.canonical) details.canonicals++;
+    if (pg.schema && pg.schema.length > 0) details.schemas++;
+    if (pg.keywords && pg.keywords.length > 0) details.keywords++;
+    const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
+    if (h1s.length === 1) details.headings++;
+    if ((pg.ogTitle || pg.ogDesc || pg.ogImage)) details.social++;
+    const imgs = pg.images || [];
+    if (imgs.length === 0 || imgs.every(img => img.alt && img.alt.length > 0)) details.images++;
+  });
+
+  // Round partial counts for display
+  details.titles = Math.floor(details.titles);
+  details.descriptions = Math.floor(details.descriptions);
+
+  const avgPageScore = p.pages.length > 0 ? pageScoreSum / p.pages.length : 0;
+
+  // ── Site-wide factors (35% of final) ──────────────
+  let siteScore = 0;
+  const siteMax = 35;
+  const siteBreakdown = {};
+
+  // Sitemap (10 pts)
+  const sitemapPts = (p.sitemap && p.sitemap.length > 0) ? 10 : 0;
+  siteScore += sitemapPts;
+  siteBreakdown.sitemap = { score: sitemapPts, max: 10 };
+
+  // Robots.txt (5 pts)
+  const robotsPts = (p.robots && p.robots.trim().length > 0) ? 5 : 0;
+  siteScore += robotsPts;
+  siteBreakdown.robots = { score: robotsPts, max: 5 };
+
+  // Schema types defined (8 pts)
+  let schemaTypePts = 0;
+  const schemaCount = (p.schemas || []).length;
+  if (schemaCount >= 3) schemaTypePts = 8;
+  else if (schemaCount >= 1) schemaTypePts = Math.min(8, schemaCount * 3);
+  siteScore += schemaTypePts;
+  siteBreakdown.schemas = { score: schemaTypePts, max: 8 };
+
+  // Image health — % of all images with alt text (5 pts)
+  const allImgs = p.pages.reduce((arr, pg) => arr.concat(pg.images || []), []);
+  let imgHealthPts = 0;
+  if (allImgs.length === 0) imgHealthPts = 5;
+  else {
+    const withAlt = allImgs.filter(img => img.alt && img.alt.length > 0).length;
+    imgHealthPts = Math.round((withAlt / allImgs.length) * 5);
+  }
+  siteScore += imgHealthPts;
+  siteBreakdown.imageHealth = { score: imgHealthPts, max: 5 };
+
+  // Internal link health — % of pages with both in+out links (5 pts)
+  const linkedPages = p.pages.filter(pg => (pg.outgoingLinks || 0) > 0 && (pg.incomingLinks || 0) > 0).length;
+  const linkHealthPts = p.pages.length > 0 ? Math.round((linkedPages / p.pages.length) * 5) : 0;
+  siteScore += linkHealthPts;
+  siteBreakdown.linkHealth = { score: linkHealthPts, max: 5 };
+
+  // No accidental noindex (2 pts)
+  const noindexPages = p.pages.filter(pg => pg.noindex).length;
+  const noindexPts = noindexPages === 0 ? 2 : 0;
+  siteScore += noindexPts;
+  siteBreakdown.indexHealth = { score: noindexPts, max: 2 };
+
+  // ── Final composite score ─────────────────────────
+  // 65% page average + 35% site-wide (normalized to 35)
+  const siteNormalized = siteMax > 0 ? (siteScore / siteMax) * 100 : 0;
+  const finalScore = Math.round((avgPageScore * 0.65) + (siteNormalized * 0.35));
+
+  return {
+    score: Math.min(100, finalScore),
+    details,
+    totalPages: p.pages.length,
+    avgPageScore: Math.round(avgPageScore),
+    siteScore: Math.round(siteNormalized),
+    siteBreakdown
+  };
 }
 
 // ═══════════════════════════════════════════════════
@@ -1956,6 +2093,8 @@ function renderDashboard() {
     { label: 'מילות מפתח', count: details.keywords, icon: details.keywords > 0 ? '\u2713' : '!', color: details.keywords === p.pages.length ? 'green' : details.keywords > 0 ? 'yellow' : 'red' },
     { label: 'מבנה כותרות', count: details.headings, icon: details.headings > 0 ? '\u2713' : '!', color: details.headings === p.pages.length ? 'green' : 'yellow' },
     { label: 'מפת אתר', count: p.sitemap.length, icon: p.sitemap.length > 0 ? '\u2713' : '!', color: p.sitemap.length > 0 ? 'green' : 'red' },
+    { label: 'Social Meta', count: details.social, icon: details.social > 0 ? '\u2713' : '!', color: details.social === p.pages.length ? 'green' : details.social > 0 ? 'yellow' : 'red' },
+    { label: 'תמונות (Alt)', count: details.images, icon: details.images > 0 ? '\u2713' : '!', color: details.images === p.pages.length ? 'green' : details.images > 0 ? 'yellow' : 'red' },
   ];
 
   document.getElementById('dashboard-health').innerHTML = items.map(it => `
@@ -1966,17 +2105,30 @@ function renderDashboard() {
     </div>
   `).join('');
 
-  // Priority improvements
+  // Priority improvements — sorted by SEO impact
   const priorities = [];
-  if (details.titles < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.titles} עמודים חסרי כותרת אופטימלית`, sub: 'כותרת צריכה להיות בין 50-60 תווים' });
-  if (details.descriptions < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.descriptions} עמודים חסרי תיאור מטא אופטימלי`, sub: 'תיאור צריך להיות בין 120-160 תווים' });
+  if (details.titles < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.titles} עמודים חסרי כותרת אופטימלית`, sub: 'כותרת צריכה להיות בין 30-60 תווים, רצוי עם מילת מפתח' });
+  if (details.descriptions < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.descriptions} עמודים חסרי תיאור מטא אופטימלי`, sub: 'תיאור צריך להיות בין 100-160 תווים, רצוי עם מילת מפתח' });
   if (p.schemas.length === 0) priorities.push({ icon: 'missing', text: 'אין נתונים מובנים (Schema)', sub: 'הוסיפו לפחות סכמת ' + p.businessType });
-  if (details.keywords < p.pages.length) priorities.push({ icon: 'todo', text: `${p.pages.length - details.keywords} עמודים ללא מילות מפתח ממוקדות`, sub: 'מפו מילות מפתח לכל עמוד' });
+  if (details.keywords < p.pages.length) priorities.push({ icon: 'todo', text: `${p.pages.length - details.keywords} עמודים ללא מילות מפתח ממוקדות`, sub: 'מפו לפחות 3 מילות מפתח לכל עמוד' });
+  // Social meta check
+  if (details.social < p.pages.length) {
+    const missingSocial = p.pages.length - details.social;
+    priorities.push({ icon: 'todo', text: `${missingSocial} עמודים ללא OG Meta (שיתוף ברשתות)`, sub: 'הוסיפו OG Title, OG Description ו-OG Image לשיתוף אופטימלי' });
+  }
+  // Image alt check
+  const allImgs = p.pages.reduce((arr, pg) => arr.concat(pg.images || []), []);
+  const missingAltCount = allImgs.filter(img => !img.alt || img.alt.length === 0).length;
+  if (missingAltCount > 0) priorities.push({ icon: 'todo', text: `${missingAltCount} תמונות חסרות טקסט חלופי (Alt)`, sub: 'Alt Text משפר SEO תמונות ונגישות' });
+  // Heading structure
   p.pages.forEach(pg => {
     const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
     if (h1s.length === 0) priorities.push({ icon: 'missing', text: `עמוד "${pg.name}" חסר H1`, sub: 'כל עמוד חייב כותרת H1 אחת' });
     if (h1s.length > 1) priorities.push({ icon: 'todo', text: `עמוד "${pg.name}" עם ${h1s.length} כותרות H1`, sub: 'כל עמוד צריך בדיוק H1 אחד' });
   });
+  // Internal linking check
+  const orphanPages = p.pages.filter(pg => (pg.incomingLinks || 0) === 0 && pg.path !== '/');
+  if (orphanPages.length > 0) priorities.push({ icon: 'todo', text: `${orphanPages.length} עמודים ״יתומים״ ללא קישורים נכנסים`, sub: 'קשרו כל עמוד מעמודים אחרים באתר לשיפור הסריקה' });
   if (priorities.length === 0) priorities.push({ icon: 'done', text: 'מצוין! אין שיפורים דחופים', sub: 'המשיכו לעקוב אחרי הביצועים ב-Google Search Console' });
 
   document.getElementById('priority-list').innerHTML = priorities.map(pr => `
@@ -2016,11 +2168,12 @@ function renderPagesTable() {
   tbody.innerHTML = p.pages.map(pg => {
     const tl = (pg.title || '').length;
     const dl = (pg.description || '').length;
-    const tb = tl >= 50 && tl <= 60 ? '<span class="badge green">OK</span>' : tl > 60 ? '<span class="badge yellow">&#x2191;</span>' : tl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
-    const db = dl >= 120 && dl <= 160 ? '<span class="badge green">OK</span>' : dl > 160 ? '<span class="badge yellow">&#x2191;</span>' : dl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
+    const tb = tl >= 30 && tl <= 60 ? '<span class="badge green">OK</span>' : tl > 60 ? '<span class="badge yellow">&#x2191;</span>' : tl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
+    const db = dl >= 100 && dl <= 160 ? '<span class="badge green">OK</span>' : dl > 160 ? '<span class="badge yellow">&#x2191;</span>' : dl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
     const sb = pg.schema && pg.schema.length > 0 ? `<span class="badge green">${pg.schema.join(', ')}</span>` : '<span class="badge red">-</span>';
     const indexBadge = pg.noindex ? '<span class="badge red">Noindex</span>' : '<span class="badge green">Index</span>';
-    const ps = scorePage(pg);
+    const psResult = scorePage(pg);
+    const ps = psResult.score;
     const psColor = ps >= 80 ? 'green' : ps >= 50 ? 'yellow' : 'red';
     return `<tr class="page-row" ondblclick="editPage('${pg.id}')">
       <td><strong>${escapeHtml(pg.name)}</strong><br><span style="font-size:11px;color:var(--text-dim);direction:ltr;display:inline-block;">${escapeHtml(pg.path)}</span></td>
@@ -2160,18 +2313,18 @@ function updatePreview() {
 
   const tc = document.getElementById('title-count');
   tc.textContent = `${t.length} / 60 characters`;
-  tc.className = 'char-count' + (t.length > 60 ? ' over' : t.length >= 50 && t.length <= 60 ? ' good' : t.length > 0 ? ' warn' : '');
+  tc.className = 'char-count' + (t.length > 60 ? ' over' : t.length >= 30 && t.length <= 60 ? ' good' : t.length > 0 ? ' warn' : '');
 
   const dc = document.getElementById('desc-count');
   dc.textContent = `${d.length} / 160 characters`;
-  dc.className = 'char-count' + (d.length > 160 ? ' over' : d.length >= 120 && d.length <= 160 ? ' good' : d.length > 0 ? ' warn' : '');
+  dc.className = 'char-count' + (d.length > 160 ? ' over' : d.length >= 100 && d.length <= 160 ? ' good' : d.length > 0 ? ' warn' : '');
 }
 
 function updatePageChecklist(page) {
   const el = document.getElementById('page-checklist');
   const checks = [
-    { ok: (page.title || '').length >= 50 && (page.title || '').length <= 60, text: `כותרת: ${(page.title || '').length} תווים`, sub: 'אופטימלי: 50-60 תווים' },
-    { ok: (page.description || '').length >= 120 && (page.description || '').length <= 160, text: `תיאור: ${(page.description || '').length} תווים`, sub: 'אופטימלי: 120-160 תווים' },
+    { ok: (page.title || '').length >= 30 && (page.title || '').length <= 60, text: `כותרת: ${(page.title || '').length} תווים`, sub: 'אופטימלי: 30-60 תווים' },
+    { ok: (page.description || '').length >= 100 && (page.description || '').length <= 160, text: `תיאור: ${(page.description || '').length} תווים`, sub: 'אופטימלי: 100-160 תווים' },
     { ok: !!page.canonical, text: 'Canonical מוגדר', sub: page.canonical || 'חסר' },
     { ok: page.schema && page.schema.length > 0, text: 'נתונים מובנים', sub: page.schema && page.schema.length > 0 ? page.schema.join(', ') : 'אין סכמה' },
     { ok: (page.headings || []).filter(h => h.startsWith('H1')).length === 1, text: 'H1 יחיד', sub: (page.headings || []).find(h => h.startsWith('H1:')) || 'חסר H1' },
@@ -2932,7 +3085,7 @@ function renderExport() {
         output += `  Canonical: ${pg.canonical || '-'}\n`;
         output += `  Keywords: ${(pg.keywords || []).join(', ') || '-'}\n`;
         output += `  Headings: ${(pg.headings || []).join(' | ') || '-'}\n`;
-        output += `  Score: ${scorePage(pg)}%\n`;
+        output += `  Score: ${scorePage(pg).score}%\n`;
       });
       break;
 
@@ -3338,7 +3491,7 @@ function printReport() {
   let tableHtml = '<h3 style="font-family:var(--font-heading);font-size:16px;margin:16px 0 8px;">סיכום עמודים</h3>';
   tableHtml += '<table><thead><tr><th>עמוד</th><th>נתיב</th><th>כותרת</th><th>תיאור</th><th>ציון</th></tr></thead><tbody>';
   p.pages.forEach(pg => {
-    const ps = scorePage(pg);
+    const ps = scorePage(pg).score;
     tableHtml += `<tr>
       <td>${escapeHtml(pg.name)}</td>
       <td style="direction:ltr;">${escapeHtml(pg.path)}</td>
