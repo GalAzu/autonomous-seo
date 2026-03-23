@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0d14"/>
+      <stop offset="100%" stop-color="#12151e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2f55c7"/>
+      <stop offset="100%" stop-color="#1aa2b0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="4" fill="url(#accent)"/>
+  <rect x="80" y="200" width="80" height="80" rx="18" fill="#2f55c7"/>
+  <text x="120" y="255" font-size="45" font-weight="900" fill="white" text-anchor="middle" font-family="sans-serif">A</text>
+  <text x="180" y="252" font-size="42" font-weight="700" fill="#e8eaf0" font-family="sans-serif">Autonomous <tspan fill="#1aa2b0">SEO</tspan></text>
+  <text x="80" y="340" font-size="52" font-weight="700" fill="#e8eaf0" font-family="sans-serif" direction="rtl" text-anchor="start">כלי SEO חינמי לעסקים ישראליים</text>
+  <text x="80" y="400" font-size="26" fill="#7b82a0" font-family="sans-serif" direction="rtl" text-anchor="start">סרקו את האתר, קבלו ציון SEO, מצאו בעיות ותקנו אותן</text>
+  <text x="80" y="540" font-size="20" fill="#4a5070" font-family="sans-serif">autonomous-seo.vercel.app</text>
+  <rect x="800" y="440" width="320" height="56" rx="10" fill="url(#accent)"/>
+  <text x="960" y="476" font-size="22" font-weight="700" fill="white" text-anchor="middle" font-family="sans-serif">סריקה חינמית ←</text>
+</svg>

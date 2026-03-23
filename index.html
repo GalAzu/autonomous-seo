@@ -15,13 +15,19 @@
 <meta property="og:url" content="https://autonomous-seo.vercel.app">
 <meta property="og:site_name" content="Autonomous SEO">
 <meta property="og:locale" content="he_IL">
+<meta property="og:image" content="https://autonomous-seo.vercel.app/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://autonomous-seo.vercel.app/og-image.svg">
 <meta name="twitter:title" content="Autonomous SEO — כלי SEO חינמי לעסקים">
 <meta name="twitter:description" content="סרקו את האתר שלכם בחינם וקבלו ציון SEO מיידי עם המלצות לשיפור.">
 <meta name="theme-color" content="#2f55c7">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232f55c7'/><text x='50' y='68' font-size='55' font-weight='900' fill='white' text-anchor='middle' font-family='sans-serif'>A</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=Assistant:wght@300;400;500;600;700;800&display=swap');
   :root {
     --bg: #0a0d14;
     --surface: #12151e;
@@ -267,7 +273,7 @@
   .scan-log .log-err { color: var(--red); }
   .scan-log .log-info { color: var(--accent); }
 
-  .scan-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+  .scan-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 10px; margin-top: 16px; }
   .scan-stat { background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
   .scan-stat .val { font-family: var(--font-heading); font-size: 22px; font-weight: 800; }
   .scan-stat .lbl { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
@@ -281,9 +287,17 @@
     .grid-3 { grid-template-columns: 1fr 1fr; }
     .main { padding: 24px; }
   }
+  /* Mobile menu toggle */
+  .mobile-menu-btn { display: none; position: fixed; top: 14px; right: 14px; z-index: 200; width: 44px; height: 44px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 22px; cursor: pointer; align-items: center; justify-content: center; box-shadow: var(--shadow); }
+  .mobile-menu-btn:hover { background: var(--surface-2); }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; }
+  .sidebar-overlay.show { display: block; }
+
   @media (max-width: 768px) {
-    .sidebar { display: none; }
-    .main { margin-right: 0; padding: 16px; }
+    .mobile-menu-btn { display: flex; }
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-right: 0; padding: 16px; padding-top: 70px; }
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
     .onboarding-card { padding: 32px 24px; }
   }
@@ -501,6 +515,8 @@
 <!-- ══════════════════════════════════════════ -->
 <!-- MAIN APP                                  -->
 <!-- ══════════════════════════════════════════ -->
+<button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="תפריט" style="display:none;">&#x2630;</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileMenu()"></div>
 <div id="app-screen" class="app" style="display:none;">
   <nav class="sidebar">
     <div class="sidebar-header">
@@ -609,6 +625,16 @@
         <div id="priority-list"></div>
       </div>
       <div id="dashboard-insights" style="margin-top:16px;"></div>
+      <div id="page-actions" style="margin-top:16px;"></div>
+      <div id="serp-gallery" style="margin-top:16px;display:none;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">&#x1f441; תצוגת SERP — כל העמודים</div>
+            <button class="btn btn-sm btn-ghost" onclick="document.getElementById('serp-gallery').style.display='none'">&#x2715; סגירה</button>
+          </div>
+          <div id="serp-gallery-list"></div>
+        </div>
+      </div>
       <div class="card" id="dashboard-duplicates" style="margin-top:16px;">
         <div class="card-header">
           <div class="card-title">&#x1f50e; זיהוי תוכן כפול</div>
@@ -616,8 +642,10 @@
         </div>
         <div id="duplicates-list"></div>
       </div>
-      <div style="margin-top:16px;">
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="printReport()">&#x1f4c4; הורדת דוח PDF</button>
+        <button class="btn btn-accent" onclick="showSerpGallery()">&#x1f441; תצוגת SERP מלאה</button>
+        <button class="btn btn-ghost" onclick="downloadShareableReport()">&#x1f517; דוח HTML לשיתוף</button>
       </div>
       <div id="low-score-cta" style="display:none;"></div>
       <div class="cta-banner">
@@ -652,7 +680,7 @@
               <th style="width:85px;">אורך תיאור</th>
               <th>Canonical</th>
               <th>Schema</th>
-              <th style="width:70px;">אינדוקס</th>
+              <th style="width:90px;">הוראת אינדוקס</th>
               <th style="width:100px;">ציון</th>
               <th style="width:80px;">פעולות</th>
             </tr></thead>
@@ -681,12 +709,12 @@
                 <span class="badge primary" id="editor-file-path"></span>
               </div>
               <div class="field">
-                <label>כותרת העמוד <span style="color:var(--yellow)">(30-60 תווים)</span></label>
+                <label style="display:flex;justify-content:space-between;align-items:center;">כותרת העמוד <span style="color:var(--yellow)">(30-60 תווים)</span> <button class="btn btn-sm btn-accent" onclick="suggestTitle()" style="font-size:10px;padding:3px 8px;">&#x2728; הצע כותרת</button></label>
                 <input type="text" id="edit-title" oninput="updatePreview();autoSave();" />
                 <div class="char-count" id="title-count"></div>
               </div>
               <div class="field">
-                <label>תיאור מטא <span style="color:var(--yellow)">(100-160 תווים)</span></label>
+                <label style="display:flex;justify-content:space-between;align-items:center;">תיאור מטא <span style="color:var(--yellow)">(100-160 תווים)</span> <button class="btn btn-sm btn-accent" onclick="suggestDescription()" style="font-size:10px;padding:3px 8px;">&#x2728; הצע תיאור</button></label>
                 <textarea id="edit-description" rows="3" oninput="updatePreview();autoSave();"></textarea>
                 <div class="char-count" id="desc-count"></div>
               </div>
@@ -709,13 +737,13 @@
                 <div class="hint">תמונה מומלצת: 1200x630 פיקסלים</div>
               </div>
               <div class="field">
-                <label>אינדוקס</label>
+                <label>הוראת אינדוקס (Robots Directive)</label>
                 <label class="toggle-switch">
                   <input type="checkbox" id="edit-noindex" onchange="autoSave();" />
                   <span class="toggle-track"></span>
                   <span id="noindex-label">Index</span>
                 </label>
-                <div class="hint">כיבוי = noindex, nofollow — העמוד לא יופיע בתוצאות החיפוש</div>
+                <div class="hint">כיבוי = noindex, nofollow — העמוד מורה לגוגל לא לאנדקס אותו. זה לא אומר שגוגל אכן לא מאנדקס — בדקו ב-GSC.</div>
               </div>
               <div class="field">
                 <label>מילות מפתח ממוקדות</label>
@@ -737,9 +765,17 @@
                 <div style="font-family:var(--font-heading);font-size:12px;font-weight:600;margin-bottom:8px;">צפיפות מילות מפתח</div>
                 <div id="keyword-density-results"></div>
               </div>
-              <div style="display:flex;gap:8px;margin-top:16px;">
+              <div id="keyword-suggestions" style="display:none;margin-top:12px;">
+                <div class="density-card">
+                  <div style="font-family:var(--font-heading);font-size:12px;font-weight:600;margin-bottom:8px;">&#x1f4a1; מילות מפתח מומלצות מהתוכן</div>
+                  <div id="keyword-suggestions-list"></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
                 <button class="btn btn-primary" onclick="savePageChanges()">&#x1f4be; שמירה</button>
                 <button class="btn btn-ghost" onclick="resetPageEditor()">&#x21ba; איפוס</button>
+                <button class="btn btn-ghost" onclick="copyMetaBlock()">&#x1f4cb; העתקת קוד מטא</button>
+                <button class="btn btn-ghost" onclick="suggestKeywords()">&#x1f50d; הצע מילות מפתח</button>
               </div>
             </div>
           </div>
@@ -923,6 +959,9 @@
 
       <!-- GSC Data Dashboard (hidden until import) -->
       <div id="gsc-data-section" style="display:none;">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+          <button class="btn btn-sm btn-ghost" onclick="clearGscData()" style="color:var(--red);">&#x1f5d1; מחיקת נתוני GSC</button>
+        </div>
         <div class="grid-4" id="gsc-summary-stats" style="margin-bottom:16px;"></div>
 
         <div class="card">
@@ -1144,7 +1183,16 @@
           </div>
         </div>
         <div class="field"><label>מזהה Google Analytics</label><input type="text" id="settings-ga" style="direction:ltr;text-align:left;" onchange="updateProjectSettings()" /></div>
-        <button class="btn btn-primary" onclick="updateProjectSettings();toast('ההגדרות עודכנו','success');">שמירת הגדרות</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="updateProjectSettings();toast('ההגדרות עודכנו','success');">שמירת הגדרות</button>
+          <button class="btn btn-accent" id="rescan-btn" onclick="rescanProject()">&#x1f504; סריקה מחדש</button>
+        </div>
+        <div id="rescan-status" style="display:none;margin-top:12px;">
+          <div class="scan-progress" style="padding:12px 0;">
+            <div class="spinner"></div>
+            <div id="rescan-status-text" style="font-size:13px;color:var(--accent);font-weight:600;">סורק מחדש...</div>
+          </div>
+        </div>
       </div>
       <div class="card">
         <div class="card-header">
@@ -1152,6 +1200,18 @@
           <button class="btn btn-accent btn-sm" onclick="startNewProject()">+ פרויקט חדש</button>
         </div>
         <div id="projects-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">&#x1f4be; גיבוי ושחזור</div></div>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">הנתונים שמורים בדפדפן בלבד. גבו את הפרויקט כקובץ JSON למקרה שהדפדפן יתנקה.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="exportProjectBackup()">&#x1f4e5; ייצוא פרויקט נוכחי</button>
+          <button class="btn btn-accent" onclick="exportAllBackup()">&#x1f4e6; ייצוא כל הפרויקטים</button>
+          <label class="btn btn-ghost" style="cursor:pointer;">
+            &#x1f4c1; ייבוא מקובץ
+            <input type="file" accept=".json" onchange="importProjectBackup(event)" style="display:none;" />
+          </label>
+        </div>
       </div>
       <div class="card" style="border-color:var(--red);">
         <div class="card-header"><div class="card-title" style="color:var(--red);">&#x26a0; אזור מסוכן</div></div>
@@ -1222,6 +1282,7 @@ let currentProjectId = localStorage.getItem(CURRENT_KEY) || null;
 let currentPage = null;
 let currentExportTab = 'summary';
 let toastTimer = null;
+let autoSaveTimer = null;
 
 // ═══════════════════════════════════════════════════
 // UTILITIES
@@ -1398,6 +1459,11 @@ function extractFromHTML(html, baseUrl) {
   // Feature 2: og:image
   const ogImage = doc.querySelector('meta[property="og:image"]')?.getAttribute('content')?.trim() || '';
 
+  // Noindex detection — check meta robots directives
+  const robotsMeta = doc.querySelector('meta[name="robots"]')?.getAttribute('content')?.toLowerCase() || '';
+  const googlebotMeta = doc.querySelector('meta[name="googlebot"]')?.getAttribute('content')?.toLowerCase() || '';
+  const noindex = robotsMeta.includes('noindex') || googlebotMeta.includes('noindex');
+
   // Feature 7: Extract images with alt text
   const images = [];
   doc.querySelectorAll('img').forEach(img => {
@@ -1406,7 +1472,7 @@ function extractFromHTML(html, baseUrl) {
     if (src) images.push({ src, alt: alt || '' });
   });
 
-  return { title, metaDesc, canonical, ogTitle, ogDesc, ogImage, headings, links: [...links], schemas, lang, dir, ga, metaKeywords, images };
+  return { title, metaDesc, canonical, ogTitle, ogDesc, ogImage, headings, links: [...links], schemas, lang, dir, ga, metaKeywords, images, noindex };
 }
 
 function normalizeUrl(raw) {
@@ -1471,11 +1537,12 @@ async function _doScan(rawUrl, name) {
   scanLog(`  Internal links: ${homeData.links.length} discovered`, 'info');
   if (homeData.schemas.length > 0) scanLog(`  JSON-LD schemas: ${homeData.schemas.length} found`, 'ok');
   if (homeData.ga) scanLog(`  Google Analytics: ${homeData.ga}`, 'ok');
+  if (homeData.noindex) scanLog('  \u26A0 Noindex directive detected!', 'warn');
 
   document.getElementById('scan-status').textContent = '\u05E1\u05D5\u05E8\u05E7 \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD \u05E4\u05E0\u05D9\u05DE\u05D9\u05D9\u05DD...';
 
   // 2. Crawl discovered pages (up to 20)
-  const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, ogImage: homeData.ogImage || '', headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.metaKeywords ? homeData.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [], images: homeData.images || [], outgoingLinks: homeData.links.length }];
+  const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, ogImage: homeData.ogImage || '', headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.metaKeywords ? homeData.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [], images: homeData.images || [], outgoingLinks: homeData.links.length, linkPaths: homeData.links.map(l => normalizePath(l)), noindex: homeData.noindex || false }];
   const visited = new Set(['/']);
   const toVisit = homeData.links
     .map(l => normalizePath(l))
@@ -1499,6 +1566,7 @@ async function _doScan(rawUrl, name) {
 
     const data = extractFromHTML(html, baseUrl);
     scanLog(`  \u2713 ${data.title || path}`, 'ok');
+    if (data.noindex) scanLog(`  \u26A0 ${path} has noindex directive`, 'warn');
 
     discoveredPages.push({
       path,
@@ -1512,7 +1580,9 @@ async function _doScan(rawUrl, name) {
       schemas: data.schemas.map(s => s['@type'] || 'Unknown'),
       keywords: data.metaKeywords ? data.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [],
       images: data.images || [],
-      outgoingLinks: data.links.length
+      outgoingLinks: data.links.length,
+      linkPaths: data.links.map(l => normalizePath(l)),
+      noindex: data.noindex || false
     });
 
     // Discover deeper pages
@@ -1579,11 +1649,13 @@ async function _doScan(rawUrl, name) {
   const withTitle = discoveredPages.filter(p => p.title).length;
   const withDesc = discoveredPages.filter(p => p.description).length;
   const withSchema = discoveredPages.filter(p => p.schemas.length > 0).length;
+  const noindexCount = discoveredPages.filter(p => p.noindex).length;
 
   document.getElementById('scan-results-stats').innerHTML = `
     <div class="scan-stat"><div class="val" style="color:var(--primary)">${discoveredPages.length}</div><div class="lbl">\u05E2\u05DE\u05D5\u05D3\u05D9\u05DD</div></div>
     <div class="scan-stat"><div class="val" style="color:${withTitle === discoveredPages.length ? 'var(--green)' : 'var(--yellow)'}">${withTitle}/${discoveredPages.length}</div><div class="lbl">\u05E2\u05DD \u05DB\u05D5\u05EA\u05E8\u05EA</div></div>
     <div class="scan-stat"><div class="val" style="color:${withDesc === discoveredPages.length ? 'var(--green)' : 'var(--yellow)'}">${withDesc}/${discoveredPages.length}</div><div class="lbl">\u05E2\u05DD \u05EA\u05D9\u05D0\u05D5\u05E8</div></div>
+    ${noindexCount > 0 ? `<div class="scan-stat"><div class="val" style="color:var(--yellow)">${noindexCount}</div><div class="lbl">noindex</div></div>` : ''}
   `;
   document.getElementById('scan-summary-text').textContent = `\u05E0\u05DE\u05E6\u05D0\u05D5 ${discoveredPages.length} \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD, ${scannedData.schemas.length} \u05E1\u05DB\u05DE\u05D5\u05EA, ${sitemapUrls.length > 0 ? sitemapUrls.length + ' \u05DB\u05EA\u05D5\u05D1\u05D5\u05EA \u05D1\u05DE\u05E4\u05EA \u05D0\u05EA\u05E8' : '\u05DC\u05DC\u05D0 \u05DE\u05E4\u05EA \u05D0\u05EA\u05E8'}`;
 
@@ -1638,8 +1710,8 @@ function renderSetupPages() {
   el.innerHTML = setupPages.map((p, i) => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface-2);border-radius:var(--radius-xs);margin-bottom:6px;">
       <div>
-        <strong style="font-size:13px;">${p.name}</strong>
-        <span style="font-size:11px;color:var(--text-dim);margin-right:8px;direction:ltr;display:inline-block;">${p.path}</span>
+        <strong style="font-size:13px;">${escapeHtml(p.name)}</strong>
+        <span style="font-size:11px;color:var(--text-dim);margin-right:8px;direction:ltr;display:inline-block;">${escapeHtml(p.path)}</span>
       </div>
       <button class="btn btn-sm btn-ghost" onclick="removeSetupPage(${i})" style="padding:2px 8px;color:var(--red);">&times;</button>
     </div>
@@ -1674,7 +1746,7 @@ function finishSetup() {
       ogTitle: p.ogTitle || '',
       ogDesc: p.ogDesc || '',
       ogImage: p.ogImage || '',
-      noindex: false,
+      noindex: p.noindex || false,
       content: '',
       keywords: p.keywords || [],
       headings: p.headings || [],
@@ -1684,6 +1756,19 @@ function finishSetup() {
       incomingLinks: 0,
       order: i
     }));
+    // Calculate incoming links from the link graph
+    const pathSet = new Set(pages.map(pg => pg.path));
+    const incomingCounts = {};
+    pages.forEach(pg => { incomingCounts[pg.path] = 0; });
+    scannedData.pages.forEach(sp => {
+      (sp.linkPaths || []).forEach(lp => {
+        if (pathSet.has(lp) && lp !== sp.path) {
+          incomingCounts[lp] = (incomingCounts[lp] || 0) + 1;
+        }
+      });
+    });
+    pages.forEach(pg => { pg.incomingLinks = incomingCounts[pg.path] || 0; });
+
     sitemap = scannedData.sitemap;
     robots = scannedData.robots;
     projectSchemas = scannedData.schemas.map(s => ({ id: generateId(), type: s['@type'] || 'Custom', json: s }));
@@ -1769,6 +1854,8 @@ function startNewProject() {
   showSetupStep(0);
   document.getElementById('app-screen').style.display = 'none';
   document.getElementById('onboarding-screen').style.display = 'flex';
+  document.getElementById('mobile-menu-btn').style.display = 'none';
+  closeMobileMenu();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1777,31 +1864,26 @@ function startNewProject() {
 function enterApp() {
   document.getElementById('onboarding-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'flex';
+  document.getElementById('mobile-menu-btn').removeAttribute('style');
   populateProjectSelector();
   renderAll();
 }
 
+let renderedTabs = new Set();
+
 function renderAll() {
   const p = getProject();
   if (!p) return;
+  renderedTabs.clear();
 
+  // Always render dashboard + page selector (needed globally)
   renderDashboard();
-  renderPagesTable();
   populatePageSelector();
-  renderSchemas();
-  renderSitemap();
-  renderRobots();
-  renderKeywords();
-  renderHeadings();
-  renderGSCGuide();
-  renderChecklist();
-  renderSettings();
-  renderProjectsList();
-  renderRedirects();
-  renderImages();
-  renderLinks();
-  renderHreflang();
-  renderDuplicateContent();
+  renderedTabs.add('dashboard');
+
+  // Render the currently active tab
+  const activeTab = document.querySelector('.tab-content.active');
+  if (activeTab) renderTabContent(activeTab.id.replace('tab-', ''));
   document.getElementById('nav-pages-count').textContent = p.pages.length;
   // Update redirect count badge
   const redirectCount = (p.redirects || []).length;
@@ -1840,12 +1922,50 @@ function switchProject(id) {
 // ═══════════════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════════════
+function toggleMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+
+function closeMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+}
+
+function renderTabContent(tabId) {
+  if (renderedTabs.has(tabId)) return;
+  renderedTabs.add(tabId);
+  const map = {
+    pages: () => renderPagesTable(),
+    editor: () => {},
+    structured: () => renderSchemas(),
+    sitemap: () => renderSitemap(),
+    robots: () => renderRobots(),
+    keywords: () => renderKeywords(),
+    headings: () => renderHeadings(),
+    gsc: () => renderGSCGuide(),
+    checklist: () => renderChecklist(),
+    settings: () => { renderSettings(); renderProjectsList(); },
+    redirects: () => renderRedirects(),
+    images: () => renderImages(),
+    links: () => renderLinks(),
+    hreflang: () => renderHreflang(),
+  };
+  if (map[tabId]) map[tabId]();
+}
+
 function showTab(tabId, el) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const tab = document.getElementById('tab-' + tabId);
   if (tab) tab.classList.add('active');
   if (el) el.classList.add('active');
+  renderTabContent(tabId);
+  closeMobileMenu();
 }
 
 // ═══════════════════════════════════════════════════
@@ -2126,6 +2246,11 @@ function renderDashboard() {
     if (h1s.length === 0) priorities.push({ icon: 'missing', text: `עמוד "${pg.name}" חסר H1`, sub: 'כל עמוד חייב כותרת H1 אחת' });
     if (h1s.length > 1) priorities.push({ icon: 'todo', text: `עמוד "${pg.name}" עם ${h1s.length} כותרות H1`, sub: 'כל עמוד צריך בדיוק H1 אחד' });
   });
+  // Noindex check
+  const noindexPages = p.pages.filter(pg => pg.noindex);
+  if (noindexPages.length > 0) {
+    priorities.push({ icon: 'todo', text: `${noindexPages.length} עמודים עם הוראת noindex`, sub: 'עמודים אלה מורים לגוגל לא לאנדקס: ' + noindexPages.map(pg => pg.name).join(', ') + '. וודאו שזה מכוון.' });
+  }
   // Internal linking check
   const orphanPages = p.pages.filter(pg => (pg.incomingLinks || 0) === 0 && pg.path !== '/');
   if (orphanPages.length > 0) priorities.push({ icon: 'todo', text: `${orphanPages.length} עמודים ״יתומים״ ללא קישורים נכנסים`, sub: 'קשרו כל עמוד מעמודים אחרים באתר לשיפור הסריקה' });
@@ -2156,6 +2281,10 @@ function renderDashboard() {
       lowScoreCta.style.display = 'none';
     }
   }
+
+  // Render sub-sections
+  renderPageActions();
+  renderDuplicateContent();
 }
 
 // ═══════════════════════════════════════════════════
@@ -2330,7 +2459,7 @@ function updatePageChecklist(page) {
     { ok: (page.headings || []).filter(h => h.startsWith('H1')).length === 1, text: 'H1 יחיד', sub: (page.headings || []).find(h => h.startsWith('H1:')) || 'חסר H1' },
     { ok: page.keywords && page.keywords.length > 0, text: 'מילות מפתח', sub: (page.keywords || []).join(', ') || 'לא הוגדרו' },
     { ok: !!(page.ogImage), text: 'og:image מוגדר', sub: page.ogImage ? escapeHtml(page.ogImage).substring(0, 60) : 'חסר תמונת שיתוף' },
-    { ok: !(page.noindex), text: 'אינדוקס', sub: page.noindex ? 'העמוד מוגדר כ-noindex — לא יופיע בגוגל' : 'העמוד ניתן לאינדוקס' },
+    { ok: !(page.noindex), text: 'הוראת אינדוקס', sub: page.noindex ? 'העמוד מורה לגוגל לא לאנדקס — האם זה מכוון?' : 'העמוד מאפשר אינדוקס' },
   ];
   el.innerHTML = checks.map(c => `<div class="checklist-item"><div class="check-icon ${c.ok ? 'done' : 'todo'}">${c.ok ? '\u2713' : '~'}</div><div class="checklist-text"><div>${c.text}</div><div class="sub">${c.sub}</div></div></div>`).join('');
 }
@@ -2347,7 +2476,7 @@ function renderPageHeadings(page) {
   }).join('');
 }
 
-function autoSave() {
+function _doAutoSave() {
   if (!currentPage) return;
   const p = getProject();
   if (!p) return;
@@ -2372,6 +2501,11 @@ function autoSave() {
   saveProjects();
 }
 
+function autoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(_doAutoSave, 500);
+}
+
 function savePageChanges() {
   autoSave();
   renderDashboard();
@@ -2383,7 +2517,7 @@ function savePageChanges() {
 function resetPageEditor() {
   if (!currentPage) return;
   loadPageEditor(currentPage.id);
-  toast('אופס למצב הנוכחי');
+  toast('איפוס למצב השמור');
 }
 
 function addKeyword(event) {
@@ -2478,13 +2612,11 @@ function saveSchemaEdit(i) {
   }
 }
 
-function updateSchema(i) {
-  // Just mark as dirty, save on button click
-}
 
 function removeSchema(i) {
   const p = getProject();
   if (!p) return;
+  if (!confirm('למחוק סכמה זו?')) return;
   p.schemas.splice(i, 1);
   saveProjects();
   renderSchemas();
@@ -2547,6 +2679,7 @@ function addSitemapEntry() {
 function removeSitemapEntry(i) {
   const p = getProject();
   if (!p) return;
+  if (!confirm('להסיר כתובת זו ממפת האתר?')) return;
   p.sitemap.splice(i, 1);
   saveProjects();
   renderSitemap();
@@ -2809,6 +2942,19 @@ function handleGscFile(event) {
   reader.readAsText(file);
 }
 
+function clearGscData() {
+  if (!confirm('למחוק את כל נתוני GSC? לא ניתן לשחזר.')) return;
+  const p = getProject();
+  if (!p) return;
+  p.gscData = [];
+  p.gscHistory = [];
+  gscRows = [];
+  saveProjects();
+  document.getElementById('gsc-data-section').style.display = 'none';
+  document.getElementById('gsc-paste-area').value = '';
+  toast('נתוני GSC נמחקו');
+}
+
 function sortGscData(field) {
   if (gscSortField === field) gscSortDir *= -1;
   else { gscSortField = field; gscSortDir = -1; }
@@ -3048,12 +3194,204 @@ function deleteCurrentProject() {
 }
 
 // ═══════════════════════════════════════════════════
+// RE-SCAN
+// ═══════════════════════════════════════════════════
+async function rescanProject() {
+  const p = getProject();
+  if (!p || !p.url) { toast('אין כתובת אתר לסריקה'); return; }
+  if (!confirm(`סריקה מחדש של ${p.url}? נתוני עמודים קיימים (מילות מפתח, תוכן, סכמות ידניות) יישמרו — רק מטא-דאטה, כותרות ותמונות יתעדכנו.`)) return;
+
+  const btn = document.getElementById('rescan-btn');
+  const status = document.getElementById('rescan-status');
+  const statusText = document.getElementById('rescan-status-text');
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
+  status.style.display = 'block';
+
+  try {
+    statusText.textContent = 'מתחבר לאתר...';
+    const homeHtml = await fetchWithProxy(p.url);
+    if (!homeHtml) { toast('לא ניתן להתחבר לאתר'); return; }
+
+    const homeData = extractFromHTML(homeHtml, p.url);
+    const scannedPages = [{ path: '/', ...homeData, links: homeData.links.map(l => normalizePath(l)) }];
+
+    const visited = new Set(['/']);
+    const toVisit = homeData.links.map(l => normalizePath(l))
+      .filter(l => l !== '/' && !l.includes('?') && !SKIP_EXTENSIONS.test(l) && !visited.has(l))
+      .filter((v, i, a) => a.indexOf(v) === i).slice(0, 20);
+
+    for (let i = 0; i < toVisit.length; i++) {
+      const path = toVisit[i];
+      if (visited.has(path)) continue;
+      visited.add(path);
+      statusText.textContent = `סורק ${i + 1}/${toVisit.length}... ${path}`;
+      const html = await fetchWithProxy(p.url + path);
+      if (!html) continue;
+      const data = extractFromHTML(html, p.url);
+      scannedPages.push({ path, ...data, links: data.links.map(l => normalizePath(l)) });
+      data.links.forEach(l => {
+        const nl = normalizePath(l);
+        if (!visited.has(nl) && !toVisit.includes(nl) && toVisit.length < 30 && !nl.includes('?') && !SKIP_EXTENSIONS.test(nl)) toVisit.push(nl);
+      });
+    }
+
+    // Build incoming link counts
+    const allPaths = new Set(scannedPages.map(sp => sp.path));
+    const incomingCounts = {};
+    scannedPages.forEach(sp => {
+      (sp.links || []).forEach(lp => {
+        if (allPaths.has(lp) && lp !== sp.path) incomingCounts[lp] = (incomingCounts[lp] || 0) + 1;
+      });
+    });
+
+    // Merge scan results with existing page data
+    const existingByPath = {};
+    p.pages.forEach(pg => { existingByPath[pg.path] = pg; });
+
+    let newPages = 0;
+    let updatedPages = 0;
+
+    scannedPages.forEach(sp => {
+      const existing = existingByPath[sp.path];
+      if (existing) {
+        // Update scan-derived fields, preserve user-edited fields
+        existing.title = sp.title || existing.title;
+        existing.description = sp.metaDesc || existing.description;
+        existing.canonical = sp.canonical || existing.canonical;
+        existing.ogTitle = sp.ogTitle || existing.ogTitle;
+        existing.ogDesc = sp.ogDesc || existing.ogDesc;
+        existing.ogImage = sp.ogImage || existing.ogImage;
+        existing.headings = sp.headings.length > 0 ? sp.headings : existing.headings;
+        existing.images = sp.images.length > 0 ? sp.images : existing.images;
+        existing.noindex = sp.noindex;
+        existing.outgoingLinks = sp.links.length;
+        existing.incomingLinks = incomingCounts[sp.path] || 0;
+        // Preserve: keywords, content, schema (user-edited)
+        updatedPages++;
+      } else {
+        // New page discovered
+        p.pages.push({
+          id: generateId(),
+          name: (sp.title ? sp.title.split('|')[0].split('\u2013')[0].split(' - ')[0].trim() : '') || guessPageName(sp.path) || sp.path,
+          path: sp.path, file: '',
+          title: sp.title || '', description: sp.metaDesc || '',
+          canonical: sp.canonical || sp.path,
+          ogTitle: sp.ogTitle || '', ogDesc: sp.ogDesc || '', ogImage: sp.ogImage || '',
+          noindex: sp.noindex, content: '',
+          keywords: sp.metaKeywords ? sp.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [],
+          headings: sp.headings || [], schema: sp.schemas ? sp.schemas.map(s => s['@type'] || 'Unknown') : [],
+          images: sp.images || [],
+          outgoingLinks: sp.links.length,
+          incomingLinks: incomingCounts[sp.path] || 0,
+          order: p.pages.length
+        });
+        newPages++;
+      }
+    });
+
+    // Update sitemap.xml if found
+    statusText.textContent = 'בודק sitemap...';
+    const sitemapHtml = await fetchWithProxy(p.url + '/sitemap.xml');
+    if (sitemapHtml && sitemapHtml.includes('<urlset')) {
+      const sParser = new DOMParser();
+      const sDoc = sParser.parseFromString(sitemapHtml, 'text/xml');
+      const newSitemap = [];
+      sDoc.querySelectorAll('url').forEach(u => {
+        const loc = u.querySelector('loc')?.textContent || '';
+        if (loc) {
+          try {
+            const path = new URL(loc).pathname.replace(/\/+$/, '') || '/';
+            newSitemap.push({
+              url: path.endsWith('/') ? path : path + '/',
+              priority: u.querySelector('priority')?.textContent || '0.7',
+              changefreq: u.querySelector('changefreq')?.textContent || 'monthly',
+              lastmod: (u.querySelector('lastmod')?.textContent || new Date().toISOString()).split('T')[0]
+            });
+          } catch (e) {}
+        }
+      });
+      if (newSitemap.length > 0) p.sitemap = newSitemap;
+    }
+
+    // Update robots.txt
+    const robotsTxt = await fetchWithProxy(p.url + '/robots.txt');
+    if (robotsTxt && robotsTxt.includes('User-agent')) p.robots = robotsTxt;
+
+    saveProjects();
+    renderAll();
+    toast(`סריקה הושלמה: ${updatedPages} עודכנו, ${newPages} חדשים`, 'success');
+
+  } catch (err) {
+    console.error('Rescan error:', err);
+    toast('שגיאה בסריקה — נסו שוב');
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    status.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECT BACKUP & RESTORE
+// ═══════════════════════════════════════════════════
+function exportProjectBackup() {
+  const p = getProject();
+  if (!p) { toast('אין פרויקט פעיל'); return; }
+  const data = JSON.stringify({ _format: 'autonomous-seo-backup', _version: 1, _exportedAt: new Date().toISOString(), projects: { [p.id]: p } }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  downloadBlob(blob, `seo-backup-${(p.name || 'project').replace(/\s+/g, '-')}.json`);
+  toast('הפרויקט יוצא בהצלחה', 'success');
+}
+
+function exportAllBackup() {
+  if (Object.keys(projects).length === 0) { toast('אין פרויקטים לייצוא'); return; }
+  const data = JSON.stringify({ _format: 'autonomous-seo-backup', _version: 1, _exportedAt: new Date().toISOString(), projects }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  downloadBlob(blob, `seo-backup-all-${new Date().toISOString().split('T')[0]}.json`);
+  toast(`${Object.keys(projects).length} פרויקטים יוצאו`, 'success');
+}
+
+function importProjectBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.projects || data._format !== 'autonomous-seo-backup') {
+        toast('קובץ לא תקין — נדרש קובץ גיבוי של Autonomous SEO');
+        return;
+      }
+      let imported = 0;
+      Object.entries(data.projects).forEach(([id, proj]) => {
+        if (projects[id]) {
+          if (!confirm(`הפרויקט "${proj.name}" כבר קיים. לדרוס?`)) return;
+        }
+        projects[id] = proj;
+        imported++;
+      });
+      if (imported === 0) { toast('לא יובאו פרויקטים'); return; }
+      if (!currentProjectId) currentProjectId = Object.keys(data.projects)[0];
+      saveProjects();
+      enterApp();
+      toast(`${imported} פרויקטים יובאו בהצלחה`, 'success');
+    } catch (err) {
+      toast('שגיאה בקריאת הקובץ — וודאו שהוא JSON תקין');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ═══════════════════════════════════════════════════
 // EXPORT
 // ═══════════════════════════════════════════════════
 function exportAll() {
   currentExportTab = 'summary';
   renderExport();
   document.getElementById('export-modal').classList.add('show');
+  closeMobileMenu();
 }
 
 function setExportTab(tab) {
@@ -3178,18 +3516,15 @@ function textSimilarity(a, b) {
   a = a.toLowerCase().trim();
   b = b.toLowerCase().trim();
   if (a === b) return 1;
-  const longer = a.length > b.length ? a : b;
-  const shorter = a.length > b.length ? b : a;
-  if (longer.length === 0) return 1;
-  // Simple Levenshtein-based similarity for short strings
-  if (longer.length < 200) {
-    let matches = 0;
-    const wordsA = a.split(/\s+/);
-    const wordsB = new Set(b.split(/\s+/));
-    wordsA.forEach(w => { if (wordsB.has(w)) matches++; });
-    return wordsA.length > 0 ? matches / Math.max(wordsA.length, wordsB.size) : 0;
-  }
-  return a === b ? 1 : 0;
+  if (a.length === 0 || b.length === 0) return 0;
+  // Word-overlap similarity (Jaccard-like) — works for all string lengths
+  const wordsA = a.split(/\s+/).filter(w => w.length > 1);
+  const wordsB = b.split(/\s+/).filter(w => w.length > 1);
+  if (wordsA.length === 0 || wordsB.length === 0) return 0;
+  const setB = new Set(wordsB);
+  let matches = 0;
+  wordsA.forEach(w => { if (setB.has(w)) matches++; });
+  return matches / Math.max(wordsA.length, wordsB.length);
 }
 
 function renderDuplicateContent() {
@@ -3337,6 +3672,7 @@ function addRedirect() {
 function removeRedirect(i) {
   const p = getProject();
   if (!p || !p.redirects) return;
+  if (!confirm('למחוק ניתוב זה?')) return;
   p.redirects.splice(i, 1);
   saveProjects();
   renderRedirects();
@@ -3640,12 +3976,366 @@ function copyHreflangOutput() {
   toast('תגיות hreflang הועתקו', 'success');
 }
 
-// Close modals on overlay click
+// Close modals on overlay click or Escape
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => {
     if (e.target === e.currentTarget) overlay.classList.remove('show');
   });
 });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+    closeMobileMenu();
+  }
+});
+
+// ═══════════════════════════════════════════════════
+// PER-PAGE ACTION CARDS
+// ═══════════════════════════════════════════════════
+function renderPageActions() {
+  const p = getProject();
+  if (!p || p.pages.length === 0) { document.getElementById('page-actions').innerHTML = ''; return; }
+
+  // Only show pages with issues, sorted by score ascending (worst first)
+  const pagesWithActions = p.pages.map(pg => {
+    const actions = [];
+    const tl = (pg.title || '').length;
+    const dl = (pg.description || '').length;
+    const kws = pg.keywords || [];
+    const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
+
+    if (tl === 0) actions.push({ severity: 'red', text: 'חסרה כותרת לגמרי', fix: `הוסיפו כותרת בין 30-60 תווים עם מילת המפתח הראשית. דוגמה: "${pg.name} | ${p.name}"` });
+    else if (tl < 30) actions.push({ severity: 'yellow', text: `כותרת קצרה (${tl} תווים)`, fix: 'הרחיבו ל-30-60 תווים. שלבו מילת מפתח + שם העסק.' });
+    else if (tl > 60) actions.push({ severity: 'yellow', text: `כותרת ארוכה (${tl} תווים)`, fix: 'קצרו ל-60 תווים — גוגל חותך את השאר.' });
+
+    if (dl === 0) actions.push({ severity: 'red', text: 'חסר תיאור מטא', fix: 'כתבו 120-150 תווים שמתארים את תוכן העמוד. כללו קריאה לפעולה.' });
+    else if (dl < 100) actions.push({ severity: 'yellow', text: `תיאור קצר (${dl} תווים)`, fix: 'הרחיבו ל-100-160 תווים עם מילת מפתח ו-CTA.' });
+    else if (dl > 160) actions.push({ severity: 'yellow', text: `תיאור ארוך (${dl} תווים)`, fix: 'קצרו ל-160 תווים — גוגל חותך את השאר.' });
+
+    if (kws.length === 0) actions.push({ severity: 'yellow', text: 'אין מילות מפתח ממוקדות', fix: 'הגדירו 2-3 מילות מפתח ושלבו אותן בכותרת, H1, ופסקה ראשונה.' });
+    if (h1s.length === 0) actions.push({ severity: 'red', text: 'חסר H1', fix: 'הוסיפו כותרת H1 אחת שמתארת את נושא העמוד.' });
+    if (h1s.length > 1) actions.push({ severity: 'yellow', text: `${h1s.length} כותרות H1`, fix: 'השאירו H1 אחד בלבד — השאר צריכים להיות H2.' });
+    if (!pg.canonical) actions.push({ severity: 'yellow', text: 'חסר Canonical', fix: `הגדירו: ${pg.path}` });
+    if (!(pg.ogTitle || pg.ogDesc)) actions.push({ severity: 'yellow', text: 'חסר OG Meta לשיתוף', fix: 'הוסיפו OG Title ו-OG Description לתצוגה מיטבית ברשתות.' });
+    if (pg.noindex) actions.push({ severity: 'red', text: 'העמוד מסומן כ-noindex', fix: 'העמוד לא יופיע בגוגל. אם זה לא מכוון — בטלו את ה-noindex.' });
+
+    return { pg, actions, score: scorePage(pg).score };
+  }).filter(x => x.actions.length > 0).sort((a, b) => a.score - b.score).slice(0, 5);
+
+  if (pagesWithActions.length === 0) {
+    document.getElementById('page-actions').innerHTML = '';
+    return;
+  }
+
+  document.getElementById('page-actions').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">&#x1f3af; תוכנית פעולה לכל עמוד</div>
+        <span class="badge primary">${pagesWithActions.length} עמודים לשיפור</span>
+      </div>
+      ${pagesWithActions.map(({ pg, actions, score }) => `
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div>
+              <strong>${escapeHtml(pg.name)}</strong>
+              <span style="font-size:11px;color:var(--text-dim);margin-right:8px;direction:ltr;display:inline-block;">${escapeHtml(pg.path)}</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span class="badge ${score >= 80 ? 'green' : score >= 50 ? 'yellow' : 'red'}">${score}%</span>
+              <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">&#x270f; תקן</button>
+            </div>
+          </div>
+          ${actions.map((a, i) => `
+            <div style="display:flex;gap:10px;padding:6px 0;${i > 0 ? 'border-top:1px solid var(--border);' : ''}">
+              <span style="color:var(--${a.severity});font-weight:700;font-size:13px;min-width:20px;">${i + 1}.</span>
+              <div style="font-size:13px;"><strong>${escapeHtml(a.text)}</strong><div style="color:var(--text-dim);font-size:12px;margin-top:2px;">${escapeHtml(a.fix)}</div></div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// TITLE & DESCRIPTION GENERATOR
+// ═══════════════════════════════════════════════════
+function suggestTitle() {
+  if (!currentPage) return;
+  const p = getProject();
+  if (!p) return;
+  const pg = currentPage;
+  const kws = pg.keywords || [];
+  const pageName = pg.name || '';
+  const bizName = p.name || '';
+
+  const templates = [
+    kws.length > 0 ? `${kws[0]} — ${pageName} | ${bizName}` : null,
+    `${pageName} — ${bizName}`,
+    kws.length > 0 ? `${pageName} | ${kws[0]} — ${bizName}` : null,
+    `${bizName} — ${pageName}`,
+    kws.length >= 2 ? `${kws[0]} ו${kws[1]} | ${bizName}` : null,
+  ].filter(Boolean);
+
+  // Pick the best: closest to 50 chars
+  const sorted = templates.sort((a, b) => Math.abs(a.length - 50) - Math.abs(b.length - 50));
+  const suggestion = sorted[0] || `${pageName} | ${bizName}`;
+
+  document.getElementById('edit-title').value = suggestion;
+  updatePreview();
+  autoSave();
+  toast(`הוצעה כותרת (${suggestion.length} תווים)`, 'success');
+}
+
+function suggestDescription() {
+  if (!currentPage) return;
+  const p = getProject();
+  if (!p) return;
+  const pg = currentPage;
+  const kws = pg.keywords || [];
+  const pageName = pg.name || '';
+  const bizName = p.name || '';
+  const bizType = p.businessType || 'LocalBusiness';
+
+  const typeMap = {
+    LocalBusiness: 'עסק', Organization: 'ארגון', Store: 'חנות',
+    Restaurant: 'מסעדה', ProfessionalService: 'שירות מקצועי',
+    MedicalBusiness: 'שירות רפואי', EducationalOrganization: 'מוסד חינוכי'
+  };
+  const typeHe = typeMap[bizType] || 'עסק';
+
+  const kwStr = kws.length > 0 ? kws.slice(0, 2).join(' ו') : pageName;
+  const isHome = pg.path === '/';
+
+  const templates = isHome ? [
+    `${bizName} — ${typeHe} המציע ${kwStr}. גלו את השירותים שלנו, קראו המלצות לקוחות וצרו קשר לייעוץ חינם.`,
+    `מחפשים ${kwStr}? ${bizName} מספק פתרונות מקצועיים עם שירות אישי. בדקו מה אנחנו מציעים ←`,
+    `${bizName} — ${kwStr} ברמה הגבוהה ביותר. שנות ניסיון, שירות אמין ותוצאות מוכחות. התקשרו עוד היום.`,
+  ] : [
+    `${pageName} — ${kwStr} מבית ${bizName}. כל מה שצריך לדעת על ${pageName.toLowerCase()}, עם מידע מקצועי ופרטים ליצירת קשר.`,
+    `גלו את ${pageName} של ${bizName}. ${kws.length > 0 ? kws[0] + ' — ' : ''}מידע מקיף, מחירים ודרכי התקשרות.`,
+    `${kws.length > 0 ? kws[0] : pageName} | ${bizName}. עמוד ${pageName} עם כל הפרטים שתצטרכו. צרו קשר עוד היום ←`,
+  ];
+
+  // Pick closest to 140 chars
+  const sorted = templates.sort((a, b) => Math.abs(a.length - 140) - Math.abs(b.length - 140));
+  const suggestion = sorted[0];
+
+  document.getElementById('edit-description').value = suggestion;
+  updatePreview();
+  autoSave();
+  toast(`הוצע תיאור (${suggestion.length} תווים)`, 'success');
+}
+
+// ═══════════════════════════════════════════════════
+// KEYWORD SUGGESTIONS FROM CONTENT
+// ═══════════════════════════════════════════════════
+function suggestKeywords() {
+  if (!currentPage) return;
+  const content = document.getElementById('edit-content').value || '';
+  const headingsText = document.getElementById('edit-headings').value || '';
+  const title = document.getElementById('edit-title').value || '';
+  const allText = (title + ' ' + headingsText + ' ' + content).toLowerCase();
+
+  if (allText.trim().length < 20) { toast('הוסיפו תוכן או כותרות כדי לקבל הצעות'); return; }
+
+  // Hebrew stop words
+  const stopWords = new Set(['של','את','על','עם','או','גם','לא','כי','אם','הם','היא','הוא','זה','זו','אני','אנחנו','שלנו','שלכם','אותו','אותה','כל','עוד','יותר','אין','יש','בין','כמו','רק','אחד','אחת','פי','מאוד','כבר','לפני','אחרי','בגלל','משום','the','and','for','with','this','that','from','are','was','you','your','our','more','about','all','but','not','has','can','will','been','have','each','which','their','what']);
+
+  const words = allText.split(/[\s,.;:!?\-\u200f\u200e()\[\]{}"'\/]+/).filter(w => w.length > 2 && !stopWords.has(w) && !/^\d+$/.test(w));
+  const freq = {};
+  words.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
+
+  // Also count 2-word phrases from title and headings (higher value)
+  const phraseText = (title + ' ' + headingsText).toLowerCase();
+  const phraseWords = phraseText.split(/[\s,.;:!?\-\u200f\u200e()\[\]{}"'\/]+/).filter(w => w.length > 1);
+  for (let i = 0; i < phraseWords.length - 1; i++) {
+    const phrase = phraseWords[i] + ' ' + phraseWords[i + 1];
+    if (!stopWords.has(phraseWords[i]) && !stopWords.has(phraseWords[i + 1])) {
+      freq[phrase] = (freq[phrase] || 0) + 3; // boost phrases
+    }
+  }
+
+  const existing = new Set((currentPage.keywords || []).map(k => k.toLowerCase()));
+  const suggestions = Object.entries(freq)
+    .filter(([w, c]) => c >= 2 && !existing.has(w))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  if (suggestions.length === 0) { toast('לא נמצאו מילות מפתח חדשות — הוסיפו תוכן'); return; }
+
+  const container = document.getElementById('keyword-suggestions');
+  const list = document.getElementById('keyword-suggestions-list');
+  container.style.display = 'block';
+  list.innerHTML = suggestions.map(([word, count]) =>
+    `<div class="density-item"><span>${escapeHtml(word)} <span style="color:var(--text-muted);font-size:10px;">(${count}x)</span></span><button class="btn btn-sm btn-accent" onclick="addSuggestedKeyword('${escapeHtml(word).replace(/'/g, "\\'")}');this.disabled=true;this.textContent='&#x2713;';" style="padding:2px 10px;font-size:11px;">+ הוסף</button></div>`
+  ).join('');
+}
+
+function addSuggestedKeyword(kw) {
+  addKeywordTag(kw);
+  autoSave();
+  toast(`"${kw}" נוסף למילות מפתח`, 'success');
+}
+
+// ═══════════════════════════════════════════════════
+// COPY-READY META BLOCK
+// ═══════════════════════════════════════════════════
+function copyMetaBlock() {
+  if (!currentPage) return;
+  const p = getProject();
+  if (!p) return;
+  const pg = currentPage;
+  const fullUrl = (p.url || '') + (pg.canonical || pg.path);
+
+  let meta = '';
+  meta += `<title>${pg.title || ''}</title>\n`;
+  meta += `<meta name="description" content="${(pg.description || '').replace(/"/g, '&quot;')}">\n`;
+  if (pg.canonical) meta += `<link rel="canonical" href="${fullUrl}">\n`;
+  if (pg.noindex) meta += `<meta name="robots" content="noindex, nofollow">\n`;
+  meta += `\n<!-- Open Graph -->\n`;
+  meta += `<meta property="og:type" content="website">\n`;
+  meta += `<meta property="og:title" content="${(pg.ogTitle || pg.title || '').replace(/"/g, '&quot;')}">\n`;
+  meta += `<meta property="og:description" content="${(pg.ogDesc || pg.description || '').replace(/"/g, '&quot;')}">\n`;
+  meta += `<meta property="og:url" content="${fullUrl}">\n`;
+  if (pg.ogImage) meta += `<meta property="og:image" content="${pg.ogImage}">\n`;
+  meta += `\n<!-- Twitter -->\n`;
+  meta += `<meta name="twitter:card" content="summary_large_image">\n`;
+  meta += `<meta name="twitter:title" content="${(pg.ogTitle || pg.title || '').replace(/"/g, '&quot;')}">\n`;
+  meta += `<meta name="twitter:description" content="${(pg.ogDesc || pg.description || '').replace(/"/g, '&quot;')}">\n`;
+
+  safeClipboard(meta);
+  toast('קוד מטא הועתק ללוח — הדביקו ב-<head>', 'success');
+}
+
+// ═══════════════════════════════════════════════════
+// SERP PREVIEW GALLERY
+// ═══════════════════════════════════════════════════
+function showSerpGallery() {
+  const p = getProject();
+  if (!p) return;
+
+  const el = document.getElementById('serp-gallery-list');
+  el.innerHTML = p.pages.map(pg => {
+    const t = pg.title || '';
+    const d = pg.description || '';
+    const u = (p.url || '') + (pg.canonical || pg.path);
+    const score = scorePage(pg).score;
+    const tOk = t.length >= 30 && t.length <= 60;
+    const dOk = d.length >= 100 && d.length <= 160;
+
+    return `<div style="padding:16px;border-bottom:1px solid var(--border);display:flex;gap:16px;align-items:flex-start;">
+      <div style="flex:1;">
+        <div style="font-family:Arial,sans-serif;direction:rtl;">
+          <div style="color:#8ab4f8;font-size:18px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${!tOk ? 'border-bottom:2px solid var(--yellow);padding-bottom:2px;' : ''}">${t.length > 60 ? escapeHtml(t.substring(0, 57)) + '...' : escapeHtml(t) || '<span style="color:var(--red);">חסרה כותרת</span>'}</div>
+          <div style="color:#bdc1c6;font-size:12px;margin:3px 0;direction:ltr;text-align:right;">${escapeHtml(u)}</div>
+          <div style="color:#bdc1c6;font-size:13px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;${!dOk ? 'border-bottom:2px solid var(--yellow);padding-bottom:2px;' : ''}">${d.length > 160 ? escapeHtml(d.substring(0, 157)) + '...' : escapeHtml(d) || '<span style="color:var(--red);">חסר תיאור</span>'}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:60px;">
+        <span class="badge ${score >= 80 ? 'green' : score >= 50 ? 'yellow' : 'red'}">${score}%</span>
+        <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')" style="font-size:10px;">&#x270f;</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('serp-gallery').style.display = 'block';
+  document.getElementById('serp-gallery').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════
+// SHAREABLE HTML REPORT
+// ═══════════════════════════════════════════════════
+function downloadShareableReport() {
+  const p = getProject();
+  if (!p) return;
+  const { score, details } = scoreProject();
+  const domain = (p.url || '').replace('https://', '').replace('http://', '');
+  const date = new Date().toLocaleDateString('he-IL');
+
+  const scoreColor = score >= 80 ? '#22c55e' : score >= 50 ? '#eab308' : '#ef4444';
+
+  let pagesHtml = '';
+  p.pages.forEach(pg => {
+    const ps = scorePage(pg);
+    const psColor = ps.score >= 80 ? '#22c55e' : ps.score >= 50 ? '#eab308' : '#ef4444';
+    const actions = [];
+    const tl = (pg.title || '').length;
+    const dl = (pg.description || '').length;
+    if (tl === 0) actions.push('חסרה כותרת');
+    else if (tl < 30 || tl > 60) actions.push(`כותרת לא אופטימלית (${tl} תווים)`);
+    if (dl === 0) actions.push('חסר תיאור מטא');
+    else if (dl < 100 || dl > 160) actions.push(`תיאור לא אופטימלי (${dl} תווים)`);
+    if ((pg.keywords || []).length === 0) actions.push('אין מילות מפתח');
+    if (pg.noindex) actions.push('noindex — לא מופיע בגוגל');
+    const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
+    if (h1s.length !== 1) actions.push(h1s.length === 0 ? 'חסר H1' : `${h1s.length} כותרות H1`);
+
+    pagesHtml += `<div style="border:1px solid #2a3050;border-radius:10px;padding:20px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div><strong>${escapeHtml(pg.name)}</strong> <span style="color:#7b82a0;font-size:12px;direction:ltr;display:inline-block;margin-right:6px;">${escapeHtml(pg.path)}</span></div>
+        <span style="background:${psColor}20;color:${psColor};padding:4px 12px;border-radius:8px;font-weight:700;font-size:13px;">${ps.score}%</span>
+      </div>
+      <div style="font-family:Arial,sans-serif;background:#0a0d14;border-radius:8px;padding:14px;margin-bottom:10px;direction:rtl;">
+        <div style="color:#8ab4f8;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(pg.title) || '<span style="color:#ef4444">חסרה כותרת</span>'}</div>
+        <div style="color:#bdc1c6;font-size:11px;direction:ltr;text-align:right;margin:2px 0;">${escapeHtml(p.url + (pg.canonical || pg.path))}</div>
+        <div style="color:#bdc1c6;font-size:12px;line-height:1.5;">${escapeHtml(pg.description) || '<span style="color:#ef4444">חסר תיאור</span>'}</div>
+      </div>
+      ${actions.length > 0 ? '<div style="font-size:13px;">' + actions.map(a => `<div style="padding:3px 0;color:#eab308;">&#x26A0; ${escapeHtml(a)}</div>`).join('') + '</div>' : '<div style="color:#22c55e;font-size:13px;">&#x2713; העמוד תקין</div>'}
+    </div>`;
+  });
+
+  const html = `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>דוח SEO — ${escapeHtml(p.name)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Assistant',sans-serif;background:#0a0d14;color:#e8eaf0;padding:40px 20px;line-height:1.7;direction:rtl;min-height:100vh;}
+.container{max-width:800px;margin:0 auto;}
+h1,h2,h3{font-family:'Rubik',sans-serif;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="text-align:center;padding:40px 0 30px;border-bottom:2px solid #2f55c7;margin-bottom:30px;">
+    <h1 style="font-size:28px;margin-bottom:4px;">דוח SEO — ${escapeHtml(p.name)}</h1>
+    <p style="color:#7b82a0;">${escapeHtml(domain)} | ${date}</p>
+    <div style="width:100px;height:100px;border-radius:50%;margin:20px auto;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;font-family:'Rubik',sans-serif;background:conic-gradient(${scoreColor} ${score * 3.6}deg, #2a3050 0);position:relative;">
+      <div style="position:absolute;inset:4px;border-radius:50%;background:#12151e;display:flex;align-items:center;justify-content:center;">${score}</div>
+    </div>
+    <div style="font-size:14px;color:#7b82a0;">ציון SEO כולל מתוך 100</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:30px;">
+    <div style="background:#12151e;border:1px solid #2a3050;border-radius:10px;padding:18px;text-align:center;"><div style="font-size:28px;font-weight:800;font-family:'Rubik',sans-serif;color:#2f55c7;">${p.pages.length}</div><div style="font-size:12px;color:#7b82a0;">עמודים</div></div>
+    <div style="background:#12151e;border:1px solid #2a3050;border-radius:10px;padding:18px;text-align:center;"><div style="font-size:28px;font-weight:800;font-family:'Rubik',sans-serif;color:${details.titles === p.pages.length ? '#22c55e' : '#eab308'};">${details.titles}/${p.pages.length}</div><div style="font-size:12px;color:#7b82a0;">כותרות תקינות</div></div>
+    <div style="background:#12151e;border:1px solid #2a3050;border-radius:10px;padding:18px;text-align:center;"><div style="font-size:28px;font-weight:800;font-family:'Rubik',sans-serif;color:${details.descriptions === p.pages.length ? '#22c55e' : '#eab308'};">${details.descriptions}/${p.pages.length}</div><div style="font-size:12px;color:#7b82a0;">תיאורים תקינים</div></div>
+    <div style="background:#12151e;border:1px solid #2a3050;border-radius:10px;padding:18px;text-align:center;"><div style="font-size:28px;font-weight:800;font-family:'Rubik',sans-serif;color:${(p.schemas||[]).length > 0 ? '#22c55e' : '#eab308'};">${(p.schemas||[]).length}</div><div style="font-size:12px;color:#7b82a0;">סוגי Schema</div></div>
+  </div>
+
+  <h2 style="font-size:20px;margin-bottom:16px;">&#x1f4c4; סיכום עמודים</h2>
+  ${pagesHtml}
+
+  <div style="text-align:center;margin-top:40px;padding:30px;background:linear-gradient(135deg,rgba(47,85,199,0.15),rgba(26,162,176,0.15));border:1px solid #2a3050;border-radius:14px;">
+    <strong style="font-size:18px;">צריכים עזרה ביישום?</strong>
+    <p style="color:#7b82a0;margin:8px 0 16px;">שיחת ייעוץ חינמית עם מומחה SEO מ-Autonomous</p>
+    <a href="https://autonomous.co.il/contact" style="display:inline-block;background:linear-gradient(135deg,#2f55c7,#1aa2b0);color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;">קבעו שיחה &#x2192;</a>
+  </div>
+
+  <div style="text-align:center;padding:24px 0;margin-top:32px;border-top:1px solid #2a3050;font-size:13px;color:#4a5070;">
+    Powered by <a href="https://autonomous.co.il" style="color:#1aa2b0;text-decoration:none;font-weight:600;">Autonomous</a> — Building Systems, Creating Habits
+  </div>
+</div>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  downloadBlob(blob, `seo-report-${(p.name || 'report').replace(/\s+/g, '-')}.html`);
+  toast('דוח HTML נוצר — שתפו עם הלקוח', 'success');
+}
 
 // ═══════════════════════════════════════════════════
 // BOOT
