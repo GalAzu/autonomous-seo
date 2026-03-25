@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Autonomous SEO — כלי SEO חינמי לעסקים ישראליים</title>
 <meta name="description" content="כלי SEO חינמי ומקיף בעברית. סרקו את האתר שלכם, קבלו ציון SEO, מצאו בעיות ותקנו אותן — בלי רישום, בלי תשלום. מבית Autonomous.">
-<meta name="keywords" content="בדיקת SEO, כלי SEO בעברית, SEO חינמי, בדיקת SEO לאתר, ניהול SEO, שיפור דירוג גוגל">
+
 <meta name="author" content="Autonomous — Building Systems, Creating Habits">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://autonomous-seo.vercel.app">
@@ -308,7 +308,7 @@
     .sidebar, .onboarding, .modal-overlay, .toast, .btn, button, select, input, textarea,
     .nav-section, .sidebar-footer, #editor-panel, #tab-pages, #tab-editor, #tab-structured,
     #tab-sitemap, #tab-robots, #tab-keywords, #tab-headings, #tab-gsc, #tab-checklist,
-    #tab-settings, #tab-redirects, #tab-images, #tab-links, #tab-hreflang { display: none !important; }
+    #tab-settings, #tab-redirects, #tab-images, #tab-links, #tab-hreflang, #tab-geo { display: none !important; }
     .app { display: block !important; }
     .main { margin: 0 !important; padding: 20px !important; max-width: 100% !important; }
     #tab-dashboard { display: block !important; }
@@ -365,6 +365,42 @@
   .toggle-switch input:checked + .toggle-track { background: var(--green); }
   .toggle-track::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: white; top: 2px; right: 2px; transition: var(--transition); }
   .toggle-switch input:checked + .toggle-track::after { right: 18px; }
+
+  /* GEO & Keywords Sub-tabs */
+  .geo-score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .geo-factor { padding: 8px 10px; background: var(--surface-2); border-radius: var(--radius-xs); border: 1px solid var(--border); text-align: center; }
+  .geo-factor-label { font-size: 10px; color: var(--text-dim); }
+  .geo-factor-bar { height: 3px; background: var(--surface-3); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .geo-factor-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .geo-page-card { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+  .geo-page-card:hover { border-color: var(--border-hover); }
+  .geo-page-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; transition: var(--transition); }
+  .geo-page-header:hover { background: var(--surface-2); }
+  .geo-page-body { padding: 0 16px 16px; display: none; }
+  .geo-page-body.open { display: block; }
+  .geo-checklist { display: flex; flex-wrap: wrap; gap: 6px; }
+  .geo-check { display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: var(--surface-2); border-radius: var(--radius-xs); font-size: 11px; cursor: pointer; border: 1px solid var(--border); transition: var(--transition); user-select: none; }
+  .geo-check:hover { border-color: var(--primary); }
+  .geo-check.active { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .geo-section-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .geo-section-row .field { margin: 0; }
+  .geo-section-row .field label { font-size: 10px; margin-bottom: 2px; }
+  .geo-section-row .field input { font-size: 12px; padding: 6px 8px; }
+  .collapsible-trigger { cursor: pointer; user-select: none; }
+  .collapsible-trigger::after { content: ' ▸'; font-size: 10px; transition: transform 0.2s; display: inline-block; }
+  .collapsible-trigger.open::after { transform: rotate(90deg); }
+  .intent-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+  .intent-info { background: var(--blue-bg); color: var(--blue); }
+  .intent-nav { background: var(--purple-bg); color: var(--purple); }
+  .intent-trans { background: var(--green-bg); color: var(--green); }
+  .intent-comm { background: var(--orange-bg); color: var(--orange); }
+  .competitor-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; }
+  .competitor-card .comp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .kw-detail-row { display: grid; grid-template-columns: 1fr 80px 80px 80px; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .kw-detail-row:last-child { border-bottom: none; }
+  .gap-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface-2); border-radius: var(--radius-xs); margin-bottom: 6px; }
+  .citation-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .citation-row input { flex: 1; font-size: 12px; padding: 6px 10px; }
 </style>
 </head>
 <body>
@@ -581,6 +617,12 @@
       </div>
     </div>
     <div class="nav-section">
+      <div class="nav-label">AI / GEO</div>
+      <div class="nav-item" onclick="showTab('geo',this)">
+        <span class="icon">&#x1f916;</span> GEO — מנועי AI
+      </div>
+    </div>
+    <div class="nav-section">
       <div class="nav-label">אינטגרציה</div>
       <div class="nav-item" onclick="showTab('gsc',this)">
         <span class="icon">&#x1f310;</span> Search Console
@@ -650,10 +692,10 @@
       <div id="low-score-cta" style="display:none;"></div>
       <div class="cta-banner">
         <div class="cta-text">
-          <strong>צריכים עזרה ביישום השינויים?</strong>
-          <p>בדיקת SEO חינמית עם מומחה מ-Autonomous — נראה לכם בדיוק מה לשפר ואיך</p>
+          <strong>רוצים ניתוח עמוק והמלצות מקצועיות?</strong>
+          <p>צוות המומחים שלנו ינתח את האתר שלכם ויחזור עם תוכנית פעולה מותאמת</p>
         </div>
-        <a href="https://autonomous.co.il/contact" target="_blank" class="btn-cta">קבעו שיחה חינם &#x2192;</a>
+        <button class="btn-cta" onclick="openLeadModal()">ניתוח עמוק והמלצות בחינם &#x2192;</button>
       </div>
       <div class="print-header" id="print-header"></div>
       <div class="print-pages-summary" id="print-pages-summary"></div>
@@ -904,13 +946,25 @@
     <div id="tab-keywords" class="tab-content">
       <div class="section">
         <h2 class="section-title">אסטרטגיית מילות מפתח</h2>
-        <p class="section-desc">מיפוי מילות מפתח לעמודים — יעדי תוכן לדירוג בגוגל</p>
+        <p class="section-desc">מיפוי מילות מפתח, ניתוח מתחרים ופערי תוכן</p>
       </div>
-      <div class="insight-card" style="margin-bottom:20px;">
-        <div class="insight-title">&#x1f4a1; חשוב לדעת</div>
-        <div class="insight-text">גוגל מתעלם מתגית &lt;meta keywords&gt; מאז 2009. מילות המפתח כאן הן <strong>יעדי תוכן</strong> — שלבו אותן בכותרות, H1, H2, גוף הטקסט וטקסט alt בתמונות.</div>
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="kw-sub-tabs">
+        <button class="btn btn-sm" onclick="setKwSubTab('map')" id="kw-tab-map" style="background:var(--primary);color:white;">מיפוי מילות מפתח</button>
+        <button class="btn btn-sm btn-ghost" onclick="setKwSubTab('competitors')" id="kw-tab-competitors">ניתוח מתחרים</button>
+        <button class="btn btn-sm btn-ghost" onclick="setKwSubTab('gaps')" id="kw-tab-gaps">פערי תוכן</button>
+        <button class="btn btn-sm btn-ghost" onclick="setKwSubTab('clusters')" id="kw-tab-clusters">אשכולות</button>
       </div>
-      <div id="keywords-map"></div>
+      <div id="kw-sub-content"></div>
+    </div>
+
+    <!-- ═══ GEO ═══ -->
+    <div id="tab-geo" class="tab-content">
+      <div class="section">
+        <h2 class="section-title">GEO — מנועי AI</h2>
+        <p class="section-desc">שפרו את הנראות שלכם ב-ChatGPT, Perplexity ו-Google AI Overviews</p>
+      </div>
+      <div id="geo-overview" style="margin-bottom:20px;"></div>
+      <div id="geo-pages-analysis"></div>
     </div>
 
     <!-- ═══ HEADINGS ═══ -->
@@ -1254,6 +1308,7 @@
       <button class="btn btn-sm btn-ghost" onclick="setExportTab('sitemap')" id="exp-tab-sitemap">מפת אתר</button>
       <button class="btn btn-sm btn-ghost" onclick="setExportTab('schemas')" id="exp-tab-schemas">סכמות</button>
       <button class="btn btn-sm btn-ghost" onclick="setExportTab('robots')" id="exp-tab-robots">Robots</button>
+      <button class="btn btn-sm btn-ghost" onclick="setExportTab('geo')" id="exp-tab-geo">GEO</button>
     </div>
     <div id="export-content" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;font-family:'SF Mono',monospace;font-size:12px;white-space:pre-wrap;max-height:55vh;overflow-y:auto;color:var(--accent);direction:ltr;text-align:left;"></div>
     <div style="margin-top:16px;display:flex;gap:8px;">
@@ -1263,7 +1318,24 @@
     </div>
     <div style="margin-top:16px;padding:14px 18px;background:linear-gradient(135deg,var(--primary-glow),var(--accent-glow));border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:space-between;gap:12px;">
       <span style="font-size:13px;color:var(--text-dim);">רוצים שניישם את השינויים עבורכם?</span>
-      <a href="https://autonomous.co.il/contact" target="_blank" style="font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;text-decoration:none;">דברו איתנו &#x2192;</a>
+      <a href="#" onclick="event.preventDefault();closeModal('export-modal');openLeadModal();" style="font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;text-decoration:none;">דברו איתנו &#x2192;</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEAD CAPTURE MODAL ═══ -->
+<div class="modal-overlay" id="lead-modal">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-title">&#x1f50d; ניתוח עמוק והמלצות בחינם</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">השאירו פרטים וצוות המומחים שלנו יחזור אליכם עם ניתוח מקצועי והמלצות</p>
+    <div class="field"><label>שם</label><input type="text" id="lead-name" placeholder="השם שלכם" /></div>
+    <div class="field"><label>אימייל</label><input type="email" id="lead-email" placeholder="your@email.com" style="direction:ltr;text-align:left;" /></div>
+    <div class="field"><label>טלפון <span style="color:var(--text-muted);font-weight:400;">(רשות)</span></label><input type="tel" id="lead-phone" placeholder="050-0000000" style="direction:ltr;text-align:left;" /></div>
+    <div class="field"><label>כתובת האתר</label><input type="url" id="lead-website" placeholder="https://example.co.il" style="direction:ltr;text-align:left;" /></div>
+    <div id="lead-status" style="display:none;padding:10px;border-radius:var(--radius-xs);margin-bottom:12px;font-size:13px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" onclick="submitLead()" id="lead-submit-btn" style="flex:1;">&#x1f680; קבלו ניתוח והמלצות</button>
+      <button class="btn btn-ghost" onclick="closeModal('lead-modal')">ביטול</button>
     </div>
   </div>
 </div>
@@ -1453,7 +1525,7 @@ function extractFromHTML(html, baseUrl) {
     } catch (e) {}
   });
 
-  // Meta keywords (deprecated but useful to know)
+  // Meta keywords (deprecated — imported for user awareness only)
   const metaKeywords = doc.querySelector('meta[name="keywords"]')?.getAttribute('content')?.trim() || '';
 
   // Feature 2: og:image
@@ -1754,7 +1826,8 @@ function finishSetup() {
       images: p.images || [],
       outgoingLinks: p.outgoingLinks || 0,
       incomingLinks: 0,
-      order: i
+      order: i,
+      geo: { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }
     }));
     // Calculate incoming links from the link graph
     const pathSet = new Set(pages.map(pg => pg.path));
@@ -1795,7 +1868,8 @@ function finishSetup() {
       images: [],
       outgoingLinks: 0,
       incomingLinks: 0,
-      order: i
+      order: i,
+      geo: { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }
     }));
     sitemap = pages.map(p => ({
       url: p.path,
@@ -1825,6 +1899,9 @@ function finishSetup() {
     redirects: [],
     gscHistory: [],
     hreflang: { languages: [], mappings: [] },
+    geoSettings: { businessExpertise: '', aboutPageUrl: '', trustSignals: [] },
+    competitors: [],
+    keywordClusters: [],
     createdAt: new Date().toISOString()
   };
 
@@ -1859,6 +1936,28 @@ function startNewProject() {
 }
 
 // ═══════════════════════════════════════════════════
+// DATA MIGRATION
+// ═══════════════════════════════════════════════════
+function migrateProjectData() {
+  let changed = false;
+  Object.values(projects).forEach(p => {
+    // Add missing project fields
+    if (!p.geoSettings) { p.geoSettings = { businessExpertise: '', aboutPageUrl: '', trustSignals: [] }; changed = true; }
+    if (!p.competitors) { p.competitors = []; changed = true; }
+    if (!p.keywordClusters) { p.keywordClusters = []; changed = true; }
+    // Add missing page fields
+    p.pages.forEach(pg => {
+      if (!pg.geo) { pg.geo = { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }; changed = true; }
+      if (!pg.keywordData) {
+        pg.keywordData = (pg.keywords || []).map(kw => ({ keyword: kw, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' }));
+        changed = true;
+      }
+    });
+  });
+  if (changed) saveProjects();
+}
+
+// ═══════════════════════════════════════════════════
 // APP INIT
 // ═══════════════════════════════════════════════════
 function enterApp() {
@@ -1866,6 +1965,7 @@ function enterApp() {
   document.getElementById('app-screen').style.display = 'flex';
   document.getElementById('mobile-menu-btn').removeAttribute('style');
   populateProjectSelector();
+  migrateProjectData();
   renderAll();
 }
 
@@ -1954,6 +2054,7 @@ function renderTabContent(tabId) {
     images: () => renderImages(),
     links: () => renderLinks(),
     hreflang: () => renderHreflang(),
+    geo: () => renderGeo(),
   };
   if (map[tabId]) map[tabId]();
 }
@@ -1971,61 +2072,96 @@ function showTab(tabId, el) {
 // ═══════════════════════════════════════════════════
 // SEO SCORING ENGINE
 // ═══════════════════════════════════════════════════
-// Weights: Content (35%) > Technical (20%) > Schema (15%) > Headings (10%) > Social (10%) > Media & Links (10%)
 
 function scorePage(pg) {
   let s = 0;
   const breakdown = {};
-
-  // ── Content Quality (35 pts) ──────────────────────
-  // Title (20 pts) — strongest ranking signal
-  const tl = (pg.title || '').length;
   const kws = pg.keywords || [];
   const titleLower = (pg.title || '').toLowerCase();
+  const descLower = (pg.description || '').toLowerCase();
+  const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
+  const h2s = (pg.headings || []).filter(h => h.startsWith('H2'));
+  const h1Text = h1s.length > 0 ? h1s[0].replace(/^H1:\s*/, '').toLowerCase() : '';
+  const contentWords = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+
+  // ── Content & Keyword Optimization (40 pts) ──────
+  // Title (15 pts): length + keyword presence
+  const tl = (pg.title || '').length;
   let titlePts = 0;
   if (tl === 0) titlePts = 0;
-  else if (tl >= 30 && tl <= 60) {
-    titlePts = 14;
-    // Bonus: keyword appears in title
-    if (kws.length > 0 && kws.some(k => titleLower.includes(k.toLowerCase()))) titlePts = 20;
-  } else if (tl > 0 && tl < 30) titlePts = 6;    // too short
-  else if (tl > 60 && tl <= 70) titlePts = 10;    // slightly long
-  else titlePts = 5;                                // way off
+  else if (tl >= 30 && tl <= 60) titlePts = 10;
+  else if (tl > 60 && tl <= 70) titlePts = 7;
+  else if (tl > 0 && tl < 30) titlePts = 4;
+  else titlePts = 3;
+  if (titlePts >= 7 && kws.length > 0 && kws.some(k => titleLower.includes(k.toLowerCase()))) titlePts = 15;
   s += titlePts;
-  breakdown.title = { score: titlePts, max: 20 };
+  breakdown.title = { score: titlePts, max: 15, label: '\u05DB\u05D5\u05EA\u05E8\u05EA' };
 
-  // Description (15 pts)
+  // Description (10 pts): length + keyword presence
   const dl = (pg.description || '').length;
-  const descLower = (pg.description || '').toLowerCase();
   let descPts = 0;
   if (dl === 0) descPts = 0;
-  else if (dl >= 100 && dl <= 160) {
-    descPts = 10;
-    if (kws.length > 0 && kws.some(k => descLower.includes(k.toLowerCase()))) descPts = 15;
-  } else if (dl > 0 && dl < 100) descPts = 5;
-  else if (dl > 160 && dl <= 200) descPts = 7;
-  else descPts = 3;
+  else if (dl >= 100 && dl <= 160) descPts = 6;
+  else if (dl > 160 && dl <= 200) descPts = 4;
+  else if (dl > 0 && dl < 100) descPts = 3;
+  else descPts = 2;
+  if (descPts >= 4 && kws.length > 0 && kws.some(k => descLower.includes(k.toLowerCase()))) descPts = 10;
   s += descPts;
-  breakdown.description = { score: descPts, max: 15 };
+  breakdown.description = { score: descPts, max: 10, label: '\u05EA\u05D9\u05D0\u05D5\u05E8 \u05DE\u05D8\u05D0' };
 
-  // ── Technical SEO (20 pts) ────────────────────────
-  // Canonical (7 pts)
-  const canonPts = pg.canonical ? 7 : 0;
+  // Keyword in H1 (5 pts)
+  let kwH1Pts = 0;
+  if (kws.length > 0 && h1Text && kws.some(k => h1Text.includes(k.toLowerCase()))) kwH1Pts = 5;
+  else if (h1Text && kws.length === 0) kwH1Pts = 2; // has H1 but no keywords to check
+  s += kwH1Pts;
+  breakdown.kwInH1 = { score: kwH1Pts, max: 5, label: '\u05DE\u05D9\u05DC\u05EA \u05DE\u05E4\u05EA\u05D7 \u05D1-H1' };
+
+  // Content depth (5 pts): word count
+  let depthPts = 0;
+  if (contentWords >= 800) depthPts = 5;
+  else if (contentWords >= 500) depthPts = 4;
+  else if (contentWords >= 300) depthPts = 3;
+  else if (contentWords >= 100) depthPts = 1;
+  s += depthPts;
+  breakdown.contentDepth = { score: depthPts, max: 5, label: '\u05E2\u05D5\u05DE\u05E7 \u05EA\u05D5\u05DB\u05DF' };
+
+  // Keyword coverage (5 pts): has keywords mapped
+  let kwCovPts = 0;
+  if (kws.length >= 3) kwCovPts = 5;
+  else if (kws.length === 2) kwCovPts = 3;
+  else if (kws.length === 1) kwCovPts = 2;
+  s += kwCovPts;
+  breakdown.kwCoverage = { score: kwCovPts, max: 5, label: '\u05DB\u05D9\u05E1\u05D5\u05D9 \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7' };
+
+  // ── Technical Structure (25 pts) ──────────────────
+  // Heading hierarchy (10 pts): H1 + H2 structure
+  let headPts = 0;
+  if (h1s.length === 1) {
+    headPts = 5;
+    if (h2s.length >= 2) headPts = 10;
+    else if (h2s.length === 1) headPts = 7;
+  } else if (h1s.length > 1) headPts = 2;
+  s += headPts;
+  breakdown.headings = { score: headPts, max: 10, label: '\u05DE\u05D1\u05E0\u05D4 \u05DB\u05D5\u05EA\u05E8\u05D5\u05EA' };
+
+  // Internal linking (8 pts)
+  let linkPts = 0;
+  if ((pg.outgoingLinks || 0) >= 3) linkPts += 4;
+  else if ((pg.outgoingLinks || 0) >= 1) linkPts += 2;
+  if ((pg.incomingLinks || 0) >= 2) linkPts += 4;
+  else if ((pg.incomingLinks || 0) >= 1) linkPts += 2;
+  s += linkPts;
+  breakdown.links = { score: linkPts, max: 8, label: '\u05E7\u05D9\u05E9\u05D5\u05E8\u05D9\u05DD \u05E4\u05E0\u05D9\u05DE\u05D9\u05D9\u05DD' };
+
+  // Canonical (4 pts)
+  const canonPts = pg.canonical ? 4 : 0;
   s += canonPts;
-  breakdown.canonical = { score: canonPts, max: 7 };
+  breakdown.canonical = { score: canonPts, max: 4, label: 'Canonical' };
 
-  // Keywords mapped (8 pts)
-  let kwPts = 0;
-  if (kws.length >= 3) kwPts = 8;
-  else if (kws.length === 2) kwPts = 6;
-  else if (kws.length === 1) kwPts = 4;
-  s += kwPts;
-  breakdown.keywords = { score: kwPts, max: 8 };
-
-  // Not accidentally noindex (5 pts)
-  const noindexPts = pg.noindex ? 0 : 5;
-  s += noindexPts;
-  breakdown.indexable = { score: noindexPts, max: 5 };
+  // Indexable (3 pts)
+  const indexPts = pg.noindex ? 0 : 3;
+  s += indexPts;
+  breakdown.indexable = { score: indexPts, max: 3, label: '\u05D0\u05D9\u05E0\u05D3\u05D5\u05E7\u05E1' };
 
   // ── Structured Data (15 pts) ──────────────────────
   let schemaPts = 0;
@@ -2033,66 +2169,46 @@ function scorePage(pg) {
   if (schemaCount >= 2) schemaPts = 15;
   else if (schemaCount === 1) schemaPts = 10;
   s += schemaPts;
-  breakdown.schema = { score: schemaPts, max: 15 };
+  breakdown.schema = { score: schemaPts, max: 15, label: '\u05E0\u05EA\u05D5\u05E0\u05D9\u05DD \u05DE\u05D5\u05D1\u05E0\u05D9\u05DD' };
 
-  // ── Heading Structure (10 pts) ────────────────────
-  const headings = pg.headings || [];
-  const h1s = headings.filter(h => h.startsWith('H1'));
-  const h2s = headings.filter(h => h.startsWith('H2'));
-  let headPts = 0;
-  if (h1s.length === 1) {
-    headPts = 6;
-    // Bonus: has H2 sub-headings (proper hierarchy)
-    if (h2s.length >= 1) headPts = 10;
-  } else if (h1s.length > 1) headPts = 3;
-  s += headPts;
-  breakdown.headings = { score: headPts, max: 10 };
-
-  // ── Social / Sharing (10 pts) ─────────────────────
+  // ── Social & Sharing (10 pts) ─────────────────────
   let socialPts = 0;
-  if (pg.ogTitle && pg.ogTitle.length > 0) socialPts += 4;
-  if (pg.ogDesc && pg.ogDesc.length > 0) socialPts += 4;
-  if (pg.ogImage && pg.ogImage.length > 0) socialPts += 2;
+  if (pg.ogTitle && pg.ogTitle.length > 0) socialPts += 3;
+  if (pg.ogDesc && pg.ogDesc.length > 0) socialPts += 3;
+  if (pg.ogImage && pg.ogImage.length > 0) socialPts += 4;
   s += socialPts;
-  breakdown.social = { score: socialPts, max: 10 };
+  breakdown.social = { score: socialPts, max: 10, label: '\u05E9\u05D9\u05EA\u05D5\u05E3 \u05D7\u05D1\u05E8\u05EA\u05D9' };
 
-  // ── Media & Links (10 pts) ────────────────────────
-  // Images: alt text coverage (5 pts)
+  // ── Media Optimization (10 pts) ───────────────────
   const images = pg.images || [];
   let imgPts = 0;
-  if (images.length === 0) imgPts = 5; // no images = no problem
-  else {
+  if (images.length === 0) {
+    imgPts = 2; // no images — not ideal, not terrible
+  } else {
     const withAlt = images.filter(img => img.alt && img.alt.length > 0).length;
-    imgPts = Math.round((withAlt / images.length) * 5);
+    const altRatio = withAlt / images.length;
+    imgPts = Math.round(altRatio * 7) + 3; // 3pts for having images + up to 7 for alt coverage
   }
+  imgPts = Math.min(10, imgPts);
   s += imgPts;
-  breakdown.images = { score: imgPts, max: 5 };
+  breakdown.images = { score: imgPts, max: 10, label: '\u05EA\u05DE\u05D5\u05E0\u05D5\u05EA' };
 
-  // Internal linking (5 pts)
-  let linkPts = 0;
-  if ((pg.outgoingLinks || 0) > 0) linkPts += 3;
-  if ((pg.incomingLinks || 0) > 0) linkPts += 2;
-  s += linkPts;
-  breakdown.links = { score: linkPts, max: 5 };
-
-  return { score: s, max: 100, breakdown };
+  return { score: Math.min(100, s), max: 100, breakdown };
 }
 
 function scoreProject() {
   const p = getProject();
   if (!p || p.pages.length === 0) return { score: 0, details: {}, breakdown: {} };
 
-  // ── Page scores (65% of final) ────────────────────
-  const details = { titles: 0, descriptions: 0, canonicals: 0, schemas: 0, keywords: 0, headings: 0, social: 0, images: 0 };
+  const details = { titles: 0, descriptions: 0, canonicals: 0, schemas: 0, keywords: 0, headings: 0, social: 0, images: 0, contentDepth: 0, linking: 0 };
   let pageScoreSum = 0;
 
   p.pages.forEach(pg => {
     const ps = scorePage(pg);
     pageScoreSum += ps.score;
 
-    // Count pages meeting each criterion (for health cards)
     if (pg.title && pg.title.length >= 30 && pg.title.length <= 60) details.titles++;
-    else if (pg.title && pg.title.length > 0) details.titles += 0.5; // partial — has title but not optimal
+    else if (pg.title && pg.title.length > 0) details.titles += 0.5;
     if (pg.description && pg.description.length >= 100 && pg.description.length <= 160) details.descriptions++;
     else if (pg.description && pg.description.length > 0) details.descriptions += 0.5;
     if (pg.canonical) details.canonicals++;
@@ -2100,44 +2216,52 @@ function scoreProject() {
     if (pg.keywords && pg.keywords.length > 0) details.keywords++;
     const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
     if (h1s.length === 1) details.headings++;
-    if ((pg.ogTitle || pg.ogDesc || pg.ogImage)) details.social++;
+    if (pg.ogTitle || pg.ogDesc || pg.ogImage) details.social++;
     const imgs = pg.images || [];
     if (imgs.length === 0 || imgs.every(img => img.alt && img.alt.length > 0)) details.images++;
+    const words = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+    if (words >= 300) details.contentDepth++;
+    if ((pg.outgoingLinks || 0) > 0 && (pg.incomingLinks || 0) > 0) details.linking++;
   });
 
-  // Round partial counts for display
   details.titles = Math.floor(details.titles);
   details.descriptions = Math.floor(details.descriptions);
 
   const avgPageScore = p.pages.length > 0 ? pageScoreSum / p.pages.length : 0;
 
-  // ── Site-wide factors (35% of final) ──────────────
+  // Site-wide factors (30% of final, out of 40 points normalized)
   let siteScore = 0;
-  const siteMax = 35;
+  const siteMax = 40;
   const siteBreakdown = {};
 
-  // Sitemap (10 pts)
-  const sitemapPts = (p.sitemap && p.sitemap.length > 0) ? 10 : 0;
+  // Sitemap (8 pts)
+  const sitemapPts = (p.sitemap && p.sitemap.length > 0) ? 8 : 0;
   siteScore += sitemapPts;
-  siteBreakdown.sitemap = { score: sitemapPts, max: 10 };
+  siteBreakdown.sitemap = { score: sitemapPts, max: 8 };
 
-  // Robots.txt (5 pts)
-  const robotsPts = (p.robots && p.robots.trim().length > 0) ? 5 : 0;
+  // Robots.txt (4 pts)
+  const robotsPts = (p.robots && p.robots.trim().length > 0) ? 4 : 0;
   siteScore += robotsPts;
-  siteBreakdown.robots = { score: robotsPts, max: 5 };
+  siteBreakdown.robots = { score: robotsPts, max: 4 };
 
-  // Schema types defined (8 pts)
+  // Schema variety (6 pts)
   let schemaTypePts = 0;
   const schemaCount = (p.schemas || []).length;
-  if (schemaCount >= 3) schemaTypePts = 8;
-  else if (schemaCount >= 1) schemaTypePts = Math.min(8, schemaCount * 3);
+  if (schemaCount >= 3) schemaTypePts = 6;
+  else if (schemaCount >= 1) schemaTypePts = Math.min(6, schemaCount * 2);
   siteScore += schemaTypePts;
-  siteBreakdown.schemas = { score: schemaTypePts, max: 8 };
+  siteBreakdown.schemas = { score: schemaTypePts, max: 6 };
 
-  // Image health — % of all images with alt text (5 pts)
+  // Internal link network (8 pts)
+  const linkedPages = p.pages.filter(pg => (pg.outgoingLinks || 0) > 0 && (pg.incomingLinks || 0) > 0).length;
+  const linkHealthPts = p.pages.length > 0 ? Math.round((linkedPages / p.pages.length) * 8) : 0;
+  siteScore += linkHealthPts;
+  siteBreakdown.linkHealth = { score: linkHealthPts, max: 8 };
+
+  // Image health (5 pts)
   const allImgs = p.pages.reduce((arr, pg) => arr.concat(pg.images || []), []);
   let imgHealthPts = 0;
-  if (allImgs.length === 0) imgHealthPts = 5;
+  if (allImgs.length === 0) imgHealthPts = 3;
   else {
     const withAlt = allImgs.filter(img => img.alt && img.alt.length > 0).length;
     imgHealthPts = Math.round((withAlt / allImgs.length) * 5);
@@ -2145,22 +2269,25 @@ function scoreProject() {
   siteScore += imgHealthPts;
   siteBreakdown.imageHealth = { score: imgHealthPts, max: 5 };
 
-  // Internal link health — % of pages with both in+out links (5 pts)
-  const linkedPages = p.pages.filter(pg => (pg.outgoingLinks || 0) > 0 && (pg.incomingLinks || 0) > 0).length;
-  const linkHealthPts = p.pages.length > 0 ? Math.round((linkedPages / p.pages.length) * 5) : 0;
-  siteScore += linkHealthPts;
-  siteBreakdown.linkHealth = { score: linkHealthPts, max: 5 };
+  // HTTPS (3 pts)
+  const httpsPts = (p.url && p.url.startsWith('https://')) ? 3 : 0;
+  siteScore += httpsPts;
+  siteBreakdown.https = { score: httpsPts, max: 3 };
 
-  // No accidental noindex (2 pts)
+  // No accidental noindex (3 pts)
   const noindexPages = p.pages.filter(pg => pg.noindex).length;
-  const noindexPts = noindexPages === 0 ? 2 : 0;
+  const noindexPts = noindexPages === 0 ? 3 : 0;
   siteScore += noindexPts;
-  siteBreakdown.indexHealth = { score: noindexPts, max: 2 };
+  siteBreakdown.indexHealth = { score: noindexPts, max: 3 };
 
-  // ── Final composite score ─────────────────────────
-  // 65% page average + 35% site-wide (normalized to 35)
+  // Content depth (3 pts)
+  const deepPages = p.pages.filter(pg => (pg.content || '').split(/\s+/).filter(w => w.length > 0).length >= 300).length;
+  const contentPts = p.pages.length > 0 ? Math.round((deepPages / p.pages.length) * 3) : 0;
+  siteScore += contentPts;
+  siteBreakdown.contentDepth = { score: contentPts, max: 3 };
+
   const siteNormalized = siteMax > 0 ? (siteScore / siteMax) * 100 : 0;
-  const finalScore = Math.round((avgPageScore * 0.65) + (siteNormalized * 0.35));
+  const finalScore = Math.round((avgPageScore * 0.70) + (siteNormalized * 0.30));
 
   return {
     score: Math.min(100, finalScore),
@@ -2170,6 +2297,306 @@ function scoreProject() {
     siteScore: Math.round(siteNormalized),
     siteBreakdown
   };
+}
+
+// ═══════════════════════════════════════════════════
+// GEO SCORING ENGINE
+// ═══════════════════════════════════════════════════
+
+function scorePageGeo(pg, project) {
+  let s = 0;
+  const breakdown = {};
+  const geo = pg.geo || {};
+  const headings = pg.headings || [];
+  const h2s = headings.filter(h => h.startsWith('H2'));
+  const contentWords = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+
+  // E-E-A-T Signals (30 pts)
+  let eeatPts = 0;
+  if (geo.authorName && geo.authorName.length > 0) eeatPts += 10;
+  if (geo.authorCredentials && geo.authorCredentials.length > 0) eeatPts += 8;
+  if (geo.authorUrl && geo.authorUrl.length > 0) eeatPts += 7;
+  if (geo.lastReviewedDate) eeatPts += 5;
+  eeatPts = Math.min(30, eeatPts);
+  s += eeatPts;
+  breakdown.eeat = { score: eeatPts, max: 30, label: 'E-E-A-T' };
+
+  // AI-Friendly Content (30 pts)
+  let aiPts = 0;
+  if (geo.hasQAFormat) aiPts += 10;
+  if (geo.hasStatistics) aiPts += 8;
+  if (contentWords >= 500) aiPts += 7;
+  else if (contentWords >= 300) aiPts += 4;
+  if (h2s.length >= 3) aiPts += 5;
+  else if (h2s.length >= 1) aiPts += 2;
+  aiPts = Math.min(30, aiPts);
+  s += aiPts;
+  breakdown.aiContent = { score: aiPts, max: 30, label: '\u05EA\u05D5\u05DB\u05DF \u05D9\u05D3\u05D9\u05D3\u05D5\u05EA\u05D9 \u05DC-AI' };
+
+  // Schema for AI (20 pts)
+  let schemaPts = 0;
+  const schemas = pg.schema || [];
+  if (schemas.includes('FAQPage')) schemaPts += 6;
+  if (schemas.includes('Article') || schemas.includes('BlogPosting')) schemaPts += 6;
+  if (schemas.includes('HowTo')) schemaPts += 4;
+  if (schemas.length > 0 && schemaPts === 0) schemaPts += 4; // has some schema
+  schemaPts = Math.min(20, schemaPts);
+  s += schemaPts;
+  breakdown.aiSchema = { score: schemaPts, max: 20, label: '\u05E1\u05DB\u05DE\u05D5\u05EA AI' };
+
+  // Citation Readiness (20 pts)
+  let citePts = 0;
+  const citations = geo.citations || [];
+  if (citations.length >= 3) citePts += 10;
+  else if (citations.length >= 1) citePts += 5;
+  if (geo.hasDefinitiveStatements) citePts += 5;
+  if (geo.hasStatistics) citePts += 5;
+  citePts = Math.min(20, citePts);
+  s += citePts;
+  breakdown.citations = { score: citePts, max: 20, label: '\u05DE\u05D5\u05DB\u05E0\u05D5\u05EA \u05DC\u05E6\u05D9\u05D8\u05D5\u05D8' };
+
+  return { score: Math.min(100, s), max: 100, breakdown };
+}
+
+function scoreProjectGeo() {
+  const p = getProject();
+  if (!p || p.pages.length === 0) return { score: 0, pageScores: [], avgPage: 0, siteScore: 0 };
+
+  let pageScoreSum = 0;
+  const pageScores = p.pages.map(pg => {
+    const gs = scorePageGeo(pg, p);
+    pageScoreSum += gs.score;
+    return { page: pg, ...gs };
+  });
+
+  const avgPage = pageScoreSum / p.pages.length;
+
+  // Site-wide (30%)
+  let sitePts = 0;
+  const gs = p.geoSettings || {};
+  if (gs.trustSignals && gs.trustSignals.length > 0) sitePts += 30;
+  else sitePts += 0;
+  if (gs.aboutPageUrl) sitePts += 20;
+  if (gs.businessExpertise) sitePts += 15;
+  // FAQ schema somewhere
+  const hasFaq = p.pages.some(pg => (pg.schema || []).includes('FAQPage'));
+  if (hasFaq) sitePts += 20;
+  // Article schema with author
+  const hasArticle = p.pages.some(pg => (pg.schema || []).includes('Article') || (pg.schema || []).includes('BlogPosting'));
+  if (hasArticle) sitePts += 15;
+  sitePts = Math.min(100, sitePts);
+
+  const finalScore = Math.round(avgPage * 0.70 + sitePts * 0.30);
+
+  return { score: Math.min(100, finalScore), pageScores, avgPage: Math.round(avgPage), siteScore: sitePts };
+}
+
+// ═══════════════════════════════════════════════════
+// GEO RENDERING
+// ═══════════════════════════════════════════════════
+
+function renderGeo() {
+  const p = getProject();
+  if (!p) return;
+  const geoResult = scoreProjectGeo();
+  const gs = p.geoSettings || {};
+  const scoreClass = geoResult.score >= 80 ? 'score-green' : geoResult.score >= 50 ? 'score-yellow' : 'score-red';
+  const pagesWithAuthor = p.pages.filter(pg => pg.geo && pg.geo.authorName).length;
+  const pagesWithCitations = p.pages.filter(pg => pg.geo && pg.geo.citations && pg.geo.citations.length > 0).length;
+  const aiSchemaPages = p.pages.filter(pg => (pg.schema || []).some(s => ['FAQPage','Article','HowTo','BlogPosting'].includes(s))).length;
+
+  // Overview — compact stats + inline settings
+  document.getElementById('geo-overview').innerHTML = `
+    <div class="grid-4" style="margin-bottom:16px;">
+      <div class="card stat">
+        <div class="score-ring ${scoreClass}" style="--pct:${geoResult.score}; margin:0 auto 8px;"><span>${geoResult.score}</span></div>
+        <div class="stat-label">ציון GEO</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-value" style="color:var(--accent)">${pagesWithAuthor}/${p.pages.length}</div>
+        <div class="stat-label">מחבר מזוהה</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-value" style="color:var(--purple)">${pagesWithCitations}/${p.pages.length}</div>
+        <div class="stat-label">עם מקורות</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-value" style="color:var(--blue)">${aiSchemaPages}</div>
+        <div class="stat-label">סכמות AI</div>
+      </div>
+    </div>
+    <div class="card" style="padding:14px 18px;">
+      <div class="collapsible-trigger" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';" style="font-size:13px;font-weight:600;color:var(--text-dim);">&#x2699; הגדרות אתר</div>
+      <div style="display:none;margin-top:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <input type="text" value="${escapeHtml(gs.businessExpertise || '')}" onchange="saveGeoSetting('businessExpertise', this.value)" placeholder="תחום מומחיות (לדוג׳: שיווק דיגיטלי)" style="font-size:12px;padding:7px 10px;" />
+          <input type="text" value="${escapeHtml(gs.aboutPageUrl || '')}" onchange="saveGeoSetting('aboutPageUrl', this.value)" placeholder="עמוד אודות (/about)" style="font-size:12px;padding:7px 10px;direction:ltr;text-align:left;" />
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);min-height:34px;">
+          ${(gs.trustSignals || []).map(t => `<span class="tag" data-val="${escapeHtml(t)}">${escapeHtml(t)} <span style="cursor:pointer;margin-right:4px;" onclick="removeTrustSignal('${escapeHtml(t)}')">&times;</span></span>`).join('')}
+          <input type="text" id="trust-signal-input" placeholder="אותות אמון + Enter" style="border:none;background:none;flex:1;min-width:100px;color:var(--text);font-size:12px;outline:none;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTrustSignal(this.value);this.value='';}" />
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Per-page — collapsed by default, click to expand
+  document.getElementById('geo-pages-analysis').innerHTML = p.pages.map(pg => {
+    const gs2 = scorePageGeo(pg, p);
+    const geo = pg.geo || {};
+    const scoreColor = gs2.score >= 80 ? 'green' : gs2.score >= 50 ? 'yellow' : 'red';
+    const recs = getGeoRecommendations(pg, gs2);
+    const filledChecks = [geo.hasQAFormat, geo.hasDefinitiveStatements, geo.hasStatistics].filter(Boolean).length;
+    const citationCount = (geo.citations || []).length;
+
+    return `
+      <div class="geo-page-card">
+        <div class="geo-page-header" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.arrow').classList.toggle('open');">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="arrow collapsible-trigger" style="font-size:0;"></span>
+            <strong style="font-size:13px;">${escapeHtml(pg.name)}</strong>
+            <span style="font-size:10px;color:var(--text-dim);direction:ltr;">${escapeHtml(pg.path)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${recs.length > 0 ? `<span style="font-size:10px;color:var(--yellow);">${recs.length} לשיפור</span>` : '<span style="font-size:10px;color:var(--green);">&#x2713;</span>'}
+            <span class="badge ${scoreColor}" style="font-size:11px;">${gs2.score}%</span>
+          </div>
+        </div>
+        <div class="geo-page-body">
+          <div class="geo-score-grid" style="margin-bottom:12px;">
+            ${Object.entries(gs2.breakdown).map(([key, val]) => {
+              const c = val.score >= val.max * 0.7 ? 'var(--green)' : val.score >= val.max * 0.4 ? 'var(--yellow)' : 'var(--red)';
+              return `<div class="geo-factor"><div class="geo-factor-label">${val.label}</div><div style="font-weight:700;font-size:14px;color:${c};">${val.score}/${val.max}</div><div class="geo-factor-bar"><div class="geo-factor-fill" style="width:${(val.score/val.max)*100}%;background:${c};"></div></div></div>`;
+            }).join('')}
+          </div>
+          <div class="geo-section-row">
+            <div class="field"><label>מחבר</label><input type="text" value="${escapeHtml(geo.authorName || '')}" onchange="savePageGeo('${pg.id}','authorName',this.value)" placeholder="שם" /></div>
+            <div class="field"><label>תפקיד</label><input type="text" value="${escapeHtml(geo.authorCredentials || '')}" onchange="savePageGeo('${pg.id}','authorCredentials',this.value)" placeholder="מומחיות" /></div>
+            <div class="field"><label>קישור לפרופיל</label><input type="text" value="${escapeHtml(geo.authorUrl || '')}" onchange="savePageGeo('${pg.id}','authorUrl',this.value)" placeholder="/about/name" style="direction:ltr;text-align:left;" /></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div class="geo-checklist">
+              <div class="geo-check ${geo.hasQAFormat ? 'active' : ''}" onclick="togglePageGeo('${pg.id}','hasQAFormat')">Q&A</div>
+              <div class="geo-check ${geo.hasDefinitiveStatements ? 'active' : ''}" onclick="togglePageGeo('${pg.id}','hasDefinitiveStatements')">הצהרות ברורות</div>
+              <div class="geo-check ${geo.hasStatistics ? 'active' : ''}" onclick="togglePageGeo('${pg.id}','hasStatistics')">נתונים</div>
+            </div>
+            <button class="btn btn-sm btn-ghost" onclick="addCitation('${pg.id}')" style="font-size:11px;">+ מקור</button>
+          </div>
+          ${citationCount > 0 ? `<div style="margin-top:4px;">${(geo.citations || []).map((c, i) => `<div class="citation-row"><input type="text" value="${escapeHtml(c.text || '')}" onchange="updateCitation('${pg.id}',${i},'text',this.value)" placeholder="מקור" /><input type="text" value="${escapeHtml(c.url || '')}" onchange="updateCitation('${pg.id}',${i},'url',this.value)" placeholder="URL" style="direction:ltr;text-align:left;" /><button class="btn btn-sm btn-ghost" onclick="removeCitation('${pg.id}',${i})" style="color:var(--red);flex-shrink:0;padding:2px 6px;">&times;</button></div>`).join('')}</div>` : ''}
+          ${recs.length > 0 ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);">${recs.map(r => `<span style="display:inline-block;margin-left:12px;margin-bottom:2px;">&#x26a0; ${r}</span>`).join('')}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function getGeoRecommendations(pg, geoScore) {
+  const recs = [];
+  const geo = pg.geo || {};
+  const b = geoScore.breakdown;
+
+  if (b.eeat.score < 15) {
+    if (!geo.authorName) recs.push('חסר שם מחבר');
+    if (!geo.authorCredentials) recs.push('חסר תפקיד/מומחיות');
+    if (!geo.authorUrl) recs.push('חסר קישור לפרופיל');
+  }
+  if (b.aiContent.score < 15) {
+    if (!geo.hasQAFormat) recs.push('סמנו Q&A אם יש מבנה שאלה-תשובה');
+    if (!geo.hasStatistics) recs.push('שלבו נתונים ומספרים');
+    const words = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+    if (words < 300) recs.push('תוכן דליל — הרחיבו ל-300+ מילים');
+  }
+  if (b.aiSchema.score < 10) {
+    if (!(pg.schema || []).includes('FAQPage')) recs.push('הוסיפו סכמת FAQPage');
+  }
+  if (b.citations.score < 10) {
+    if ((geo.citations || []).length < 3) recs.push('הוסיפו 3+ מקורות');
+  }
+  return recs;
+}
+
+function saveGeoSetting(key, value) {
+  const p = getProject();
+  if (!p) return;
+  if (!p.geoSettings) p.geoSettings = {};
+  p.geoSettings[key] = value;
+  saveProjects();
+}
+
+function addTrustSignal(val) {
+  if (!val.trim()) return;
+  const p = getProject();
+  if (!p) return;
+  if (!p.geoSettings) p.geoSettings = {};
+  if (!p.geoSettings.trustSignals) p.geoSettings.trustSignals = [];
+  p.geoSettings.trustSignals.push(val.trim());
+  saveProjects();
+  renderedTabs.delete('geo');
+  renderGeo();
+}
+
+function removeTrustSignal(val) {
+  const p = getProject();
+  if (!p || !p.geoSettings) return;
+  p.geoSettings.trustSignals = (p.geoSettings.trustSignals || []).filter(t => t !== val);
+  saveProjects();
+  renderedTabs.delete('geo');
+  renderGeo();
+}
+
+function savePageGeo(pageId, key, value) {
+  const p = getProject();
+  if (!p) return;
+  const pg = p.pages.find(x => x.id === pageId);
+  if (!pg) return;
+  if (!pg.geo) pg.geo = {};
+  pg.geo[key] = value;
+  saveProjects();
+}
+
+function togglePageGeo(pageId, key) {
+  const p = getProject();
+  if (!p) return;
+  const pg = p.pages.find(x => x.id === pageId);
+  if (!pg) return;
+  if (!pg.geo) pg.geo = {};
+  pg.geo[key] = !pg.geo[key];
+  saveProjects();
+  renderedTabs.delete('geo');
+  renderGeo();
+}
+
+function addCitation(pageId) {
+  const p = getProject();
+  if (!p) return;
+  const pg = p.pages.find(x => x.id === pageId);
+  if (!pg) return;
+  if (!pg.geo) pg.geo = {};
+  if (!pg.geo.citations) pg.geo.citations = [];
+  pg.geo.citations.push({ text: '', url: '' });
+  saveProjects();
+  renderedTabs.delete('geo');
+  renderGeo();
+}
+
+function updateCitation(pageId, index, key, value) {
+  const p = getProject();
+  if (!p) return;
+  const pg = p.pages.find(x => x.id === pageId);
+  if (!pg || !pg.geo || !pg.geo.citations[index]) return;
+  pg.geo.citations[index][key] = value;
+  saveProjects();
+}
+
+function removeCitation(pageId, index) {
+  const p = getProject();
+  if (!p) return;
+  const pg = p.pages.find(x => x.id === pageId);
+  if (!pg || !pg.geo) return;
+  pg.geo.citations.splice(index, 1);
+  saveProjects();
+  renderedTabs.delete('geo');
+  renderGeo();
 }
 
 // ═══════════════════════════════════════════════════
@@ -2185,12 +2612,18 @@ function renderDashboard() {
 
   const scoreClass = score >= 80 ? 'score-green' : score >= 50 ? 'score-yellow' : 'score-red';
   const scoreColor = score >= 80 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)';
-  const withSchema = p.pages.filter(pg => pg.schema && pg.schema.length > 0).length;
+
+  const geoScore = scoreProjectGeo().score;
+  const geoClass = geoScore >= 80 ? 'score-green' : geoScore >= 50 ? 'score-yellow' : 'score-red';
 
   document.getElementById('dashboard-stats').innerHTML = `
     <div class="card stat">
       <div class="score-ring ${scoreClass}" style="--pct:${score}; margin:0 auto 12px;"><span>${score}</span></div>
       <div class="stat-label">ציון SEO כולל</div>
+    </div>
+    <div class="card stat">
+      <div class="score-ring ${geoClass}" style="--pct:${geoScore}; margin:0 auto 12px;"><span>${geoScore}</span></div>
+      <div class="stat-label">ציון GEO (AI)</div>
     </div>
     <div class="card stat">
       <div class="stat-value" style="color:var(--primary)">${p.pages.length}</div>
@@ -2200,20 +2633,16 @@ function renderDashboard() {
       <div class="stat-value" style="color:${details.descriptions === p.pages.length ? 'var(--green)' : 'var(--yellow)'}">${details.descriptions}/${p.pages.length}</div>
       <div class="stat-label">עמודים עם תיאור</div>
     </div>
-    <div class="card stat">
-      <div class="stat-value" style="color:${withSchema > 0 ? 'var(--green)' : 'var(--yellow)'}">${p.schemas ? p.schemas.length : 0}</div>
-      <div class="stat-label">סוגי Schema</div>
-    </div>
   `;
 
   const items = [
     { label: 'כותרות', count: details.titles, icon: '\u2713', color: details.titles === p.pages.length ? 'green' : 'yellow' },
     { label: 'תיאורים', count: details.descriptions, icon: '\u2713', color: details.descriptions === p.pages.length ? 'green' : 'yellow' },
-    { label: 'Canonicals', count: details.canonicals, icon: '\u2713', color: details.canonicals === p.pages.length ? 'green' : 'yellow' },
     { label: 'מילות מפתח', count: details.keywords, icon: details.keywords > 0 ? '\u2713' : '!', color: details.keywords === p.pages.length ? 'green' : details.keywords > 0 ? 'yellow' : 'red' },
     { label: 'מבנה כותרות', count: details.headings, icon: details.headings > 0 ? '\u2713' : '!', color: details.headings === p.pages.length ? 'green' : 'yellow' },
+    { label: 'קישורים פנימיים', count: details.linking, icon: details.linking > 0 ? '\u2713' : '!', color: details.linking === p.pages.length ? 'green' : details.linking > 0 ? 'yellow' : 'red' },
+    { label: 'עומק תוכן', count: details.contentDepth, icon: details.contentDepth > 0 ? '\u2713' : '!', color: details.contentDepth === p.pages.length ? 'green' : details.contentDepth > 0 ? 'yellow' : 'red' },
     { label: 'מפת אתר', count: p.sitemap.length, icon: p.sitemap.length > 0 ? '\u2713' : '!', color: p.sitemap.length > 0 ? 'green' : 'red' },
-    { label: 'Social Meta', count: details.social, icon: details.social > 0 ? '\u2713' : '!', color: details.social === p.pages.length ? 'green' : details.social > 0 ? 'yellow' : 'red' },
     { label: 'תמונות (Alt)', count: details.images, icon: details.images > 0 ? '\u2713' : '!', color: details.images === p.pages.length ? 'green' : details.images > 0 ? 'yellow' : 'red' },
   ];
 
@@ -2225,36 +2654,64 @@ function renderDashboard() {
     </div>
   `).join('');
 
-  // Priority improvements — sorted by SEO impact
+  // Priority improvements — sorted by severity
   const priorities = [];
-  if (details.titles < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.titles} עמודים חסרי כותרת אופטימלית`, sub: 'כותרת צריכה להיות בין 30-60 תווים, רצוי עם מילת מפתח' });
-  if (details.descriptions < p.pages.length) priorities.push({ icon: 'missing', text: `${p.pages.length - details.descriptions} עמודים חסרי תיאור מטא אופטימלי`, sub: 'תיאור צריך להיות בין 100-160 תווים, רצוי עם מילת מפתח' });
-  if (p.schemas.length === 0) priorities.push({ icon: 'missing', text: 'אין נתונים מובנים (Schema)', sub: 'הוסיפו לפחות סכמת ' + p.businessType });
-  if (details.keywords < p.pages.length) priorities.push({ icon: 'todo', text: `${p.pages.length - details.keywords} עמודים ללא מילות מפתח ממוקדות`, sub: 'מפו לפחות 3 מילות מפתח לכל עמוד' });
-  // Social meta check
-  if (details.social < p.pages.length) {
-    const missingSocial = p.pages.length - details.social;
-    priorities.push({ icon: 'todo', text: `${missingSocial} עמודים ללא OG Meta (שיתוף ברשתות)`, sub: 'הוסיפו OG Title, OG Description ו-OG Image לשיתוף אופטימלי' });
-  }
-  // Image alt check
-  const allImgs = p.pages.reduce((arr, pg) => arr.concat(pg.images || []), []);
-  const missingAltCount = allImgs.filter(img => !img.alt || img.alt.length === 0).length;
-  if (missingAltCount > 0) priorities.push({ icon: 'todo', text: `${missingAltCount} תמונות חסרות טקסט חלופי (Alt)`, sub: 'Alt Text משפר SEO תמונות ונגישות' });
-  // Heading structure
+
+  // Critical: missing content
+  if (details.titles < p.pages.length) priorities.push({ severity: 3, icon: 'missing', text: `${p.pages.length - details.titles} עמודים חסרי כותרת אופטימלית`, sub: 'כותרת (30-60 תווים) עם מילת מפתח — גורם הדירוג החשוב ביותר' });
+  if (details.descriptions < p.pages.length) priorities.push({ severity: 3, icon: 'missing', text: `${p.pages.length - details.descriptions} עמודים חסרי תיאור מטא`, sub: 'תיאור (100-160 תווים) עם מילת מפתח — משפיע על CTR בתוצאות' });
+
+  // High: structure issues
   p.pages.forEach(pg => {
     const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
-    if (h1s.length === 0) priorities.push({ icon: 'missing', text: `עמוד "${pg.name}" חסר H1`, sub: 'כל עמוד חייב כותרת H1 אחת' });
-    if (h1s.length > 1) priorities.push({ icon: 'todo', text: `עמוד "${pg.name}" עם ${h1s.length} כותרות H1`, sub: 'כל עמוד צריך בדיוק H1 אחד' });
+    if (h1s.length === 0) priorities.push({ severity: 3, icon: 'missing', text: `"${pg.name}" — חסר H1`, sub: 'כל עמוד חייב כותרת H1 אחת עם מילת המפתח הראשית' });
+    if (h1s.length > 1) priorities.push({ severity: 2, icon: 'todo', text: `"${pg.name}" — ${h1s.length} כותרות H1`, sub: 'השאירו H1 אחד בלבד, השאר צריכים להיות H2' });
   });
-  // Noindex check
-  const noindexPages = p.pages.filter(pg => pg.noindex);
-  if (noindexPages.length > 0) {
-    priorities.push({ icon: 'todo', text: `${noindexPages.length} עמודים עם הוראת noindex`, sub: 'עמודים אלה מורים לגוגל לא לאנדקס: ' + noindexPages.map(pg => pg.name).join(', ') + '. וודאו שזה מכוון.' });
-  }
-  // Internal linking check
+
+  // Medium: keyword optimization
+  const pagesNoKwInTitle = p.pages.filter(pg => {
+    const kws = pg.keywords || [];
+    return kws.length > 0 && !kws.some(k => (pg.title || '').toLowerCase().includes(k.toLowerCase()));
+  });
+  if (pagesNoKwInTitle.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${pagesNoKwInTitle.length} עמודים — מילת מפתח לא בכותרת`, sub: 'שלבו את מילת המפתח הראשית בכותרת כל עמוד' });
+
+  if (details.keywords < p.pages.length) priorities.push({ severity: 2, icon: 'todo', text: `${p.pages.length - details.keywords} עמודים ללא מילות מפתח`, sub: 'מפו 2-3 מילות מפתח לכל עמוד — בסיס לאסטרטגיית תוכן' });
+
+  // Schema
+  if (p.schemas.length === 0) priorities.push({ severity: 2, icon: 'missing', text: 'אין נתונים מובנים (Schema)', sub: 'הוסיפו לפחות סכמת ' + (p.businessType || 'LocalBusiness') + ' — קריטי לתוצאות עשירות ו-AI' });
+
+  // Internal linking
   const orphanPages = p.pages.filter(pg => (pg.incomingLinks || 0) === 0 && pg.path !== '/');
-  if (orphanPages.length > 0) priorities.push({ icon: 'todo', text: `${orphanPages.length} עמודים ״יתומים״ ללא קישורים נכנסים`, sub: 'קשרו כל עמוד מעמודים אחרים באתר לשיפור הסריקה' });
-  if (priorities.length === 0) priorities.push({ icon: 'done', text: 'מצוין! אין שיפורים דחופים', sub: 'המשיכו לעקוב אחרי הביצועים ב-Google Search Console' });
+  if (orphanPages.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${orphanPages.length} עמודים "יתומים" ללא קישורים נכנסים`, sub: 'קשרו כל עמוד מעמודים אחרים — קריטי לסריקה ולחלוקת Authority' });
+
+  // Content depth
+  const thinPages = p.pages.filter(pg => (pg.content || '').split(/\s+/).filter(w => w.length > 0).length < 300 && (pg.content || '').length > 0);
+  if (thinPages.length > 0) priorities.push({ severity: 1, icon: 'todo', text: `${thinPages.length} עמודים עם תוכן דליל (<300 מילים)`, sub: 'תוכן מקיף דורג גבוה יותר — הרחיבו עמודים מרכזיים' });
+
+  // Image alt
+  const allImgs = p.pages.reduce((arr, pg) => arr.concat(pg.images || []), []);
+  const missingAltCount = allImgs.filter(img => !img.alt || img.alt.length === 0).length;
+  if (missingAltCount > 0) priorities.push({ severity: 1, icon: 'todo', text: `${missingAltCount} תמונות חסרות Alt Text`, sub: 'Alt Text משפר SEO תמונות, נגישות, ומוכנות ל-AI' });
+
+  // GEO
+  if (geoScore < 30) priorities.push({ severity: 1, icon: 'todo', text: `ציון GEO נמוך (${geoScore}%) — האתר לא מוכן למנועי AI`, sub: 'הוסיפו פרטי מחבר, מקורות, וסכמות AI בלשונית GEO' });
+
+  // Competitor gaps
+  const compGaps = (p.competitors || []).reduce((sum, c) => {
+    const myKws = new Set();
+    p.pages.forEach(pg => (pg.keywords || []).forEach(k => myKws.add(k.toLowerCase())));
+    return sum + (c.keywords || []).filter(ck => !myKws.has(ck.keyword.toLowerCase())).length;
+  }, 0);
+  if (compGaps > 3) priorities.push({ severity: 1, icon: 'todo', text: `${compGaps} מילות מפתח של מתחרים לא מכוסות`, sub: 'בדקו פערי תוכן בלשונית מילות מפתח \u2192 פערי תוכן' });
+
+  // Noindex
+  const noindexPages = p.pages.filter(pg => pg.noindex);
+  if (noindexPages.length > 0) priorities.push({ severity: 1, icon: 'todo', text: `${noindexPages.length} עמודים עם noindex`, sub: 'עמודים אלה לא יופיעו בחיפוש: ' + noindexPages.map(pg => pg.name).join(', ') });
+
+  // Sort by severity (highest first)
+  priorities.sort((a, b) => b.severity - a.severity);
+
+  if (priorities.length === 0) priorities.push({ severity: 0, icon: 'done', text: 'מצוין! אין שיפורים דחופים', sub: 'המשיכו לעקוב אחרי הביצועים ב-Google Search Console' });
 
   document.getElementById('priority-list').innerHTML = priorities.map(pr => `
     <div class="checklist-item">
@@ -2274,7 +2731,7 @@ function renderDashboard() {
           <div class="alert-text">
             <strong>הציון שלכם (${score}%) מצביע על פוטנציאל משמעותי לשיפור</strong>
             <p>שיפור ה-SEO יכול להביא יותר לקוחות מגוגל בלי לשלם על פרסום. רוצים שמומחה מ-Autonomous יסתכל על זה ביחד איתכם?
-            <a href="https://autonomous.co.il/contact" target="_blank">שיחת ייעוץ חינמית &#x2192;</a></p>
+            <a href="#" onclick="event.preventDefault();openLeadModal();" style="color:var(--accent);font-weight:600;">ניתוח עמוק והמלצות בחינם &#x2192;</a></p>
           </div>
         </div>`;
     } else {
@@ -2372,7 +2829,8 @@ function addPageFromModal() {
     images: [],
     outgoingLinks: 0,
     incomingLinks: 0,
-    order: p.pages.length
+    order: p.pages.length,
+    geo: { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }
   });
 
   saveProjects();
@@ -2764,37 +3222,345 @@ function downloadRobots() {
 // ═══════════════════════════════════════════════════
 // KEYWORDS
 // ═══════════════════════════════════════════════════
+let currentKwSubTab = 'map';
+
+function setKwSubTab(tab) {
+  currentKwSubTab = tab;
+  document.querySelectorAll('#kw-sub-tabs button').forEach(b => { b.className = 'btn btn-sm btn-ghost'; b.style.cssText = ''; });
+  const active = document.getElementById('kw-tab-' + tab);
+  if (active) { active.className = 'btn btn-sm'; active.style.cssText = 'background:var(--primary);color:white;'; }
+  renderKeywords();
+}
+
 function renderKeywords() {
   const p = getProject();
   if (!p) return;
-  const el = document.getElementById('keywords-map');
+  const el = document.getElementById('kw-sub-content');
+  if (!el) return;
+
+  switch (currentKwSubTab) {
+    case 'map': renderKeywordMap(p, el); break;
+    case 'competitors': renderCompetitors(p, el); break;
+    case 'gaps': renderContentGaps(p, el); break;
+    case 'clusters': renderKeywordClusters(p, el); break;
+    default: renderKeywordMap(p, el);
+  }
+}
+
+function renderKeywordMap(p, el) {
   const pagesWithKw = p.pages.filter(pg => pg.keywords && pg.keywords.length > 0);
   const pagesWithoutKw = p.pages.filter(pg => !pg.keywords || pg.keywords.length === 0);
 
-  let html = pagesWithKw.map(pg => `
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">${pg.name} <span style="font-weight:400;color:var(--text-dim);font-size:11px;margin-right:8px;direction:ltr;display:inline-block;">${pg.path}</span></div>
-        <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">&#x270f; עריכה</button>
+  let html = pagesWithKw.map(pg => {
+    const kwData = pg.keywordData || pg.keywords.map(k => ({ keyword: k, intent: '', searchVolume: null, competition: '', currentRanking: null }));
+    const kws = pg.keywords || [];
+    const titleLower = (pg.title || '').toLowerCase();
+    const h1Text = ((pg.headings || []).find(h => h.startsWith('H1')) || '').replace(/^H1:\s*/, '').toLowerCase();
+    const descLower = (pg.description || '').toLowerCase();
+
+    return `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">${escapeHtml(pg.name)} <span style="font-weight:400;color:var(--text-dim);font-size:11px;margin-right:8px;direction:ltr;display:inline-block;">${escapeHtml(pg.path)}</span></div>
+          <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">&#x270f; \u05E2\u05E8\u05D9\u05DB\u05D4</button>
+        </div>
+        <div style="margin-bottom:12px;">
+          ${kwData.map(kd => {
+            const kw = kd.keyword || '';
+            const kwLower = kw.toLowerCase();
+            const inTitle = titleLower.includes(kwLower);
+            const inH1 = h1Text.includes(kwLower);
+            const inDesc = descLower.includes(kwLower);
+            const intentClass = kd.intent === 'informational' ? 'intent-info' : kd.intent === 'navigational' ? 'intent-nav' : kd.intent === 'transactional' ? 'intent-trans' : kd.intent === 'commercial' ? 'intent-comm' : '';
+            return `
+              <div class="kw-detail-row" style="grid-template-columns:1fr auto auto auto auto auto;">
+                <div>
+                  <strong>${escapeHtml(kw)}</strong>
+                  ${kd.intent ? `<span class="intent-badge ${intentClass}">${getIntentLabel(kd.intent)}</span>` : ''}
+                </div>
+                <span class="badge ${inTitle ? 'green' : 'red'}" title="\u05D1\u05DB\u05D5\u05EA\u05E8\u05EA" style="font-size:10px;">T ${inTitle ? '\u2713' : '\u2717'}</span>
+                <span class="badge ${inH1 ? 'green' : 'red'}" title="\u05D1-H1" style="font-size:10px;">H1 ${inH1 ? '\u2713' : '\u2717'}</span>
+                <span class="badge ${inDesc ? 'green' : 'red'}" title="\u05D1\u05EA\u05D9\u05D0\u05D5\u05E8" style="font-size:10px;">D ${inDesc ? '\u2713' : '\u2717'}</span>
+                <span style="font-size:10px;color:var(--text-dim);">${kd.competition ? getDifficultyLabel(kd.competition) : ''}</span>
+                <select style="font-size:10px;padding:2px 4px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);" onchange="updateKeywordIntent('${pg.id}','${escapeHtml(kw)}',this.value)" title="\u05DB\u05D5\u05D5\u05E0\u05EA \u05D7\u05D9\u05E4\u05D5\u05E9">
+                  <option value="" ${!kd.intent ? 'selected' : ''}>\u05DB\u05D5\u05D5\u05E0\u05D4</option>
+                  <option value="informational" ${kd.intent === 'informational' ? 'selected' : ''}>\u05DE\u05D9\u05D3\u05E2\u05D9\u05EA</option>
+                  <option value="navigational" ${kd.intent === 'navigational' ? 'selected' : ''}>\u05E0\u05D9\u05D5\u05D5\u05D8\u05D9\u05EA</option>
+                  <option value="transactional" ${kd.intent === 'transactional' ? 'selected' : ''}>\u05E2\u05E1\u05E7\u05D0\u05D9\u05EA</option>
+                  <option value="commercial" ${kd.intent === 'commercial' ? 'selected' : ''}>\u05DE\u05E1\u05D7\u05E8\u05D9\u05EA</option>
+                </select>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);">
+          <strong>\u05DE\u05D9\u05E7\u05D5\u05DD:</strong>
+          T = \u05DB\u05D5\u05EA\u05E8\u05EA, H1 = \u05DB\u05D5\u05EA\u05E8\u05EA \u05E8\u05D0\u05E9\u05D9\u05EA, D = \u05EA\u05D9\u05D0\u05D5\u05E8.
+          ${kws.length > 0 ? `<span style="color:var(--${kws.some(k => titleLower.includes(k.toLowerCase())) && kws.some(k => h1Text.includes(k.toLowerCase())) ? 'green' : 'yellow'});">\u05DE\u05D9\u05DC\u05EA \u05DE\u05E4\u05EA\u05D7 \u05D1-${[titleLower, h1Text, descLower].filter((t, i) => kws.some(k => t.includes(k.toLowerCase()))).length}/3 \u05DE\u05E7\u05D5\u05DE\u05D5\u05EA</span>` : ''}
+        </div>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">${pg.keywords.map(kw => `<span class="badge blue">${kw}</span>`).join('')}</div>
-      <div style="font-size:11px;color:var(--text-dim);"><strong>היכן לשלב:</strong> כותרת, H1, פסקה ראשונה, H2, טקסט alt</div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   if (pagesWithoutKw.length > 0) {
     html += `<div class="card" style="border-color:var(--yellow);">
-      <div class="card-header"><div class="card-title" style="color:var(--yellow);">&#x26a0; עמודים ללא מילות מפתח</div></div>
+      <div class="card-header"><div class="card-title" style="color:var(--yellow);">&#x26a0; \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD \u05DC\u05DC\u05D0 \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7</div></div>
       ${pagesWithoutKw.map(pg => `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
-          <span>${pg.name} <span style="color:var(--text-dim);font-size:11px;">${pg.path}</span></span>
-          <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">+ הוסף</button>
+          <span>${escapeHtml(pg.name)} <span style="color:var(--text-dim);font-size:11px;">${escapeHtml(pg.path)}</span></span>
+          <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">+ \u05D4\u05D5\u05E1\u05E3</button>
         </div>
       `).join('')}
     </div>`;
   }
 
-  el.innerHTML = html || '<div class="empty-state"><div class="icon">&#x1f50d;</div><h3>אין מילות מפתח</h3><p>ערכו עמודים והוסיפו מילות מפתח ממוקדות</p></div>';
+  el.innerHTML = html || '<div class="empty-state"><div class="icon">&#x1f50d;</div><h3>\u05D0\u05D9\u05DF \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7</h3><p>\u05E2\u05E8\u05DB\u05D5 \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD \u05D5\u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7 \u05DE\u05DE\u05D5\u05E7\u05D3\u05D5\u05EA</p></div>';
+}
+
+function getIntentLabel(intent) {
+  const map = { informational: '\u05DE\u05D9\u05D3\u05E2\u05D9\u05EA', navigational: '\u05E0\u05D9\u05D5\u05D5\u05D8\u05D9\u05EA', transactional: '\u05E2\u05E1\u05E7\u05D0\u05D9\u05EA', commercial: '\u05DE\u05E1\u05D7\u05E8\u05D9\u05EA' };
+  return map[intent] || intent;
+}
+
+function getDifficultyLabel(comp) {
+  const map = { low: '<span style="color:var(--green)">\u05E7\u05DC</span>', medium: '<span style="color:var(--yellow)">\u05D1\u05D9\u05E0\u05D5\u05E0\u05D9</span>', high: '<span style="color:var(--red)">\u05E7\u05E9\u05D4</span>' };
+  return map[comp] || '';
+}
+
+function updateKeywordIntent(pageId, keyword, intent) {
+  const p = getProject();
+  if (!p) return;
+  const pg = p.pages.find(x => x.id === pageId);
+  if (!pg) return;
+  if (!pg.keywordData) pg.keywordData = (pg.keywords || []).map(k => ({ keyword: k, intent: '', searchVolume: null, competition: '', currentRanking: null }));
+  const kd = pg.keywordData.find(k => k.keyword === keyword);
+  if (kd) kd.intent = intent;
+  saveProjects();
+}
+
+function renderCompetitors(p, el) {
+  const competitors = p.competitors || [];
+
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">&#x1f3af; \u05DE\u05EA\u05D7\u05E8\u05D9\u05DD</div>
+        <button class="btn btn-sm btn-primary" onclick="addCompetitor()">+ \u05D4\u05D5\u05E1\u05E3 \u05DE\u05EA\u05D7\u05E8\u05D4</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">\u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05DE\u05EA\u05D7\u05E8\u05D9\u05DD \u05D5\u05D0\u05EA \u05DE\u05D9\u05DC\u05D5\u05EA \u05D4\u05DE\u05E4\u05EA\u05D7 \u05E9\u05DC\u05D4\u05DD \u05DB\u05D3\u05D9 \u05DC\u05D6\u05D4\u05D5\u05EA \u05E4\u05E2\u05E8\u05D9 \u05EA\u05D5\u05DB\u05DF \u05D5\u05D4\u05D6\u05D3\u05DE\u05E0\u05D5\u05D9\u05D5\u05EA.</p>
+      ${competitors.length === 0 ? '<div style="text-align:center;padding:32px;color:var(--text-muted);">\u05D0\u05D9\u05DF \u05DE\u05EA\u05D7\u05E8\u05D9\u05DD \u05E2\u05D3\u05D9\u05D9\u05DF. \u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05DE\u05EA\u05D7\u05E8\u05D4 \u05DB\u05D3\u05D9 \u05DC\u05D4\u05EA\u05D7\u05D9\u05DC.</div>' : ''}
+      ${competitors.map((comp, ci) => `
+        <div class="competitor-card">
+          <div class="comp-header">
+            <div>
+              <strong>${escapeHtml(comp.name)}</strong>
+              <span style="font-size:11px;color:var(--text-dim);margin-right:8px;direction:ltr;display:inline-block;">${escapeHtml(comp.url)}</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sm btn-ghost" onclick="addCompetitorKeyword(${ci})">+ \u05DE\u05D9\u05DC\u05EA \u05DE\u05E4\u05EA\u05D7</button>
+              <button class="btn btn-sm btn-ghost" onclick="removeCompetitor(${ci})" style="color:var(--red);">&times;</button>
+            </div>
+          </div>
+          ${(comp.keywords || []).length > 0 ? `
+            <div style="font-size:12px;">
+              <div class="kw-detail-row" style="font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);">
+                <div>\u05DE\u05D9\u05DC\u05EA \u05DE\u05E4\u05EA\u05D7</div><div>\u05DB\u05D5\u05D5\u05E0\u05D4</div><div>\u05D3\u05D9\u05E8\u05D5\u05D2 \u05DE\u05E9\u05D5\u05E2\u05E8</div><div>\u05E4\u05E2\u05D5\u05DC\u05D5\u05EA</div>
+              </div>
+              ${comp.keywords.map((ck, ki) => `
+                <div class="kw-detail-row">
+                  <div>${escapeHtml(ck.keyword)}</div>
+                  <div>
+                    <select style="font-size:10px;padding:2px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);" onchange="updateCompKeyword(${ci},${ki},'intent',this.value)">
+                      <option value="" ${!ck.intent ? 'selected' : ''}>-</option>
+                      <option value="informational" ${ck.intent === 'informational' ? 'selected' : ''}>\u05DE\u05D9\u05D3\u05E2\u05D9\u05EA</option>
+                      <option value="transactional" ${ck.intent === 'transactional' ? 'selected' : ''}>\u05E2\u05E1\u05E7\u05D0\u05D9\u05EA</option>
+                      <option value="commercial" ${ck.intent === 'commercial' ? 'selected' : ''}>\u05DE\u05E1\u05D7\u05E8\u05D9\u05EA</option>
+                    </select>
+                  </div>
+                  <div><input type="number" value="${ck.estimatedPosition || ''}" onchange="updateCompKeyword(${ci},${ki},'estimatedPosition',parseInt(this.value)||null)" style="width:50px;font-size:11px;padding:3px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);text-align:center;" placeholder="-" /></div>
+                  <div><button class="btn btn-sm btn-ghost" onclick="removeCompKeyword(${ci},${ki})" style="color:var(--red);font-size:10px;">&times;</button></div>
+                </div>
+              `).join('')}
+            </div>
+          ` : '<div style="font-size:12px;color:var(--text-muted);padding:8px;">\u05D0\u05D9\u05DF \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7 \u2014 \u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7 \u05E9\u05D4\u05DE\u05EA\u05D7\u05E8\u05D4 \u05DE\u05DE\u05D5\u05E7\u05D3 \u05D0\u05DC\u05D9\u05D4\u05DF</div>'}
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  el.innerHTML = html;
+}
+
+function addCompetitor() {
+  const name = prompt('\u05E9\u05DD \u05D4\u05DE\u05EA\u05D7\u05E8\u05D4:');
+  if (!name) return;
+  const url = prompt('\u05DB\u05EA\u05D5\u05D1\u05EA \u05D0\u05EA\u05E8 \u05D4\u05DE\u05EA\u05D7\u05E8\u05D4:');
+  if (!url) return;
+  const p = getProject();
+  if (!p) return;
+  if (!p.competitors) p.competitors = [];
+  p.competitors.push({ id: generateId(), name, url, keywords: [] });
+  saveProjects();
+  renderedTabs.delete('keywords');
+  renderKeywords();
+}
+
+function removeCompetitor(index) {
+  if (!confirm('\u05DC\u05DE\u05D7\u05D5\u05E7 \u05D0\u05EA \u05D4\u05DE\u05EA\u05D7\u05E8\u05D4?')) return;
+  const p = getProject();
+  if (!p) return;
+  p.competitors.splice(index, 1);
+  saveProjects();
+  renderedTabs.delete('keywords');
+  renderKeywords();
+}
+
+function addCompetitorKeyword(compIndex) {
+  const kw = prompt('\u05DE\u05D9\u05DC\u05EA \u05DE\u05E4\u05EA\u05D7:');
+  if (!kw) return;
+  const p = getProject();
+  if (!p || !p.competitors[compIndex]) return;
+  p.competitors[compIndex].keywords.push({ keyword: kw.trim(), intent: '', estimatedPosition: null, pageUrl: '' });
+  saveProjects();
+  renderedTabs.delete('keywords');
+  renderKeywords();
+}
+
+function removeCompKeyword(compIndex, kwIndex) {
+  const p = getProject();
+  if (!p || !p.competitors[compIndex]) return;
+  p.competitors[compIndex].keywords.splice(kwIndex, 1);
+  saveProjects();
+  renderedTabs.delete('keywords');
+  renderKeywords();
+}
+
+function updateCompKeyword(compIndex, kwIndex, key, value) {
+  const p = getProject();
+  if (!p || !p.competitors[compIndex] || !p.competitors[compIndex].keywords[kwIndex]) return;
+  p.competitors[compIndex].keywords[kwIndex][key] = value;
+  saveProjects();
+}
+
+function renderContentGaps(p, el) {
+  const myKeywords = new Set();
+  p.pages.forEach(pg => (pg.keywords || []).forEach(k => myKeywords.add(k.toLowerCase())));
+
+  const gaps = [];
+  (p.competitors || []).forEach(comp => {
+    (comp.keywords || []).forEach(ck => {
+      if (!myKeywords.has(ck.keyword.toLowerCase())) {
+        gaps.push({ keyword: ck.keyword, intent: ck.intent, competitor: comp.name, position: ck.estimatedPosition });
+      }
+    });
+  });
+
+  const gapPct = (p.competitors || []).reduce((sum, c) => sum + (c.keywords || []).length, 0);
+  const gapRate = gapPct > 0 ? Math.round((gaps.length / gapPct) * 100) : 0;
+
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">&#x1f50d; \u05E4\u05E2\u05E8\u05D9 \u05EA\u05D5\u05DB\u05DF</div>
+        <span class="badge ${gapRate > 50 ? 'red' : gapRate > 25 ? 'yellow' : 'green'}">${gaps.length} \u05E4\u05E2\u05E8\u05D9\u05DD (${gapRate}%)</span>
+      </div>
+      <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">\u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7 \u05E9\u05D4\u05DE\u05EA\u05D7\u05E8\u05D9\u05DD \u05DE\u05DE\u05D5\u05E7\u05D3\u05D9\u05DD \u05D0\u05DC\u05D9\u05D4\u05DF \u05D5\u05D0\u05EA\u05DD \u05DC\u05D0. \u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05D0\u05D5\u05EA\u05DF \u05DC\u05D0\u05E1\u05D8\u05E8\u05D8\u05D2\u05D9\u05D4 \u05E9\u05DC\u05DB\u05DD.</p>
+      ${gaps.length === 0 ? `<div style="text-align:center;padding:32px;color:var(--text-muted);">${(p.competitors || []).length === 0 ? '\u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05DE\u05EA\u05D7\u05E8\u05D9\u05DD \u05EA\u05D7\u05D9\u05DC\u05D4 \u05D1\u05DC\u05E9\u05D5\u05E0\u05D9\u05EA "\u05E0\u05D9\u05EA\u05D5\u05D7 \u05DE\u05EA\u05D7\u05E8\u05D9\u05DD"' : '\u05D0\u05D9\u05DF \u05E4\u05E2\u05E8\u05D9\u05DD! \u05D0\u05EA\u05DD \u05DE\u05DB\u05E1\u05D9\u05DD \u05D0\u05EA \u05DB\u05DC \u05DE\u05D9\u05DC\u05D5\u05EA \u05D4\u05DE\u05E4\u05EA\u05D7 \u05E9\u05DC \u05D4\u05DE\u05EA\u05D7\u05E8\u05D9\u05DD.'}</div>` : ''}
+      ${gaps.map(g => `
+        <div class="gap-item">
+          <div>
+            <strong>${escapeHtml(g.keyword)}</strong>
+            ${g.intent ? `<span class="intent-badge intent-${g.intent === 'informational' ? 'info' : g.intent === 'navigational' ? 'nav' : g.intent === 'transactional' ? 'trans' : 'comm'}">${getIntentLabel(g.intent)}</span>` : ''}
+            <span style="font-size:10px;color:var(--text-dim);margin-right:6px;">\u05DE\u05EA\u05D7\u05E8\u05D4: ${escapeHtml(g.competitor)}${g.position ? ` (\u05DE\u05D9\u05E7\u05D5\u05DD ~${g.position})` : ''}</span>
+          </div>
+          <button class="btn btn-sm btn-accent" onclick="addGapKeywordToPage('${escapeHtml(g.keyword)}')">+ \u05D4\u05D5\u05E1\u05E3 \u05DC\u05E2\u05DE\u05D5\u05D3</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  el.innerHTML = html;
+}
+
+function addGapKeywordToPage(keyword) {
+  const p = getProject();
+  if (!p) return;
+  const pageNames = p.pages.map(pg => pg.name);
+  const choice = prompt('\u05DC\u05D0\u05D9\u05D6\u05D4 \u05E2\u05DE\u05D5\u05D3 \u05DC\u05D4\u05D5\u05E1\u05D9\u05E3 \u05D0\u05EA "' + keyword + '"?\n\n' + pageNames.map((n, i) => (i + 1) + '. ' + n).join('\n'));
+  if (!choice) return;
+  const idx = parseInt(choice) - 1;
+  if (idx < 0 || idx >= p.pages.length) { toast('\u05DE\u05E1\u05E4\u05E8 \u05E2\u05DE\u05D5\u05D3 \u05DC\u05D0 \u05EA\u05E7\u05D9\u05DF'); return; }
+  const pg = p.pages[idx];
+  if (!pg.keywords) pg.keywords = [];
+  if (!pg.keywords.includes(keyword)) {
+    pg.keywords.push(keyword);
+    if (!pg.keywordData) pg.keywordData = [];
+    pg.keywordData.push({ keyword, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' });
+    saveProjects();
+    toast(`"${keyword}" \u05E0\u05D5\u05E1\u05E3 \u05DC-${pg.name}`, 'success');
+    renderedTabs.delete('keywords');
+    renderKeywords();
+  } else {
+    toast('\u05DE\u05D9\u05DC\u05EA \u05DE\u05E4\u05EA\u05D7 \u05DB\u05D1\u05E8 \u05E7\u05D9\u05D9\u05DE\u05EA \u05D1\u05E2\u05DE\u05D5\u05D3 \u05D6\u05D4');
+  }
+}
+
+function renderKeywordClusters(p, el) {
+  // Auto-generate clusters from keyword overlap
+  const allKws = [];
+  p.pages.forEach(pg => {
+    (pg.keywords || []).forEach(kw => {
+      if (!allKws.find(k => k.keyword.toLowerCase() === kw.toLowerCase())) {
+        allKws.push({ keyword: kw, pages: [pg.name], intent: (pg.keywordData || []).find(d => d.keyword === kw)?.intent || '' });
+      } else {
+        const existing = allKws.find(k => k.keyword.toLowerCase() === kw.toLowerCase());
+        if (!existing.pages.includes(pg.name)) existing.pages.push(pg.name);
+      }
+    });
+  });
+
+  // Group by shared words (simple clustering)
+  const clusters = {};
+  allKws.forEach(kd => {
+    const words = kd.keyword.toLowerCase().split(/\s+/);
+    let assigned = false;
+    for (const [clusterName, clusterKws] of Object.entries(clusters)) {
+      const clusterWords = clusterName.toLowerCase().split(/\s+/);
+      if (words.some(w => clusterWords.includes(w) && w.length > 2)) {
+        clusterKws.push(kd);
+        assigned = true;
+        break;
+      }
+    }
+    if (!assigned) {
+      clusters[kd.keyword] = [kd];
+    }
+  });
+
+  const clusterEntries = Object.entries(clusters).filter(([_, kws]) => kws.length > 0);
+
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">&#x1f4ca; \u05D0\u05E9\u05DB\u05D5\u05DC\u05D5\u05EA \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7</div>
+        <span class="badge primary">${clusterEntries.length} \u05D0\u05E9\u05DB\u05D5\u05DC\u05D5\u05EA</span>
+      </div>
+      <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">\u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7 \u05DE\u05E7\u05D5\u05D1\u05E6\u05D5\u05EA \u05DC\u05E4\u05D9 \u05E0\u05D5\u05E9\u05D0. \u05D5\u05D3\u05D0\u05D5 \u05E9\u05DB\u05DC \u05D0\u05E9\u05DB\u05D5\u05DC \u05DE\u05DE\u05D5\u05E4\u05D4 \u05DC\u05E2\u05DE\u05D5\u05D3 \u05DE\u05EA\u05D0\u05D9\u05DD.</p>
+      ${clusterEntries.length === 0 ? '<div style="text-align:center;padding:32px;color:var(--text-muted);">\u05D0\u05D9\u05DF \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7 \u05E2\u05D3\u05D9\u05D9\u05DF. \u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7 \u05D3\u05E8\u05DA \u05E2\u05D5\u05E8\u05DA \u05D4\u05E2\u05DE\u05D5\u05D3\u05D9\u05DD.</div>' : ''}
+      ${clusterEntries.map(([name, kws]) => `
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
+          <div style="font-weight:600;margin-bottom:8px;">${escapeHtml(name)} <span class="badge primary" style="font-size:10px;">${kws.length}</span></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${kws.map(kd => `
+              <span class="badge blue" title="\u05E2\u05DE\u05D5\u05D3\u05D9\u05DD: ${kd.pages.join(', ')}">${escapeHtml(kd.keyword)} <span style="font-size:9px;opacity:0.7;">(${kd.pages.length})</span></span>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  el.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════
@@ -3050,7 +3816,6 @@ function renderChecklist() {
         { key: 'meta-descriptions', text: 'כל עמוד עם תיאור מטא', auto: () => p.pages.every(pg => pg.description && pg.description.length > 0) },
         { key: 'canonicals', text: 'כתובות Canonical מוגדרות', auto: () => p.pages.every(pg => pg.canonical) },
         { key: 'og-tags', text: 'תגיות Open Graph', check: true },
-        { key: 'twitter-cards', text: 'תגיות Twitter Card', check: true },
         { key: 'rtl-lang', text: 'dir/lang מוגדרים כראוי', check: true },
         { key: 'trailing-slashes', text: 'Trailing slashes עקביים', check: true },
         { key: 'image-alts', text: 'תמונות עם טקסט alt', check: true },
@@ -3083,6 +3848,17 @@ function renderChecklist() {
         { key: 'gsc-verified', text: 'Google Search Console מאומת', check: true },
         { key: 'sitemap-submitted', text: 'מפת אתר הוגשה ל-GSC', check: true },
         { key: 'ga-gsc-linked', text: 'GA4 מחובר ל-GSC', check: true },
+      ]
+    },
+    {
+      title: '\uD83E\uDD16 GEO / \u05DE\u05E0\u05D5\u05E2\u05D9 AI',
+      items: [
+        { key: 'geo-author', text: '\u05E4\u05E8\u05D8\u05D9 \u05DE\u05D7\u05D1\u05E8 \u05D1\u05DB\u05DC \u05E2\u05DE\u05D5\u05D3', auto: () => p.pages.every(pg => pg.geo && pg.geo.authorName) },
+        { key: 'geo-faq', text: '\u05E1\u05DB\u05DE\u05EA FAQPage \u05D1\u05E2\u05DE\u05D5\u05D3 \u05D0\u05D7\u05D3 \u05DC\u05E4\u05D7\u05D5\u05EA', auto: () => p.pages.some(pg => (pg.schema || []).includes('FAQPage')) },
+        { key: 'geo-citations', text: '\u05DE\u05E7\u05D5\u05E8\u05D5\u05EA \u05D7\u05D9\u05E6\u05D5\u05E0\u05D9\u05D9\u05DD (3+ \u05DC\u05E2\u05DE\u05D5\u05D3)', auto: () => p.pages.some(pg => pg.geo && pg.geo.citations && pg.geo.citations.length >= 3) },
+        { key: 'geo-qa', text: '\u05DE\u05D1\u05E0\u05D4 \u05E9\u05D0\u05DC\u05D4-\u05EA\u05E9\u05D5\u05D1\u05D4 \u05D1\u05EA\u05D5\u05DB\u05DF', check: true },
+        { key: 'geo-stats', text: '\u05E0\u05EA\u05D5\u05E0\u05D9\u05DD \u05D5\u05E1\u05D8\u05D8\u05D9\u05E1\u05D8\u05D9\u05E7\u05D5\u05EA \u05D1\u05EA\u05D5\u05DB\u05DF', check: true },
+        { key: 'geo-about', text: '\u05E2\u05DE\u05D5\u05D3 \u05D0\u05D5\u05D3\u05D5\u05EA \u05E2\u05DD \u05DE\u05D5\u05DE\u05D7\u05D9\u05D5\u05EA', auto: () => p.geoSettings && p.geoSettings.aboutPageUrl },
       ]
     }
   ];
@@ -3425,6 +4201,10 @@ function renderExport() {
         output += `  Headings: ${(pg.headings || []).join(' | ') || '-'}\n`;
         output += `  Score: ${scorePage(pg).score}%\n`;
       });
+      const geoResult = scoreProjectGeo();
+      output += `\n== GEO Score: ${geoResult.score}/100 ==\n`;
+      output += `Site-wide GEO: ${geoResult.siteScore}/100\n`;
+      output += `Average page GEO: ${geoResult.avgPage}/100\n`;
       break;
 
     case 'meta':
@@ -3460,6 +4240,24 @@ function renderExport() {
 
     case 'robots':
       output = p.robots || '';
+      break;
+
+    case 'geo':
+      const geoR = scoreProjectGeo();
+      output = `# GEO Export \u2014 ${p.name} (${domain})\n# Score: ${geoR.score}/100\n\n`;
+      p.pages.forEach(pg => {
+        const gs = scorePageGeo(pg, p);
+        const geo = pg.geo || {};
+        output += `--- ${pg.name} (${pg.path}) \u2014 GEO: ${gs.score}% ---\n`;
+        output += `  Author: ${geo.authorName || '(none)'}\n`;
+        output += `  Credentials: ${geo.authorCredentials || '(none)'}\n`;
+        output += `  Citations: ${(geo.citations || []).length}\n`;
+        output += `  Q&A Format: ${geo.hasQAFormat ? 'Yes' : 'No'}\n`;
+        output += `  Statistics: ${geo.hasStatistics ? 'Yes' : 'No'}\n`;
+        output += `  Definitive Statements: ${geo.hasDefinitiveStatements ? 'Yes' : 'No'}\n`;
+        Object.entries(gs.breakdown).forEach(([k, v]) => { output += `  ${v.label}: ${v.score}/${v.max}\n`; });
+        output += '\n';
+      });
       break;
   }
 
@@ -4335,6 +5133,161 @@ h1,h2,h3{font-family:'Rubik',sans-serif;}
   const blob = new Blob([html], { type: 'text/html' });
   downloadBlob(blob, `seo-report-${(p.name || 'report').replace(/\s+/g, '-')}.html`);
   toast('דוח HTML נוצר — שתפו עם הלקוח', 'success');
+}
+
+// ═══════════════════════════════════════════════════
+// LEAD CAPTURE
+// ═══════════════════════════════════════════════════
+const SEO_MAGNET_WEBHOOK = 'https://autonomous.n8n888.cloud/webhook/seo-magnet';
+
+function openLeadModal() {
+  document.getElementById('lead-name').value = '';
+  document.getElementById('lead-email').value = '';
+  document.getElementById('lead-phone').value = '';
+  const p = getProject();
+  document.getElementById('lead-website').value = p ? p.url : '';
+  document.getElementById('lead-status').style.display = 'none';
+  document.getElementById('lead-submit-btn').disabled = false;
+  document.getElementById('lead-submit-btn').textContent = '\u{1F680} קבלו ניתוח והמלצות';
+  document.getElementById('lead-modal').classList.add('show');
+}
+
+async function submitLead() {
+  const name = document.getElementById('lead-name').value.trim();
+  const email = document.getElementById('lead-email').value.trim();
+  const phone = document.getElementById('lead-phone').value.trim();
+  const websiteInput = document.getElementById('lead-website').value.trim();
+  const statusEl = document.getElementById('lead-status');
+  const btn = document.getElementById('lead-submit-btn');
+
+  if (!name || !email) {
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'var(--red-bg)';
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'שם ואימייל הם שדות חובה';
+    return;
+  }
+  if (!email.includes('@') || !email.includes('.')) {
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'var(--red-bg)';
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'כתובת אימייל לא תקינה';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'שולח...';
+  statusEl.style.display = 'none';
+
+  const p = getProject();
+  const projectScore = p ? scoreProject() : null;
+  const geoResult = p ? scoreProjectGeo() : null;
+
+  // Build full audit data from the tool
+  let auditData = null;
+  if (p) {
+    const pages = p.pages.map(pg => {
+      const ps = scorePage(pg);
+      const gs = scorePageGeo(pg, p);
+      const kws = pg.keywords || [];
+      const titleLower = (pg.title || '').toLowerCase();
+      const h1 = ((pg.headings || []).find(h => h.startsWith('H1')) || '').replace(/^H1:\s*/, '');
+      return {
+        name: pg.name,
+        path: pg.path,
+        seoScore: ps.score,
+        geoScore: gs.score,
+        title: pg.title || '',
+        titleLength: (pg.title || '').length,
+        description: pg.description || '',
+        descLength: (pg.description || '').length,
+        h1: h1,
+        keywords: kws,
+        kwInTitle: kws.some(k => titleLower.includes(k.toLowerCase())),
+        kwInH1: kws.some(k => h1.toLowerCase().includes(k.toLowerCase())),
+        hasCanonical: !!pg.canonical,
+        isIndexed: !pg.noindex,
+        schemas: pg.schema || [],
+        hasOgTitle: !!(pg.ogTitle),
+        hasOgImage: !!(pg.ogImage),
+        imageCount: (pg.images || []).length,
+        imagesWithAlt: (pg.images || []).filter(i => i.alt).length,
+        outLinks: pg.outgoingLinks || 0,
+        inLinks: pg.incomingLinks || 0,
+        wordCount: (pg.content || '').split(/\s+/).filter(w => w.length > 0).length,
+        geoAuthor: (pg.geo || {}).authorName || '',
+        geoCitations: ((pg.geo || {}).citations || []).length,
+        geoQA: !!(pg.geo || {}).hasQAFormat,
+        geoStats: !!(pg.geo || {}).hasStatistics
+      };
+    });
+
+    // Priorities / issues
+    const issues = [];
+    pages.forEach(pg => {
+      if (pg.titleLength === 0) issues.push(`${pg.name}: חסרה כותרת`);
+      else if (pg.titleLength < 30 || pg.titleLength > 60) issues.push(`${pg.name}: כותרת לא אופטימלית (${pg.titleLength} תווים)`);
+      if (pg.descLength === 0) issues.push(`${pg.name}: חסר תיאור מטא`);
+      if (!pg.h1) issues.push(`${pg.name}: חסר H1`);
+      if (pg.keywords.length === 0) issues.push(`${pg.name}: אין מילות מפתח`);
+      else if (!pg.kwInTitle) issues.push(`${pg.name}: מילת מפתח לא בכותרת`);
+      if (pg.schemas.length === 0) issues.push(`${pg.name}: אין נתונים מובנים`);
+      if (pg.outLinks === 0 && pg.path !== '/') issues.push(`${pg.name}: אין קישורים יוצאים`);
+      if (pg.inLinks === 0 && pg.path !== '/') issues.push(`${pg.name}: עמוד יתום (אין קישורים נכנסים)`);
+      if (pg.wordCount < 300 && pg.wordCount > 0) issues.push(`${pg.name}: תוכן דליל (${pg.wordCount} מילים)`);
+    });
+
+    auditData = {
+      seoScore: projectScore.score,
+      geoScore: geoResult.score,
+      pageCount: p.pages.length,
+      businessType: p.businessType || '',
+      lang: p.lang || 'he',
+      hasSitemap: p.sitemap && p.sitemap.length > 0,
+      hasRobots: p.robots && p.robots.trim().length > 0,
+      schemaTypes: (p.schemas || []).map(s => s.type),
+      pages: pages,
+      topIssues: issues.slice(0, 15),
+      competitors: (p.competitors || []).map(c => ({ name: c.name, url: c.url, kwCount: (c.keywords || []).length }))
+    };
+  }
+
+  try {
+    const resp = await fetch(SEO_MAGNET_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        email,
+        phone,
+        website: websiteInput || (p ? p.url : ''),
+        business: p ? p.name : '',
+        seoScore: String(projectScore ? projectScore.score : ''),
+        geoScore: String(geoResult ? geoResult.score : ''),
+        pageCount: p ? String(p.pages.length) : '0',
+        page: 'autonomous-seo.vercel.app',
+        audit: auditData
+      })
+    });
+
+    if (resp.ok) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'var(--green-bg)';
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = '\u2705 קיבלנו את המידע שלכם, צוות המומחים שלנו יחזור אליכם עם ניתוח והמלצות בהקדם.';
+      btn.textContent = '\u2713 נשלח!';
+      setTimeout(() => closeModal('lead-modal'), 3000);
+    } else {
+      throw new Error('Server error');
+    }
+  } catch (e) {
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'var(--yellow-bg)';
+    statusEl.style.color = 'var(--yellow)';
+    statusEl.textContent = 'שגיאה בשליחה — נסו שוב או צרו קשר ישירות';
+    btn.disabled = false;
+    btn.textContent = '\u{1F680} קבלו ניתוח והמלצות';
+  }
 }
 
 // ═══════════════════════════════════════════════════
