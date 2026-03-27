@@ -6663,7 +6663,6 @@ function unlockDashboard() {
       body: JSON.stringify(gatePayload)
     }).catch(() => {});
   });
-  }).catch(function() {});
 
   if (typeof fbq === 'function' && META_PIXEL_ID) fbq('track', 'Lead', { content_name: 'SEO Audit Gate', value: projectScore ? projectScore.score : 0 });
 
