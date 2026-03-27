@@ -1575,6 +1575,33 @@
   </div>
 </div>
 
+<!-- ═══ SCORE REVEAL GATE ═══ -->
+<div id="score-reveal-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:var(--bg);overflow-y:auto;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 24px;text-align:center;">
+    <img src="logo.png" alt="Autonomous SEO" style="height:36px;margin-bottom:24px;" />
+    <h1 style="font-family:var(--font-heading);font-size:28px;margin-bottom:8px;" id="reveal-title">הסריקה הושלמה!</h1>
+    <p style="color:var(--text-dim);font-size:14px;margin-bottom:32px;" id="reveal-subtitle"></p>
+
+    <div id="reveal-score-ring" style="margin:0 auto 24px;"></div>
+
+    <div id="reveal-issues" style="text-align:right;margin-bottom:32px;"></div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;">&#x1f513; קבלו גישה לדשבורד המלא</div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">ניתוח מלא של כל העמודים, המלצות לתיקון, קוד מוכן להעתקה, ו-GEO scoring</p>
+      <div style="max-width:360px;margin:0 auto;">
+        <input type="text" id="gate-name" placeholder="השם שלכם" style="width:100%;margin-bottom:8px;" />
+        <input type="email" id="gate-email" placeholder="your@email.com" style="width:100%;margin-bottom:8px;direction:ltr;text-align:left;" />
+        <input type="tel" id="gate-phone" placeholder="טלפון (רשות)" style="width:100%;margin-bottom:12px;direction:ltr;text-align:left;" />
+        <button class="btn btn-primary btn-block" onclick="unlockDashboard()" style="font-size:15px;padding:12px;">&#x1f680; פתחו את הדשבורד המלא</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:10px;">ללא התחייבות. הנתונים שלכם מאובטחים.</p>
+    </div>
+
+    <button class="btn btn-ghost btn-sm" onclick="skipGate()" style="font-size:12px;color:var(--text-muted);">המשך ללא פרטים &#x2192;</button>
+  </div>
+</div>
+
 <!-- ═══ ADD PAGE MODAL ═══ -->
 <div class="modal-overlay" id="add-page-modal">
   <div class="modal" style="max-width:500px;">
@@ -1652,6 +1679,7 @@ if (!currentProjectId || currentProjectId === 'null' || currentProjectId === 'un
 let currentPage = null;
 let currentExportTab = 'summary';
 let toastTimer = null;
+let isUnlocked = localStorage.getItem('seo-tool-unlocked') === 'true';
 let autoSaveTimer = null;
 
 // ═══════════════════════════════════════════════════
@@ -2483,25 +2511,9 @@ function finishSetup() {
   setupMode = null;
   enterApp();
 
-  // Show lead capture for scanned projects with improvement potential
-  if (wasScanned) {
-    const { score } = scoreProject();
-    if (score < 75) {
-      setTimeout(() => {
-        const leadBanner = document.getElementById('scan-lead-banner');
-        if (leadBanner) {
-          leadBanner.style.display = 'block';
-          leadBanner.innerHTML = `
-            <div style="background:linear-gradient(135deg, var(--primary-glow), var(--accent-glow));border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;text-align:center;">
-              <div style="font-size:15px;font-weight:700;margin-bottom:6px;">\u05d4\u05d0\u05ea\u05e8 \u05e9\u05dc\u05db\u05dd \u05e7\u05d9\u05d1\u05dc \u05e6\u05d9\u05d5\u05df ${score}/100</div>
-              <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">\u05d9\u05e9 \u05de\u05e7\u05d5\u05dd \u05dc\u05e9\u05d9\u05e4\u05d5\u05e8 \u05de\u05e9\u05de\u05e2\u05d5\u05ea\u05d9. \u05e8\u05d5\u05e6\u05d9\u05dd \u05ea\u05d5\u05db\u05e0\u05d9\u05ea \u05d9\u05d9\u05e9\u05d5\u05dd \u05de\u05d5\u05ea\u05d0\u05de\u05ea \u05d0\u05d9\u05e9\u05d9\u05ea?</p>
-              <button class="btn btn-primary" onclick="openLeadModal();this.parentElement.parentElement.style.display='none';">&#x1f4e9; \u05e7\u05d1\u05dc\u05d5 \u05e0\u05d9\u05ea\u05d5\u05d7 + \u05ea\u05d5\u05db\u05e0\u05d9\u05ea \u05d9\u05d9\u05e9\u05d5\u05dd \u05d1\u05d7\u05d9\u05e0\u05dd</button>
-              <button class="btn btn-ghost btn-sm" onclick="this.parentElement.parentElement.style.display='none';" style="margin-top:8px;display:block;margin:8px auto 0;">\u05d0\u05d5\u05dc\u05d9 \u05d0\u05d7\u05e8 \u05db\u05da</button>
-            </div>
-          `;
-        }
-      }, 500);
-    }
+  // Show score reveal gate for scanned projects (if not already unlocked)
+  if (wasScanned && !isUnlocked) {
+    setTimeout(() => showScoreReveal(), 300);
   }
 
   // Initial score snapshot
@@ -5391,6 +5403,12 @@ function importProjectBackup(event) {
 // EXPORT
 // ═══════════════════════════════════════════════════
 function exportAll() {
+  if (!isUnlocked) {
+    if (confirm('\u05d9\u05d9\u05e6\u05d5\u05d0 \u05d4\u05e0\u05ea\u05d5\u05e0\u05d9\u05dd \u05d6\u05de\u05d9\u05df \u05dc\u05d0\u05d7\u05e8 \u05d4\u05e8\u05e9\u05de\u05d4 \u05d7\u05d9\u05e0\u05de\u05d9\u05ea. \u05dc\u05d4\u05d9\u05e8\u05e9\u05dd \u05e2\u05db\u05e9\u05d9\u05d5?')) {
+      showScoreReveal();
+    }
+    return;
+  }
   currentExportTab = 'summary';
   renderExport();
   document.getElementById('export-modal').classList.add('show');
@@ -6369,6 +6387,119 @@ h1,h2,h3{font-family:'Rubik',sans-serif;}
 // LEAD CAPTURE
 // ═══════════════════════════════════════════════════
 const SEO_MAGNET_WEBHOOK = 'https://autonomous.n8n888.cloud/webhook/seo-magnet';
+
+function showScoreReveal() {
+  const p = getProject();
+  if (!p) return;
+
+  const { score, details } = scoreProject();
+  const { score: geoScore } = scoreProjectGeo();
+  const scoreClass = score >= 80 ? 'score-green' : score >= 50 ? 'score-yellow' : 'score-red';
+
+  document.getElementById('reveal-subtitle').textContent = ((p.url || '').replace('https://', '').replace('http://', '')) + ' \u2014 ' + p.pages.length + ' \u05e2\u05de\u05d5\u05d3\u05d9\u05dd \u05e0\u05e1\u05e8\u05e7\u05d5';
+
+  // Score ring
+  document.getElementById('reveal-score-ring').innerHTML =
+    '<div class="score-ring ' + scoreClass + '" style="--pct:' + score + '; width:120px;height:120px;font-size:32px;margin:0 auto;"><span>' + score + '</span></div>' +
+    '<div style="margin-top:8px;font-size:13px;color:var(--text-dim);">\u05e6\u05d9\u05d5\u05df SEO \u05db\u05d5\u05dc\u05dc</div>' +
+    '<div style="margin-top:16px;display:flex;justify-content:center;gap:24px;">' +
+      '<div><span style="font-size:20px;font-weight:700;color:var(--accent);">' + geoScore + '</span><div style="font-size:11px;color:var(--text-dim);">GEO / AI</div></div>' +
+      '<div><span style="font-size:20px;font-weight:700;color:var(--primary);">' + p.pages.length + '</span><div style="font-size:11px;color:var(--text-dim);">\u05e2\u05de\u05d5\u05d3\u05d9\u05dd</div></div>' +
+      '<div><span style="font-size:20px;font-weight:700;color:' + (score >= 80 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)') + ';">' + (score >= 80 ? '\u05d8\u05d5\u05d1' : score >= 50 ? '\u05d1\u05d9\u05e0\u05d5\u05e0\u05d9' : '\u05d3\u05d5\u05e8\u05e9 \u05d8\u05d9\u05e4\u05d5\u05dc') + '</span><div style="font-size:11px;color:var(--text-dim);">\u05de\u05e6\u05d1 \u05db\u05dc\u05dc\u05d9</div></div>' +
+    '</div>';
+
+  // Top 3 issues
+  var issues = [];
+  if (details.titles < p.pages.length) issues.push({ icon: '\u26a0', text: (p.pages.length - details.titles) + ' \u05e2\u05de\u05d5\u05d3\u05d9\u05dd \u05e2\u05dd \u05db\u05d5\u05ea\u05e8\u05ea \u05dc\u05d0 \u05d0\u05d5\u05e4\u05d8\u05d9\u05de\u05dc\u05d9\u05ea', color: 'var(--red)' });
+  if (details.descriptions < p.pages.length) issues.push({ icon: '\u26a0', text: (p.pages.length - details.descriptions) + ' \u05e2\u05de\u05d5\u05d3\u05d9\u05dd \u05dc\u05dc\u05d0 \u05ea\u05d9\u05d0\u05d5\u05e8 \u05de\u05d8\u05d0', color: 'var(--red)' });
+  var orphans = p.pages.filter(function(pg) { return (pg.incomingLinks || 0) === 0 && pg.path !== '/'; });
+  if (orphans.length > 0) issues.push({ icon: '\ud83d\udd17', text: orphans.length + ' \u05e2\u05de\u05d5\u05d3\u05d9\u05dd \u05d9\u05ea\u05d5\u05de\u05d9\u05dd (\u05dc\u05dc\u05d0 \u05e7\u05d9\u05e9\u05d5\u05e8\u05d9\u05dd \u05e0\u05db\u05e0\u05e1\u05d9\u05dd)', color: 'var(--yellow)' });
+  var noSchema = p.pages.filter(function(pg) { return (pg.schema || []).length === 0; });
+  if (noSchema.length > 0) issues.push({ icon: '\ud83d\udccb', text: noSchema.length + ' \u05e2\u05de\u05d5\u05d3\u05d9\u05dd \u05dc\u05dc\u05d0 \u05e0\u05ea\u05d5\u05e0\u05d9\u05dd \u05de\u05d5\u05d1\u05e0\u05d9\u05dd (Schema)', color: 'var(--yellow)' });
+  if (geoScore < 50) issues.push({ icon: '\ud83e\udd16', text: '\u05e6\u05d9\u05d5\u05df GEO \u05e0\u05de\u05d5\u05da (' + geoScore + ') \u2014 \u05d4\u05d0\u05ea\u05e8 \u05dc\u05d0 \u05de\u05d5\u05db\u05df \u05dc\u05de\u05e0\u05d5\u05e2\u05d9 AI', color: 'var(--yellow)' });
+  var noKw = p.pages.filter(function(pg) { return !pg.keywords || pg.keywords.length === 0; });
+  if (noKw.length > 0) issues.push({ icon: '\ud83d\udd11', text: noKw.length + ' \u05e2\u05de\u05d5\u05d3\u05d9\u05dd \u05dc\u05dc\u05d0 \u05de\u05d9\u05dc\u05d5\u05ea \u05de\u05e4\u05ea\u05d7', color: 'var(--yellow)' });
+
+  var topIssues = issues.slice(0, 3);
+  if (topIssues.length > 0) {
+    document.getElementById('reveal-issues').innerHTML =
+      '<div style="font-size:14px;font-weight:600;margin-bottom:12px;">\ud83d\udd0d \u05de\u05de\u05e6\u05d0\u05d9\u05dd \u05e2\u05d9\u05e7\u05e8\u05d9\u05d9\u05dd:</div>' +
+      topIssues.map(function(i) {
+        return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;">' +
+          '<span style="font-size:18px;">' + i.icon + '</span>' +
+          '<span style="font-size:13px;color:' + i.color + ';">' + i.text + '</span>' +
+        '</div>';
+      }).join('') +
+      '<p style="font-size:12px;color:var(--text-muted);margin-top:8px;">+ \u05e2\u05d5\u05d3 ' + Math.max(0, issues.length - 3) + ' \u05de\u05de\u05e6\u05d0\u05d9\u05dd \u05d1\u05d3\u05e9\u05d1\u05d5\u05e8\u05d3 \u05d4\u05de\u05dc\u05d0</p>';
+  } else {
+    document.getElementById('reveal-issues').innerHTML = '<p style="color:var(--green);font-size:14px;">\u2713 \u05dc\u05d0 \u05e0\u05de\u05e6\u05d0\u05d5 \u05d1\u05e2\u05d9\u05d5\u05ea \u05e7\u05e8\u05d9\u05d8\u05d9\u05d5\u05ea \u2014 \u05db\u05dc \u05d4\u05db\u05d1\u05d5\u05d3!</p>';
+  }
+
+  // Clear form fields
+  document.getElementById('gate-email').value = '';
+  document.getElementById('gate-name').value = '';
+  document.getElementById('gate-phone').value = '';
+
+  document.getElementById('score-reveal-overlay').style.display = 'block';
+}
+
+function unlockDashboard() {
+  var name = document.getElementById('gate-name').value.trim();
+  var email = document.getElementById('gate-email').value.trim();
+  var phone = document.getElementById('gate-phone').value.trim();
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    toast('\u05d4\u05d6\u05d9\u05e0\u05d5 \u05db\u05ea\u05d5\u05d1\u05ea \u05d0\u05d9\u05de\u05d9\u05d9\u05dc \u05ea\u05e7\u05d9\u05e0\u05d4');
+    return;
+  }
+  if (!name) {
+    toast('\u05d4\u05d6\u05d9\u05e0\u05d5 \u05d0\u05ea \u05e9\u05de\u05db\u05dd');
+    return;
+  }
+
+  // Mark as unlocked
+  isUnlocked = true;
+  localStorage.setItem('seo-tool-unlocked', 'true');
+
+  // Close overlay with animation
+  var overlay = document.getElementById('score-reveal-overlay');
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity 0.3s';
+  setTimeout(function() { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 300);
+
+  // Submit lead data in background
+  var p = getProject();
+  var projectScore = p ? scoreProject() : null;
+  var geoResult = p ? scoreProjectGeo() : null;
+
+  fetch(SEO_MAGNET_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      phone: phone,
+      website: p ? p.url : '',
+      business: p ? p.name : '',
+      seoScore: String(projectScore ? projectScore.score : ''),
+      geoScore: String(geoResult ? geoResult.score : ''),
+      pageCount: p ? String(p.pages.length) : '0',
+      page: 'autonomous-seo.vercel.app',
+      source: 'score-reveal-gate'
+    })
+  }).catch(function() {});
+
+  toast('\u05d4\u05d3\u05e9\u05d1\u05d5\u05e8\u05d3 \u05e0\u05e4\u05ea\u05d7! \ud83c\udf89', 'success');
+}
+
+function skipGate() {
+  isUnlocked = true;
+  // Don't persist — will ask again next session
+  var overlay = document.getElementById('score-reveal-overlay');
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity 0.3s';
+  setTimeout(function() { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 300);
+}
 
 function openLeadModal() {
   document.getElementById('lead-name').value = '';
