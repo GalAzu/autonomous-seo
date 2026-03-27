@@ -1695,6 +1695,26 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
 const STORAGE_KEY = 'autonomous-seo-projects';
 const CURRENT_KEY = 'autonomous-seo-current';
 
+// Obfuscate sensitive keys before storage, deobfuscate on load
+const KEY_FIELDS = ['openaiKey', 'psiApiKey'];
+function obfuscateKeys(data) {
+  const clone = JSON.parse(JSON.stringify(data));
+  Object.values(clone).forEach(p => {
+    KEY_FIELDS.forEach(f => { if (p[f]) p[f] = btoa(p[f]); });
+    if (p._keysObfuscated === undefined) p._keysObfuscated = true;
+  });
+  return clone;
+}
+function deobfuscateKeys(data) {
+  Object.values(data).forEach(p => {
+    if (p._keysObfuscated) {
+      KEY_FIELDS.forEach(f => { if (p[f]) try { p[f] = atob(p[f]); } catch(e) {} });
+      delete p._keysObfuscated;
+    }
+  });
+  return data;
+}
+
 let projects = {};
 try { projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); deobfuscateKeys(projects); }
 catch (e) { console.error('Corrupt localStorage, resetting:', e); projects = {}; localStorage.removeItem(STORAGE_KEY); }
@@ -1735,26 +1755,6 @@ function safeClipboard(text) {
 
 function getProject() {
   return projects[currentProjectId] || null;
-}
-
-// Obfuscate sensitive keys before storage, deobfuscate on load
-const KEY_FIELDS = ['openaiKey', 'psiApiKey'];
-function obfuscateKeys(data) {
-  const clone = JSON.parse(JSON.stringify(data));
-  Object.values(clone).forEach(p => {
-    KEY_FIELDS.forEach(f => { if (p[f]) p[f] = btoa(p[f]); });
-    if (p._keysObfuscated === undefined) p._keysObfuscated = true;
-  });
-  return clone;
-}
-function deobfuscateKeys(data) {
-  Object.values(data).forEach(p => {
-    if (p._keysObfuscated) {
-      KEY_FIELDS.forEach(f => { if (p[f]) try { p[f] = atob(p[f]); } catch(e) {} });
-      delete p._keysObfuscated;
-    }
-  });
-  return data;
 }
 
 function saveProjects() {
