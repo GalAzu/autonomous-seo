@@ -5985,32 +5985,131 @@ function renderLinks() {
 function printReport() {
   const p = getProject();
   if (!p) return;
-  const { score } = scoreProject();
+  const { score, details, siteBreakdown } = scoreProject();
+  const { score: geoScore } = scoreProjectGeo();
   const domain = (p.url || '').replace('https://', '').replace('http://', '');
+  const date = new Date().toLocaleDateString('he-IL');
+  const scoreColor = score >= 80 ? '#22c55e' : score >= 50 ? '#eab308' : '#ef4444';
+  const geoColor = geoScore >= 80 ? '#22c55e' : geoScore >= 50 ? '#eab308' : '#ef4444';
 
-  // Fill print header
-  document.getElementById('print-header').innerHTML = `
-    <h1 style="font-family:var(--font-heading);">דוח SEO — ${escapeHtml(p.name)}</h1>
-    <p>${escapeHtml(domain)} | ${new Date().toLocaleDateString('he-IL')} | ציון: ${score}/100</p>
-  `;
-
-  // Fill print pages summary
-  let tableHtml = '<h3 style="font-family:var(--font-heading);font-size:16px;margin:16px 0 8px;">סיכום עמודים</h3>';
-  tableHtml += '<table><thead><tr><th>עמוד</th><th>נתיב</th><th>כותרת</th><th>תיאור</th><th>ציון</th></tr></thead><tbody>';
+  // Build pages detail
+  let pagesRows = '';
+  const issues = [];
   p.pages.forEach(pg => {
-    const ps = scorePage(pg).score;
-    tableHtml += `<tr>
-      <td>${escapeHtml(pg.name)}</td>
-      <td style="direction:ltr;">${escapeHtml(pg.path)}</td>
-      <td>${(pg.title || '').length} תווים</td>
-      <td>${(pg.description || '').length} תווים</td>
-      <td>${ps}%</td>
+    const ps = scorePage(pg);
+    const gs = scorePageGeo(pg, p);
+    const psColor = ps.score >= 80 ? '#22c55e' : ps.score >= 50 ? '#eab308' : '#ef4444';
+    const tl = (pg.title || '').length;
+    const dl = (pg.description || '').length;
+    const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
+    const kws = (pg.keywords || []);
+
+    // Collect issues
+    if (tl === 0) issues.push(`${pg.name}: חסרה כותרת`);
+    else if (tl < 30 || tl > 60) issues.push(`${pg.name}: כותרת לא אופטימלית (${tl} תווים)`);
+    if (dl === 0) issues.push(`${pg.name}: חסר תיאור מטא`);
+    if (h1s.length !== 1) issues.push(`${pg.name}: ${h1s.length === 0 ? 'חסר H1' : h1s.length + ' כותרות H1'}`);
+    if (kws.length === 0) issues.push(`${pg.name}: אין מילות מפתח`);
+
+    pagesRows += `<tr>
+      <td style="font-weight:600;">${escapeHtml(pg.name)}</td>
+      <td style="direction:ltr;font-family:monospace;font-size:10px;">${escapeHtml(pg.path)}</td>
+      <td style="text-align:center;">${tl > 0 ? tl : '<span style="color:#ef4444">✗</span>'}</td>
+      <td style="text-align:center;">${dl > 0 ? dl : '<span style="color:#ef4444">✗</span>'}</td>
+      <td style="text-align:center;">${kws.length}</td>
+      <td style="text-align:center;">${(pg.schema || []).length}</td>
+      <td style="text-align:center;font-weight:700;color:${psColor};">${ps.score}%</td>
+      <td style="text-align:center;color:${gs.score >= 50 ? '#22c55e' : '#eab308'};">${gs.score}%</td>
     </tr>`;
   });
-  tableHtml += '</tbody></table>';
-  document.getElementById('print-pages-summary').innerHTML = tableHtml;
 
-  window.print();
+  // Open a new window with the PDF-ready report
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>דוח SEO — ${escapeHtml(p.name)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Assistant', sans-serif; color: #1a1a2e; padding: 32px; line-height: 1.6; direction: rtl; }
+  h1, h2, h3 { font-family: 'Rubik', sans-serif; }
+  .container { max-width: 780px; margin: 0 auto; }
+  .header { text-align: center; border-bottom: 3px solid #2f55c7; padding-bottom: 24px; margin-bottom: 28px; }
+  .header h1 { font-size: 26px; color: #2f55c7; margin-bottom: 4px; }
+  .header p { font-size: 13px; color: #666; }
+  .score-ring { width: 90px; height: 90px; border-radius: 50%; margin: 16px auto 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; font-family: 'Rubik'; position: relative; }
+  .score-ring .inner { position: absolute; inset: 4px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+  .stat-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card .val { font-size: 24px; font-weight: 800; font-family: 'Rubik'; }
+  .stat-card .lbl { font-size: 11px; color: #666; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 24px; }
+  th { background: #f0f4ff; color: #2f55c7; font-weight: 700; padding: 8px 6px; text-align: right; border-bottom: 2px solid #2f55c7; }
+  td { padding: 7px 6px; border-bottom: 1px solid #e5e7eb; }
+  tr:nth-child(even) { background: #f9fafb; }
+  .section-title { font-size: 16px; color: #2f55c7; margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+  .issue { padding: 4px 0; font-size: 12px; color: #b45309; }
+  .issue::before { content: "⚠ "; }
+  .footer { text-align: center; margin-top: 32px; padding-top: 16px; border-top: 2px solid #2f55c7; font-size: 11px; color: #999; }
+  .footer a { color: #2f55c7; text-decoration: none; font-weight: 600; }
+  .cta-box { text-align: center; margin-top: 24px; padding: 24px; background: linear-gradient(135deg, #f0f4ff, #e8fafb); border: 1px solid #d0d8f0; border-radius: 12px; }
+  @media print {
+    body { padding: 16px; }
+    .cta-box { break-inside: avoid; }
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>דוח SEO — ${escapeHtml(p.name)}</h1>
+    <p>${escapeHtml(domain)} | ${date} | Autonomous SEO Tool</p>
+    <div style="display:flex;justify-content:center;gap:24px;margin-top:16px;">
+      <div>
+        <div class="score-ring" style="background:conic-gradient(${scoreColor} ${score * 3.6}deg, #e5e7eb 0);"><div class="inner">${score}</div></div>
+        <div style="font-size:12px;color:#666;">SEO</div>
+      </div>
+      <div>
+        <div class="score-ring" style="background:conic-gradient(${geoColor} ${geoScore * 3.6}deg, #e5e7eb 0);"><div class="inner">${geoScore}</div></div>
+        <div style="font-size:12px;color:#666;">GEO / AI</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="val" style="color:#2f55c7;">${p.pages.length}</div><div class="lbl">עמודים</div></div>
+    <div class="stat-card"><div class="val" style="color:${details.titles === p.pages.length ? '#22c55e' : '#eab308'};">${details.titles}/${p.pages.length}</div><div class="lbl">כותרות תקינות</div></div>
+    <div class="stat-card"><div class="val" style="color:${details.descriptions === p.pages.length ? '#22c55e' : '#eab308'};">${details.descriptions}/${p.pages.length}</div><div class="lbl">תיאורים תקינים</div></div>
+    <div class="stat-card"><div class="val" style="color:${(p.schemas||[]).length > 0 ? '#22c55e' : '#eab308'};">${(p.schemas||[]).length}</div><div class="lbl">סוגי Schema</div></div>
+  </div>
+
+  <h2 class="section-title">📊 סיכום עמודים</h2>
+  <table>
+    <thead><tr><th>עמוד</th><th>נתיב</th><th>כותרת</th><th>תיאור</th><th>מ״מ</th><th>סכמות</th><th>SEO</th><th>GEO</th></tr></thead>
+    <tbody>${pagesRows}</tbody>
+  </table>
+
+  ${issues.length > 0 ? `<h2 class="section-title">⚠ בעיות שדורשות טיפול (${issues.length})</h2><div style="margin-bottom:24px;">${issues.map(i => `<div class="issue">${escapeHtml(i)}</div>`).join('')}</div>` : '<h2 class="section-title" style="color:#22c55e;">✓ לא נמצאו בעיות קריטיות</h2>'}
+
+  <div class="cta-box">
+    <strong style="font-size:17px;">צריכים עזרה ביישום?</strong>
+    <p style="color:#666;margin:6px 0 14px;">שיחת ייעוץ חינמית עם מומחה SEO מ-Autonomous</p>
+    <a href="https://autonomous.co.il/contact" style="display:inline-block;background:linear-gradient(135deg,#2f55c7,#1aa2b0);color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;">קבעו שיחה →</a>
+  </div>
+
+  <div class="footer">
+    Powered by <a href="https://autonomous.co.il">Autonomous</a> — Building Systems, Creating Habits
+  </div>
+</div>
+</body>
+</html>`);
+  printWindow.document.close();
+  // Wait for fonts to load then trigger print
+  setTimeout(() => { printWindow.print(); }, 800);
 }
 
 // ═══════════════════════════════════════════════════
