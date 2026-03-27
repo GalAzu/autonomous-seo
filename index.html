@@ -712,7 +712,9 @@
         <h2 class="section-title">דשבורד SEO</h2>
         <p class="section-desc" id="dashboard-subtitle">בריאות ה-SEO הכוללת</p>
       </div>
+      <div id="scan-lead-banner" style="display:none;"></div>
       <div class="grid-4" id="dashboard-stats" style="margin-bottom:24px;"></div>
+      <div id="score-history-trend" style="display:none;"></div>
       <div class="grid-3" id="dashboard-health" style="margin-bottom:24px;"></div>
       <div class="card" id="dashboard-priorities">
         <div class="card-header">
@@ -2089,8 +2091,12 @@ async function _doScan(rawUrl, name) {
   // 1. Fetch homepage
   const homeHtml = await fetchWithProxy(baseUrl);
   if (!homeHtml) {
-    scanLog('\u2717 Failed to fetch homepage. CORS may be blocking.', 'err');
-    scanLog('Tip: Make sure the URL is correct and the site is live.', 'warn');
+    scanLog('\u2717 לא ניתן לסרוק את האתר', 'err');
+    scanLog('  סיבות אפשריות:', 'warn');
+    scanLog('  • האתר חוסם גישה חיצונית (CORS / Firewall)', 'warn');
+    scanLog('  • כתובת URL שגויה או האתר לא זמין', 'warn');
+    scanLog('  • האתר דורש JavaScript לטעינה (SPA/React/Angular)', 'warn');
+    scanLog('  • שרת ה-proxy אינו זמין כרגע', 'warn');
     document.getElementById('scan-running').style.display = 'none';
     document.getElementById('scan-idle').style.display = 'block';
     toast('לא ניתן להתחבר לאתר — בדקו שהכתובת תקינה');
@@ -2120,7 +2126,7 @@ async function _doScan(rawUrl, name) {
   document.getElementById('scan-status').textContent = '\u05E1\u05D5\u05E8\u05E7 \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD \u05E4\u05E0\u05D9\u05DE\u05D9\u05D9\u05DD...';
 
   // 2. Crawl discovered pages (up to 20)
-  const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, ogImage: homeData.ogImage || '', headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.extractedKeywords || [], images: homeData.images || [], outgoingLinks: homeData.links.length, linkPaths: homeData.links.map(l => normalizePath(l)), noindex: homeData.noindex || false, geoSignals: homeData.geoSignals || null, techSignals: homeData.techSignals || null }];
+  const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, ogImage: homeData.ogImage || '', headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.extractedKeywords || [], images: homeData.images || [], outgoingLinks: homeData.links.length, linkPaths: homeData.links.map(l => normalizePath(l)), noindex: homeData.noindex || false, geoSignals: homeData.geoSignals || null, techSignals: homeData.techSignals || null, scanStatus: 'success' }];
   const visited = new Set(['/']);
   const toVisit = homeData.links
     .map(l => normalizePath(l))
@@ -2138,7 +2144,26 @@ async function _doScan(rawUrl, name) {
 
     const html = await fetchWithProxy(baseUrl + path);
     if (!html) {
-      scanLog(`  \u26A0 Could not fetch ${path}`, 'warn');
+      scanLog(`  \u2717 ${path} — לא ניתן לסרוק (CORS/timeout)`, 'warn');
+      discoveredPages.push({
+        path,
+        title: '',
+        description: '',
+        canonical: '',
+        ogTitle: '',
+        ogDesc: '',
+        ogImage: '',
+        headings: [],
+        schemas: [],
+        keywords: [],
+        images: [],
+        outgoingLinks: 0,
+        linkPaths: [],
+        noindex: false,
+        geoSignals: null,
+        techSignals: null,
+        scanStatus: 'failed'
+      });
       continue;
     }
 
@@ -2162,7 +2187,8 @@ async function _doScan(rawUrl, name) {
       linkPaths: data.links.map(l => normalizePath(l)),
       noindex: data.noindex || false,
       geoSignals: data.geoSignals || null,
-      techSignals: data.techSignals || null
+      techSignals: data.techSignals || null,
+      scanStatus: 'success'
     });
 
     // Discover deeper pages
@@ -2368,7 +2394,8 @@ function finishSetup() {
       order: i,
       geo: p.geoSignals || { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' },
       techSignals: p.techSignals || null,
-      wordCount: p.wordCount || (p.techSignals ? p.techSignals.wordCount : 0)
+      wordCount: p.wordCount || (p.techSignals ? p.techSignals.wordCount : 0),
+      scanSuccess: p.scanStatus === 'success'
     }));
     // Calculate incoming links from the link graph
     const pathSet = new Set(pages.map(pg => pg.path));
@@ -2410,7 +2437,8 @@ function finishSetup() {
       outgoingLinks: 0,
       incomingLinks: 0,
       order: i,
-      geo: { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }
+      geo: { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' },
+      scanSuccess: false
     }));
     sitemap = pages.map(p => ({
       url: p.path,
@@ -2450,9 +2478,41 @@ function finishSetup() {
   currentProjectId = projectId;
   saveProjects();
   setupPages = [];
+  const wasScanned = scannedData !== null;
   scannedData = null;
   setupMode = null;
   enterApp();
+
+  // Show lead capture for scanned projects with improvement potential
+  if (wasScanned) {
+    const { score } = scoreProject();
+    if (score < 75) {
+      setTimeout(() => {
+        const leadBanner = document.getElementById('scan-lead-banner');
+        if (leadBanner) {
+          leadBanner.style.display = 'block';
+          leadBanner.innerHTML = `
+            <div style="background:linear-gradient(135deg, var(--primary-glow), var(--accent-glow));border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;text-align:center;">
+              <div style="font-size:15px;font-weight:700;margin-bottom:6px;">\u05d4\u05d0\u05ea\u05e8 \u05e9\u05dc\u05db\u05dd \u05e7\u05d9\u05d1\u05dc \u05e6\u05d9\u05d5\u05df ${score}/100</div>
+              <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">\u05d9\u05e9 \u05de\u05e7\u05d5\u05dd \u05dc\u05e9\u05d9\u05e4\u05d5\u05e8 \u05de\u05e9\u05de\u05e2\u05d5\u05ea\u05d9. \u05e8\u05d5\u05e6\u05d9\u05dd \u05ea\u05d5\u05db\u05e0\u05d9\u05ea \u05d9\u05d9\u05e9\u05d5\u05dd \u05de\u05d5\u05ea\u05d0\u05de\u05ea \u05d0\u05d9\u05e9\u05d9\u05ea?</p>
+              <button class="btn btn-primary" onclick="openLeadModal();this.parentElement.parentElement.style.display='none';">&#x1f4e9; \u05e7\u05d1\u05dc\u05d5 \u05e0\u05d9\u05ea\u05d5\u05d7 + \u05ea\u05d5\u05db\u05e0\u05d9\u05ea \u05d9\u05d9\u05e9\u05d5\u05dd \u05d1\u05d7\u05d9\u05e0\u05dd</button>
+              <button class="btn btn-ghost btn-sm" onclick="this.parentElement.parentElement.style.display='none';" style="margin-top:8px;display:block;margin:8px auto 0;">\u05d0\u05d5\u05dc\u05d9 \u05d0\u05d7\u05e8 \u05db\u05da</button>
+            </div>
+          `;
+        }
+      }, 500);
+    }
+  }
+
+  // Initial score snapshot
+  const pInit = getProject();
+  if (pInit) {
+    if (!pInit.scoreHistory) pInit.scoreHistory = [];
+    const { score: s1 } = scoreProject();
+    const { score: s2 } = scoreProjectGeo();
+    pInit.scoreHistory.push({ date: new Date().toISOString().split('T')[0], seoScore: s1, geoScore: s2, pageCount: pInit.pages.length });
+    saveProjects();
+  }
 }
 
 function startNewProject() {
@@ -2490,6 +2550,7 @@ function migrateProjectData() {
     if (!p.gscHistory) { p.gscHistory = []; changed = true; }
     if (!p.hreflang) { p.hreflang = { languages: [], mappings: [] }; changed = true; }
     if (!p.redirects) { p.redirects = []; changed = true; }
+    if (!p.scoreHistory) { p.scoreHistory = []; changed = true; }
     if (!p.sitemap) { p.sitemap = []; changed = true; }
     if (!p.schemas) { p.schemas = []; changed = true; }
     if (!p.checklist) { p.checklist = {}; changed = true; }
@@ -2638,7 +2699,9 @@ function scorePage(pg) {
   const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
   const h2s = (pg.headings || []).filter(h => h.startsWith('H2'));
   const h1Text = h1s.length > 0 ? h1s[0].replace(/^H1:\s*/, '').toLowerCase() : '';
-  const contentWords = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+  const manualWords = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+  const scannedWords = (pg.techSignals && pg.techSignals.wordCount) ? pg.techSignals.wordCount : 0;
+  const contentWords = Math.max(manualWords, scannedWords);
 
   // ── Content & Keyword Optimization (40 pts) ──────
   // Title (15 pts): length + keyword presence
@@ -2775,8 +2838,9 @@ function scoreProject() {
     if (pg.ogTitle || pg.ogDesc || pg.ogImage) details.social++;
     const imgs = pg.images || [];
     if (imgs.length === 0 || imgs.every(img => img.alt && img.alt.length > 0)) details.images++;
-    const words = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
-    if (words >= 300) details.contentDepth++;
+    const manualW = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+    const scannedW = (pg.techSignals && pg.techSignals.wordCount) ? pg.techSignals.wordCount : 0;
+    if (Math.max(manualW, scannedW) >= 300) details.contentDepth++;
     if ((pg.outgoingLinks || 0) > 0 && (pg.incomingLinks || 0) > 0) details.linking++;
   });
 
@@ -2838,7 +2902,11 @@ function scoreProject() {
   siteBreakdown.indexHealth = { score: noindexPts, max: 3 };
 
   // Content depth (3 pts)
-  const deepPages = p.pages.filter(pg => (pg.content || '').split(/\s+/).filter(w => w.length > 0).length >= 300).length;
+  const deepPages = p.pages.filter(pg => {
+    const mw = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+    const sw = (pg.techSignals && pg.techSignals.wordCount) ? pg.techSignals.wordCount : 0;
+    return Math.max(mw, sw) >= 300;
+  }).length;
   const contentPts = p.pages.length > 0 ? Math.round((deepPages / p.pages.length) * 3) : 0;
   siteScore += contentPts;
   siteBreakdown.contentDepth = { score: contentPts, max: 3 };
@@ -2879,7 +2947,9 @@ function scorePageGeo(pg, project) {
   const geo = pg.geo || {};
   const headings = pg.headings || [];
   const h2s = headings.filter(h => h.startsWith('H2'));
-  const contentWords = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+  const manualWords = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+  const scannedWords = (pg.techSignals && pg.techSignals.wordCount) ? pg.techSignals.wordCount : 0;
+  const contentWords = Math.max(manualWords, scannedWords);
 
   // E-E-A-T Signals (30 pts)
   let eeatPts = 0;
@@ -3294,6 +3364,57 @@ function renderDashboard() {
     </div>
   `;
 
+  // Data confidence indicator
+  const pagesWithTitle = p.pages.filter(pg => pg.title).length;
+  const pagesWithContent = p.pages.filter(pg => {
+    const manual = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+    const scanned = (pg.techSignals && pg.techSignals.wordCount) ? pg.techSignals.wordCount : 0;
+    return Math.max(manual, scanned) > 50;
+  }).length;
+  const pagesWithHeadings = p.pages.filter(pg => (pg.headings || []).length > 0).length;
+  const dataPoints = pagesWithTitle + pagesWithContent + pagesWithHeadings;
+  const maxDataPoints = p.pages.length * 3;
+  const confidence = maxDataPoints > 0 ? Math.round((dataPoints / maxDataPoints) * 100) : 0;
+
+  let confidenceBadge = '';
+  if (confidence >= 80) {
+    confidenceBadge = `<div style="margin-top:16px;padding:10px 16px;background:var(--green-bg);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius-sm);font-size:13px;color:var(--green);text-align:center;">&#x1f4ca; דיוק נתונים: גבוה (${confidence}%)</div>`;
+  } else if (confidence >= 50) {
+    confidenceBadge = `<div style="margin-top:16px;padding:10px 16px;background:var(--yellow-bg);border:1px solid rgba(234,179,8,0.2);border-radius:var(--radius-sm);font-size:13px;color:var(--yellow);text-align:center;">&#x1f4ca; דיוק נתונים: בינוני (${confidence}%) — חלק מהעמודים לא נסרקו במלואם</div>`;
+  } else {
+    confidenceBadge = `<div style="margin-top:16px;padding:10px 16px;background:var(--red-bg);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-sm);font-size:13px;color:var(--red);text-align:center;">&#x1f4ca; דיוק נתונים: נמוך (${confidence}%) — הרבה נתונים חסרים. נסו סריקה מחדש או הזינו תוכן ידנית</div>`;
+  }
+  document.getElementById('dashboard-stats').innerHTML += confidenceBadge;
+
+  // Score history trend
+  const history = p.scoreHistory || [];
+  if (history.length >= 2) {
+    const latest = history[history.length - 1];
+    const previous = history[history.length - 2];
+    const seoDelta = latest.seoScore - previous.seoScore;
+    const geoDelta = latest.geoScore - previous.geoScore;
+    const deltaColor = (d) => d > 0 ? 'var(--green)' : d < 0 ? 'var(--red)' : 'var(--text-dim)';
+    const deltaArrow = (d) => d > 0 ? '\u2191' : d < 0 ? '\u2193' : '\u2192';
+    const historyEl = document.getElementById('score-history-trend');
+    if (historyEl) {
+      historyEl.style.display = 'block';
+      historyEl.innerHTML = `
+        <div class="card" style="padding:12px 16px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;font-weight:600;">\ud83d\udcc8 \u05de\u05d2\u05de\u05d4 \u05de\u05e1\u05e8\u05d9\u05e7\u05d4 \u05d0\u05d7\u05e8\u05d5\u05e0\u05d4 (${previous.date})</span>
+            <div style="display:flex;gap:16px;">
+              <span style="font-size:13px;">SEO: <strong style="color:${deltaColor(seoDelta)}">${deltaArrow(seoDelta)} ${seoDelta > 0 ? '+' : ''}${seoDelta}</strong></span>
+              <span style="font-size:13px;">GEO: <strong style="color:${deltaColor(geoDelta)}">${deltaArrow(geoDelta)} ${geoDelta > 0 ? '+' : ''}${geoDelta}</strong></span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    const historyEl = document.getElementById('score-history-trend');
+    if (historyEl) historyEl.style.display = 'none';
+  }
+
   const items = [
     { label: 'כותרות', count: details.titles, icon: '\u2713', color: details.titles === p.pages.length ? 'green' : 'yellow' },
     { label: 'תיאורים', count: details.descriptions, icon: '\u2713', color: details.descriptions === p.pages.length ? 'green' : 'yellow' },
@@ -3324,13 +3445,14 @@ function renderDashboard() {
   const priorities = [];
 
   // Critical: missing content
-  if (details.titles < p.pages.length) priorities.push({ severity: 3, icon: 'missing', text: `${p.pages.length - details.titles} עמודים חסרי כותרת אופטימלית`, sub: 'כותרת (30-60 תווים) עם מילת מפתח — גורם הדירוג החשוב ביותר' });
-  if (details.descriptions < p.pages.length) priorities.push({ severity: 3, icon: 'missing', text: `${p.pages.length - details.descriptions} עמודים חסרי תיאור מטא`, sub: 'תיאור (100-160 תווים) עם מילת מפתח — משפיע על CTR בתוצאות' });
+  if (details.titles < p.pages.length) priorities.push({ severity: 3, icon: 'missing', text: `${p.pages.length - details.titles} עמודים חסרי כותרת אופטימלית`, sub: 'כותרת (30-60 תווים) עם מילת מפתח — גורם הדירוג החשוב ביותר', fix: '<title>שם העמוד | שם העסק</title>' });
+  if (details.descriptions < p.pages.length) priorities.push({ severity: 3, icon: 'missing', text: `${p.pages.length - details.descriptions} עמודים חסרי תיאור מטא`, sub: 'תיאור (100-160 תווים) עם מילת מפתח — משפיע על CTR בתוצאות', fix: '<meta name="description" content="תיאור העמוד כאן — 100-160 תווים">' });
+  if (details.canonicals < p.pages.length) priorities.push({ severity: 2, icon: 'missing', text: `${p.pages.length - details.canonicals} עמודים חסרי canonical`, sub: 'תגית canonical מונעת תוכן כפול ומכוונת את גוגל לגרסה הנכונה', fix: '<link rel="canonical" href="https://example.com/page-url/">' });
 
   // High: structure issues
   p.pages.forEach(pg => {
     const h1s = (pg.headings || []).filter(h => h.startsWith('H1'));
-    if (h1s.length === 0) priorities.push({ severity: 3, icon: 'missing', text: `"${pg.name}" — חסר H1`, sub: 'כל עמוד חייב כותרת H1 אחת עם מילת המפתח הראשית' });
+    if (h1s.length === 0) priorities.push({ severity: 3, icon: 'missing', text: `"${pg.name}" — חסר H1`, sub: 'כל עמוד חייב כותרת H1 אחת עם מילת המפתח הראשית', fix: '<h1>הכותרת הראשית של העמוד</h1>' });
     if (h1s.length > 1) priorities.push({ severity: 2, icon: 'todo', text: `"${pg.name}" — ${h1s.length} כותרות H1`, sub: 'השאירו H1 אחד בלבד, השאר צריכים להיות H2' });
   });
 
@@ -3351,7 +3473,12 @@ function renderDashboard() {
   if (orphanPages.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${orphanPages.length} עמודים "יתומים" ללא קישורים נכנסים`, sub: 'קשרו כל עמוד מעמודים אחרים — קריטי לסריקה ולחלוקת Authority' });
 
   // Content depth
-  const thinPages = p.pages.filter(pg => (pg.content || '').split(/\s+/).filter(w => w.length > 0).length < 300 && (pg.content || '').length > 0);
+  const thinPages = p.pages.filter(pg => {
+    const mw = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+    const sw = (pg.techSignals && pg.techSignals.wordCount) ? pg.techSignals.wordCount : 0;
+    const wc = Math.max(mw, sw);
+    return wc < 300 && wc > 0;
+  });
   if (thinPages.length > 0) priorities.push({ severity: 1, icon: 'todo', text: `${thinPages.length} עמודים עם תוכן דליל (<300 מילים)`, sub: 'תוכן מקיף דורג גבוה יותר — הרחיבו עמודים מרכזיים' });
 
   // Image alt
@@ -3389,7 +3516,7 @@ function renderDashboard() {
   // Technical health from scan (techSignals)
   if (techPages.length > 0) {
     const noViewport = techPages.filter(pg => !pg.techSignals.viewportValid);
-    if (noViewport.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${noViewport.length} עמודים ללא viewport תקין`, sub: 'נדרש לאינדוקס Mobile-First — הוסיפו meta viewport' });
+    if (noViewport.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${noViewport.length} עמודים ללא viewport תקין`, sub: 'נדרש לאינדוקס Mobile-First — הוסיפו meta viewport', fix: '<meta name="viewport" content="width=device-width, initial-scale=1.0">' });
     const mixedContent = techPages.filter(pg => pg.techSignals.mixedContentCount > 0);
     if (mixedContent.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${mixedContent.length} עמודים עם תוכן מעורב (HTTP על HTTPS)`, sub: 'משאבים לא מאובטחים — עדכנו קישורים ל-HTTPS' });
     const renderBlocking = techPages.filter(pg => pg.techSignals.renderBlockingScripts > 2);
@@ -3414,7 +3541,7 @@ function renderDashboard() {
   document.getElementById('priority-list').innerHTML = priorities.map(pr => `
     <div class="checklist-item">
       <div class="check-icon ${pr.icon}">${pr.icon === 'done' ? '\u2713' : pr.icon === 'todo' ? '~' : '!'}</div>
-      <div class="checklist-text"><div><strong>${pr.text}</strong></div><div class="sub">${pr.sub}</div></div>
+      <div class="checklist-text"><div><strong>${pr.text}</strong></div><div class="sub">${pr.sub}</div>${pr.fix ? `<button class="btn btn-sm btn-accent" onclick="safeClipboard('${escapeAttrJs(pr.fix)}');toast('\u05d4\u05e7\u05d5\u05d3 \u05d4\u05d5\u05e2\u05ea\u05e7','success');" style="margin-top:6px;font-size:11px;">&#x1f4cb; \u05d4\u05e2\u05ea\u05e7 \u05ea\u05d9\u05e7\u05d5\u05df</button>` : ''}</div>
     </div>
   `).join('');
 
@@ -3459,6 +3586,10 @@ function renderPagesTable() {
     const psResult = scorePage(pg);
     const ps = psResult.score;
     const psColor = ps >= 80 ? 'green' : ps >= 50 ? 'yellow' : 'red';
+    const pgManualWords = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
+    const pgScannedWords = (pg.techSignals && pg.techSignals.wordCount) ? pg.techSignals.wordCount : 0;
+    const hasNoContent = pgManualWords === 0 && pgScannedWords === 0;
+    const partialIndicator = hasNoContent ? ' <span title="ציון חלקי — תוכן העמוד לא נסרק" style="cursor:help;">&#x26A0;</span>' : '';
     return `<tr class="page-row" ondblclick="editPage('${pg.id}')">
       <td><strong>${escapeHtml(pg.name)}</strong><br><span style="font-size:11px;color:var(--text-dim);direction:ltr;display:inline-block;">${escapeHtml(pg.path)}</span></td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(pg.title)}">${pg.title ? escapeHtml(pg.title) : '<span style="color:var(--text-muted)">לא הוגדר</span>'}</td>
@@ -3466,7 +3597,7 @@ function renderPagesTable() {
       <td style="font-family:monospace;font-size:11px;direction:ltr;">${escapeHtml(pg.canonical) || '-'}</td>
       <td>${sb}</td>
       <td>${indexBadge}</td>
-      <td><span class="badge ${psColor}">${ps}%</span></td>
+      <td><span class="badge ${psColor}">${ps}%${partialIndicator}</span></td>
       <td style="white-space:nowrap;">
         <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">&#x270f;</button>
         ${p.psiApiKey ? `<button class="btn btn-sm btn-ghost" onclick="testPageSpeed('${pg.id}')" id="psi-btn-${pg.id}" title="Core Web Vitals">&#x26a1;</button>` : ''}
@@ -5035,7 +5166,10 @@ async function rescanProject() {
   try {
     statusText.textContent = 'מתחבר לאתר...';
     const homeHtml = await fetchWithProxy(p.url);
-    if (!homeHtml) { toast('לא ניתן להתחבר לאתר'); return; }
+    if (!homeHtml) {
+      toast('לא ניתן לסרוק את האתר — ייתכן שהאתר חוסם גישה חיצונית, דורש JavaScript, או שה-proxy אינו זמין');
+      return;
+    }
 
     const homeData = extractFromHTML(homeHtml, p.url);
     const scannedPages = [{ path: '/', ...homeData, links: homeData.links.map(l => normalizePath(l)) }];
@@ -5051,7 +5185,12 @@ async function rescanProject() {
       visited.add(path);
       statusText.textContent = `סורק ${i + 1}/${toVisit.length}... ${path}`;
       const html = await fetchWithProxy(p.url + path);
-      if (!html) continue;
+      if (!html) {
+        // Mark existing page as failed scan if it exists
+        const existingPg = p.pages.find(pg => pg.path === path);
+        if (existingPg) existingPg.scanSuccess = false;
+        continue;
+      }
       const data = extractFromHTML(html, p.url);
       scannedPages.push({ path, ...data, links: data.links.map(l => normalizePath(l)) });
       data.links.forEach(l => {
@@ -5102,6 +5241,9 @@ async function rescanProject() {
           scannedTypes.forEach(t => existingTypes.add(t));
           existing.schema = [...existingTypes];
         }
+        // Update techSignals and scanSuccess from rescan
+        if (sp.techSignals) existing.techSignals = sp.techSignals;
+        existing.scanSuccess = true;
         // Update GEO signals from rescan (merge, don't overwrite manual edits)
         if (sp.geoSignals) {
           if (!existing.geo) existing.geo = {};
@@ -5134,7 +5276,9 @@ async function rescanProject() {
           incomingLinks: incomingCounts[sp.path] || 0,
           order: p.pages.length,
           geo: sp.geoSignals || { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' },
-          keywordData: (sp.extractedKeywords || []).map(kw => ({ keyword: kw, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' }))
+          keywordData: (sp.extractedKeywords || []).map(kw => ({ keyword: kw, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' })),
+          techSignals: sp.techSignals || null,
+          scanSuccess: true
         });
         newPages++;
       }
@@ -5169,6 +5313,15 @@ async function rescanProject() {
     if (robotsTxt && robotsTxt.includes('User-agent')) p.robots = robotsTxt;
 
     saveProjects();
+
+    // Save score snapshot for history tracking
+    if (!p.scoreHistory) p.scoreHistory = [];
+    const { score: seoScore } = scoreProject();
+    const { score: geoScore } = scoreProjectGeo();
+    p.scoreHistory.push({ date: new Date().toISOString().split('T')[0], seoScore, geoScore, pageCount: p.pages.length });
+    if (p.scoreHistory.length > 12) p.scoreHistory = p.scoreHistory.slice(-12);
+    saveProjects();
+
     renderAll();
     toast(`סריקה הושלמה: ${updatedPages} עודכנו, ${newPages} חדשים`, 'success');
 
