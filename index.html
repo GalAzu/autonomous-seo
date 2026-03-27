@@ -456,6 +456,20 @@
   .citation-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
   .citation-row input { flex: 1; font-size: 12px; padding: 6px 10px; }
 </style>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+// Pixel ID will be set from project settings or hardcoded
+var META_PIXEL_ID = '';
+if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
+</script>
 </head>
 <body>
 
@@ -831,12 +845,12 @@
                 <span class="badge primary" id="editor-file-path"></span>
               </div>
               <div class="field">
-                <label style="display:flex;justify-content:space-between;align-items:center;">כותרת העמוד <span style="color:var(--yellow)">(30-60 תווים)</span> <button class="btn btn-sm btn-accent" onclick="suggestTitle()" style="font-size:10px;padding:3px 8px;">&#x2728; הצע כותרת</button></label>
+                <label style="display:flex;justify-content:space-between;align-items:center;">כותרת העמוד <span style="color:var(--yellow)">(30-60 תווים)</span> <button class="btn btn-sm btn-accent" onclick="suggestTitle()" style="font-size:10px;padding:3px 8px;">&#x2728; הצע כותרת</button><span id="ai-title-btn-wrap" style="display:none;"><button class="btn btn-sm btn-accent" onclick="aiSuggestMeta('title')" id="ai-suggest-title-btn" style="font-size:10px;padding:3px 8px;">&#x2728; AI</button></span></label>
                 <input type="text" id="edit-title" oninput="updatePreview();autoSave();" />
                 <div class="char-count" id="title-count"></div>
               </div>
               <div class="field">
-                <label style="display:flex;justify-content:space-between;align-items:center;">תיאור מטא <span style="color:var(--yellow)">(100-160 תווים)</span> <button class="btn btn-sm btn-accent" onclick="suggestDescription()" style="font-size:10px;padding:3px 8px;">&#x2728; הצע תיאור</button></label>
+                <label style="display:flex;justify-content:space-between;align-items:center;">תיאור מטא <span style="color:var(--yellow)">(100-160 תווים)</span> <button class="btn btn-sm btn-accent" onclick="suggestDescription()" style="font-size:10px;padding:3px 8px;">&#x2728; הצע תיאור</button><span id="ai-desc-btn-wrap" style="display:none;"><button class="btn btn-sm btn-accent" onclick="aiSuggestMeta('description')" id="ai-suggest-desc-btn" style="font-size:10px;padding:3px 8px;">&#x2728; AI</button></span></label>
                 <textarea id="edit-description" rows="3" oninput="updatePreview();autoSave();"></textarea>
                 <div class="char-count" id="desc-count"></div>
               </div>
@@ -1520,6 +1534,14 @@
             <a href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank" class="btn btn-sm btn-ghost" style="white-space:nowrap;">&#x1f517; השגת מפתח</a>
           </div>
         </div>
+        <div class="field">
+          <label>OpenAI API Key <span style="font-weight:400;color:var(--text-dim);">(רשות — להמלצות AI לכותרות ותיאורים)</span></label>
+          <input type="password" id="settings-openai-key" placeholder="sk-..." style="direction:ltr;text-align:left;" onchange="updateProjectSettings()" />
+        </div>
+        <div class="field">
+          <label>Meta Pixel ID <span style="font-weight:400;color:var(--text-dim);">(רשות — למעקב המרות)</span></label>
+          <input type="text" id="settings-meta-pixel" placeholder="123456789012345" style="direction:ltr;text-align:left;" onchange="updateProjectSettings()" />
+        </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-primary" onclick="updateProjectSettings();toast('ההגדרות עודכנו','success');">שמירת הגדרות</button>
           <button class="btn btn-accent" id="rescan-btn" onclick="rescanProject()">&#x1f504; סריקה מחדש</button>
@@ -1770,10 +1792,9 @@ function continueFromMode() {
 
 // ── Site Scanner ──
 const CORS_PROXIES = [
+  url => `/api/proxy?url=${encodeURIComponent(url)}`,
   url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-  url => url // direct attempt last
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
 ];
 
 function scanLog(msg, type = '') {
@@ -2500,6 +2521,8 @@ function finishSetup() {
     competitors: [],
     keywordClusters: [],
     psiApiKey: '',
+    openaiKey: '',
+    metaPixelId: '',
     createdAt: new Date().toISOString()
   };
 
@@ -2525,6 +2548,8 @@ function finishSetup() {
     pInit.scoreHistory.push({ date: new Date().toISOString().split('T')[0], seoScore: s1, geoScore: s2, pageCount: pInit.pages.length });
     saveProjects();
   }
+
+  if (typeof fbq === 'function' && META_PIXEL_ID) fbq('track', 'ViewContent', { content_name: 'SEO Scan Complete', value: 0 });
 }
 
 function startNewProject() {
@@ -2568,6 +2593,8 @@ function migrateProjectData() {
     if (!p.checklist) { p.checklist = {}; changed = true; }
     if (!p.url) { p.url = ''; changed = true; }
     if (p.psiApiKey === undefined) { p.psiApiKey = ''; changed = true; }
+    if (p.metaPixelId === undefined) { p.metaPixelId = ''; changed = true; }
+    if (p.openaiKey === undefined) { p.openaiKey = ''; changed = true; }
     // Add missing page fields
     p.pages.forEach(pg => {
       if (!pg.geo) { pg.geo = { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }; changed = true; }
@@ -2590,6 +2617,11 @@ function migrateProjectData() {
 // APP INIT
 // ═══════════════════════════════════════════════════
 function enterApp() {
+  const proj = getProject();
+  if (proj && proj.metaPixelId) {
+    META_PIXEL_ID = proj.metaPixelId;
+    if (typeof fbq === 'function') { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
+  }
   document.getElementById('onboarding-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'flex';
   document.getElementById('mobile-menu-btn').removeAttribute('style');
@@ -3567,6 +3599,20 @@ function renderDashboard() {
     </div>
   `).join('');
 
+  // Booking CTA
+  const bookingHtml = `
+    <div class="card" style="background:linear-gradient(135deg, var(--primary-glow), var(--accent-glow));border:1px solid var(--primary);margin-top:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;">&#x1f4de; רוצים שניישם את השינויים?</div>
+          <p style="font-size:13px;color:var(--text-dim);margin-top:4px;">שיחת אסטרטגיה חינמית — 30 דקות, ללא התחייבות</p>
+        </div>
+        <a href="https://calendly.com/autonomous-il/seo-strategy" target="_blank" class="btn btn-primary" style="white-space:nowrap;">&#x1f4c5; קבעו שיחה</a>
+      </div>
+    </div>
+  `;
+  document.getElementById('dashboard-priorities').insertAdjacentHTML('afterend', bookingHtml);
+
   // Low score CTA
   const lowScoreCta = document.getElementById('low-score-cta');
   if (lowScoreCta) {
@@ -3798,6 +3844,12 @@ function loadPageEditor(pageId) {
   updatePreview();
   updatePageChecklist(page);
   renderPageHeadings(page);
+
+  // Show/hide AI suggest buttons based on OpenAI key
+  const aiTitleWrap = document.getElementById('ai-title-btn-wrap');
+  const aiDescWrap = document.getElementById('ai-desc-btn-wrap');
+  if (aiTitleWrap) aiTitleWrap.style.display = p.openaiKey ? 'inline' : 'none';
+  if (aiDescWrap) aiDescWrap.style.display = p.openaiKey ? 'inline' : 'none';
 }
 
 function updatePreview() {
@@ -5119,6 +5171,8 @@ function renderSettings() {
   document.getElementById('settings-business-type').value = p.businessType || 'LocalBusiness';
   document.getElementById('settings-ga').value = p.ga || '';
   document.getElementById('settings-psi-key').value = p.psiApiKey || '';
+  document.getElementById('settings-openai-key').value = p.openaiKey || '';
+  document.getElementById('settings-meta-pixel').value = p.metaPixelId || '';
 }
 
 function updateProjectSettings() {
@@ -5130,6 +5184,8 @@ function updateProjectSettings() {
   p.businessType = document.getElementById('settings-business-type').value;
   p.ga = document.getElementById('settings-ga').value.trim();
   p.psiApiKey = document.getElementById('settings-psi-key').value.trim();
+  p.openaiKey = document.getElementById('settings-openai-key').value.trim();
+  p.metaPixelId = document.getElementById('settings-meta-pixel').value.trim();
   saveProjects();
   populateProjectSelector();
 }
@@ -6184,6 +6240,69 @@ function suggestDescription() {
 }
 
 // ═══════════════════════════════════════════════════
+// AI-POWERED META SUGGESTIONS (OpenAI)
+// ═══════════════════════════════════════════════════
+async function aiSuggestMeta(field) {
+  const p = getProject();
+  if (!p || !p.openaiKey || !currentPage) { toast('הזינו OpenAI API Key בהגדרות'); return; }
+
+  const pg = currentPage;
+  const btn = document.getElementById(field === 'title' ? 'ai-suggest-title-btn' : 'ai-suggest-desc-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span>'; }
+
+  const context = [
+    pg.title ? `Current title: ${pg.title}` : '',
+    pg.description ? `Current description: ${pg.description}` : '',
+    `Page: ${pg.name} (${pg.path})`,
+    `Business: ${p.name} (${p.businessType})`,
+    `Keywords: ${(pg.keywords || []).join(', ')}`,
+    `Headings: ${(pg.headings || []).slice(0, 5).join(', ')}`,
+    `Language: ${p.lang === 'he' ? 'Hebrew' : p.lang === 'ar' ? 'Arabic' : 'English'}`
+  ].filter(Boolean).join('\n');
+
+  const prompt = field === 'title'
+    ? `Write an SEO-optimized page title (30-60 characters) for this page. Include the primary keyword naturally. Return ONLY the title text, nothing else.\n\n${context}`
+    : `Write an SEO-optimized meta description (120-155 characters) for this page. Include a call-to-action and the primary keyword. Return ONLY the description text, nothing else.\n\n${context}`;
+
+  try {
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      signal: makeAbortSignal(15000),
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + p.openaiKey },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 200,
+        temperature: 0.7
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'API error ' + resp.status);
+    }
+
+    const data = await resp.json();
+    const suggestion = (data.choices[0]?.message?.content || '').trim().replace(/^["']|["']$/g, '');
+
+    if (!suggestion) { toast('לא התקבלה הצעה'); return; }
+
+    const input = document.getElementById(field === 'title' ? 'edit-title' : 'edit-description');
+    if (input) {
+      input.value = suggestion;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      autoSave();
+      toast(`הצעת AI: "${suggestion.substring(0, 50)}${suggestion.length > 50 ? '...' : ''}"`, 'success');
+    }
+  } catch (e) {
+    console.error('AI suggest error:', e);
+    toast('שגיאת AI: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#x2728; AI'; }
+  }
+}
+
+// ═══════════════════════════════════════════════════
 // KEYWORD SUGGESTIONS FROM CONTENT
 // ═══════════════════════════════════════════════════
 function suggestKeywords() {
@@ -6504,6 +6623,8 @@ function unlockDashboard() {
     })
   }).catch(function() {});
 
+  if (typeof fbq === 'function' && META_PIXEL_ID) fbq('track', 'Lead', { content_name: 'SEO Audit Gate', value: projectScore ? projectScore.score : 0 });
+
   toast('\u05d4\u05d3\u05e9\u05d1\u05d5\u05e8\u05d3 \u05e0\u05e4\u05ea\u05d7! \ud83c\udf89', 'success');
 }
 
@@ -6677,6 +6798,7 @@ async function submitLead() {
       statusEl.style.color = 'var(--green)';
       statusEl.textContent = '\u2705 קיבלנו את המידע שלכם, צוות המומחים שלנו יחזור אליכם עם ניתוח והמלצות בהקדם.';
       btn.textContent = '\u2713 נשלח!';
+      if (typeof fbq === 'function' && META_PIXEL_ID) fbq('track', 'Lead', { content_name: 'SEO Audit Lead Modal', value: projectScore ? projectScore.score : 0 });
       setTimeout(() => closeModal('lead-modal'), 3000);
     } else {
       throw new Error('Server error');
