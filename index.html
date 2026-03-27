@@ -1535,8 +1535,11 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
           </div>
         </div>
         <div class="field">
-          <label>OpenAI API Key <span style="font-weight:400;color:var(--text-dim);">(רשות — להמלצות AI לכותרות ותיאורים)</span></label>
-          <input type="password" id="settings-openai-key" placeholder="sk-..." style="direction:ltr;text-align:left;" onchange="updateProjectSettings()" />
+          <label>Gemini API Key <span style="font-weight:400;color:var(--text-dim);">(חינם — להמלצות AI לכותרות ותיאורים)</span></label>
+          <div style="display:flex;gap:8px;">
+            <input type="password" id="settings-openai-key" placeholder="AIzaSy..." style="direction:ltr;text-align:left;flex:1;" onchange="updateProjectSettings()" />
+            <a href="https://aistudio.google.com/apikey" target="_blank" class="btn btn-sm btn-ghost" style="white-space:nowrap;">&#x1f517; השגת מפתח</a>
+          </div>
         </div>
         <div class="field">
           <label>Meta Pixel ID <span style="font-weight:400;color:var(--text-dim);">(רשות — למעקב המרות)</span></label>
@@ -6240,16 +6243,17 @@ function suggestDescription() {
 }
 
 // ═══════════════════════════════════════════════════
-// AI-POWERED META SUGGESTIONS (OpenAI)
+// AI-POWERED META SUGGESTIONS (Google Gemini)
 // ═══════════════════════════════════════════════════
 async function aiSuggestMeta(field) {
   const p = getProject();
-  if (!p || !p.openaiKey || !currentPage) { toast('הזינו OpenAI API Key בהגדרות'); return; }
+  if (!p || !p.openaiKey || !currentPage) { toast('הזינו Gemini API Key בהגדרות'); return; }
 
   const pg = currentPage;
   const btn = document.getElementById(field === 'title' ? 'ai-suggest-title-btn' : 'ai-suggest-desc-btn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span>'; }
 
+  const lang = p.lang === 'he' ? 'Hebrew' : p.lang === 'ar' ? 'Arabic' : 'English';
   const context = [
     pg.title ? `Current title: ${pg.title}` : '',
     pg.description ? `Current description: ${pg.description}` : '',
@@ -6257,23 +6261,22 @@ async function aiSuggestMeta(field) {
     `Business: ${p.name} (${p.businessType})`,
     `Keywords: ${(pg.keywords || []).join(', ')}`,
     `Headings: ${(pg.headings || []).slice(0, 5).join(', ')}`,
-    `Language: ${p.lang === 'he' ? 'Hebrew' : p.lang === 'ar' ? 'Arabic' : 'English'}`
+    `Language: ${lang}`
   ].filter(Boolean).join('\n');
 
   const prompt = field === 'title'
-    ? `Write an SEO-optimized page title (30-60 characters) for this page. Include the primary keyword naturally. Return ONLY the title text, nothing else.\n\n${context}`
-    : `Write an SEO-optimized meta description (120-155 characters) for this page. Include a call-to-action and the primary keyword. Return ONLY the description text, nothing else.\n\n${context}`;
+    ? `Write an SEO-optimized page title (30-60 characters) in ${lang} for this page. Include the primary keyword naturally. Return ONLY the title text, nothing else. No quotes.\n\n${context}`
+    : `Write an SEO-optimized meta description (120-155 characters) in ${lang} for this page. Include a call-to-action and the primary keyword. Return ONLY the description text, nothing else. No quotes.\n\n${context}`;
 
   try {
-    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${p.openaiKey}`;
+    const resp = await fetch(apiUrl, {
       method: 'POST',
       signal: makeAbortSignal(15000),
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + p.openaiKey },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 200,
-        temperature: 0.7
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
       })
     });
 
@@ -6283,7 +6286,7 @@ async function aiSuggestMeta(field) {
     }
 
     const data = await resp.json();
-    const suggestion = (data.choices[0]?.message?.content || '').trim().replace(/^["']|["']$/g, '');
+    const suggestion = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim().replace(/^["']|["']$/g, '');
 
     if (!suggestion) { toast('לא התקבלה הצעה'); return; }
 
