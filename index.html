@@ -960,6 +960,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Organization')">Organization</button>
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Review')">Review</button>
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Custom')">JSON-LD מותאם</button>
+          <button class="btn btn-accent btn-sm" onclick="aiSuggestSchema()" id="ai-schema-btn" style="display:none;">&#x2728; AI המלצות סכמות</button>
         </div>
       </div>
       <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
@@ -3634,6 +3635,24 @@ function renderDashboard() {
   `;
   document.getElementById('dashboard-priorities').insertAdjacentHTML('afterend', bookingHtml);
 
+  // AI Insights — only for unlocked users with Gemini key
+  if (isUnlocked === true && p.openaiKey) {
+    const aiInsightsEl = document.getElementById('dashboard-insights');
+    if (aiInsightsEl && !aiInsightsEl.dataset.loaded) {
+      aiInsightsEl.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">&#x2728; ניתוח AI</div>
+            <button class="btn btn-sm btn-accent" onclick="generateAiInsights()" id="ai-insights-btn">&#x2728; צור ניתוח</button>
+          </div>
+          <div id="ai-insights-content" style="font-size:13px;color:var(--text-dim);line-height:1.8;">
+            <p>לחצו "צור ניתוח" לקבלת המלצות מותאמות אישית מ-AI על בסיס הנתונים שלכם.</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
   // Low score CTA
   const lowScoreCta = document.getElementById('low-score-cta');
   if (lowScoreCta) {
@@ -4031,6 +4050,8 @@ function addSchemaTemplate(type) {
 function renderSchemas() {
   const p = getProject();
   if (!p) return;
+  const aiSchemaBtn = document.getElementById('ai-schema-btn');
+  if (aiSchemaBtn) aiSchemaBtn.style.display = p.openaiKey ? 'inline-flex' : 'none';
   const el = document.getElementById('schema-list');
   if (!p.schemas || p.schemas.length === 0) { el.innerHTML = ''; return; }
 
@@ -4275,7 +4296,10 @@ function renderKeywordMap(p, el) {
       <div class="card">
         <div class="card-header">
           <div class="card-title">${escapeHtml(pg.name)} <span style="font-weight:400;color:var(--text-dim);font-size:11px;margin-right:8px;direction:ltr;display:inline-block;">${escapeHtml(pg.path)}</span></div>
-          <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">&#x270f; \u05E2\u05E8\u05D9\u05DB\u05D4</button>
+          <div style="display:flex;gap:6px;">
+            ${p.openaiKey ? `<button class="btn btn-sm btn-accent" onclick="aiSuggestKeywords('${pg.id}')" id="ai-kw-btn-${pg.id}" style="font-size:11px;">&#x2728; AI</button>` : ''}
+            <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">&#x270f; \u05E2\u05E8\u05D9\u05DB\u05D4</button>
+          </div>
         </div>
         <div style="margin-bottom:12px;">
           ${kwData.map(kd => {
@@ -6275,6 +6299,157 @@ function suggestDescription() {
 }
 
 // ═══════════════════════════════════════════════════
+// AI ENGINE (Google Gemini)
+// ═══════════════════════════════════════════════════
+async function callGemini(prompt, apiKey) {
+  const resp = await fetch('/api/gemini', {
+    method: 'POST',
+    signal: makeAbortSignal(25000),
+    headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'Gemini API error ' + resp.status);
+  }
+  const data = await resp.json();
+  return (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+}
+
+// ── Dashboard AI Insights ──
+async function generateAiInsights() {
+  const p = getProject();
+  if (!p || !p.openaiKey) { toast('הזינו Gemini API Key בהגדרות'); return; }
+  if (isUnlocked !== true) { showScoreReveal(); return; }
+
+  const btn = document.getElementById('ai-insights-btn');
+  const contentEl = document.getElementById('ai-insights-content');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span> מנתח...'; }
+
+  const { score } = scoreProject();
+  const { score: geoScore } = scoreProjectGeo();
+
+  const pageSummary = p.pages.slice(0, 10).map(pg => {
+    const ps = scorePage(pg);
+    return `${pg.name} (${pg.path}): SEO=${ps.score}, title="${(pg.title || '').substring(0, 50)}", desc=${(pg.description || '').length}ch, keywords=[${(pg.keywords || []).slice(0, 3).join(',')}], H1=${(pg.headings || []).filter(h => h.startsWith('H1')).length}, schemas=[${(pg.schema || []).join(',')}]`;
+  }).join('\n');
+
+  const prompt = `You are an expert SEO consultant. Analyze this website audit data and provide 3-5 specific, actionable recommendations in Hebrew. Be direct, no fluff. Use bullet points.
+
+Website: ${p.url} (${p.name})
+Business type: ${p.businessType}
+Language: ${p.lang}
+Overall SEO Score: ${score}/100
+GEO Score: ${geoScore}/100
+Pages: ${p.pages.length}
+Has sitemap: ${(p.sitemap || []).length > 0 ? 'Yes' : 'No'}
+Has robots.txt: ${(p.robots || '').length > 20 ? 'Yes' : 'No'}
+
+Page details:
+${pageSummary}
+
+Respond ONLY in Hebrew. Format each recommendation as:
+**[priority emoji] recommendation title**
+explanation (1-2 sentences max)`;
+
+  try {
+    const result = await callGemini(prompt, p.openaiKey);
+    if (contentEl) {
+      contentEl.innerHTML = `<div style="white-space:pre-wrap;line-height:1.9;">${escapeHtml(result).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</div>
+        <button class="btn btn-sm btn-ghost" onclick="generateAiInsights()" style="margin-top:10px;font-size:11px;">&#x1f504; ניתוח חוזר</button>`;
+      document.getElementById('dashboard-insights').dataset.loaded = 'true';
+    }
+  } catch (e) {
+    if (contentEl) contentEl.innerHTML = `<p style="color:var(--red);">שגיאת AI: ${escapeHtml(e.message)}</p>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#x2728; צור ניתוח'; }
+  }
+}
+
+// ── AI Keyword Suggestions ──
+async function aiSuggestKeywords(pageId) {
+  const p = getProject();
+  if (!p || !p.openaiKey) { toast('הזינו Gemini API Key בהגדרות'); return; }
+  const pg = p.pages.find(x => x.id === pageId);
+  if (!pg) return;
+
+  const btn = document.getElementById('ai-kw-btn-' + pageId);
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span>'; }
+
+  const prompt = `Suggest 5 SEO keywords for this page. Return ONLY a comma-separated list, no explanations, no numbering.
+
+Page: ${pg.name} (${pg.path})
+Business: ${p.name} (${p.businessType})
+Current title: ${pg.title || 'none'}
+Current keywords: ${(pg.keywords || []).join(', ') || 'none'}
+Headings: ${(pg.headings || []).slice(0, 5).join(', ')}
+Language: ${p.lang === 'he' ? 'Hebrew' : p.lang === 'ar' ? 'Arabic' : 'English'}
+
+Return keywords in ${p.lang === 'he' ? 'Hebrew' : p.lang === 'ar' ? 'Arabic' : 'English'}.`;
+
+  try {
+    const result = await callGemini(prompt, p.openaiKey);
+    const newKws = result.split(',').map(k => k.trim()).filter(k => k.length > 1 && k.length < 50);
+    if (newKws.length === 0) { toast('לא התקבלו מילות מפתח'); return; }
+
+    const existing = new Set((pg.keywords || []).map(k => k.toLowerCase()));
+    let added = 0;
+    newKws.forEach(kw => {
+      if (!existing.has(kw.toLowerCase())) {
+        pg.keywords.push(kw);
+        if (!pg.keywordData) pg.keywordData = [];
+        pg.keywordData.push({ keyword: kw, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' });
+        existing.add(kw.toLowerCase());
+        added++;
+      }
+    });
+    saveProjects();
+    renderedTabs.delete('keywords');
+    toast(`${added} מילות מפתח חדשות נוספו: ${newKws.slice(0, 3).join(', ')}`, 'success');
+  } catch (e) {
+    toast('שגיאת AI: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#x2728; AI'; }
+  }
+}
+
+// ── AI Schema Suggestion ──
+async function aiSuggestSchema() {
+  const p = getProject();
+  if (!p || !p.openaiKey) { toast('הזינו Gemini API Key בהגדרות'); return; }
+
+  const btn = document.getElementById('ai-schema-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span>'; }
+
+  const prompt = `What JSON-LD schema types should this website have? Return ONLY a JSON array of schema type names (e.g., ["LocalBusiness","FAQPage","BreadcrumbList"]).
+
+Website: ${p.url} (${p.name})
+Business type: ${p.businessType}
+Pages: ${p.pages.map(pg => pg.name + ' (' + pg.path + ')').join(', ')}
+Existing schemas: ${(p.schemas || []).map(s => s.type).join(', ') || 'none'}
+
+Return ONLY the JSON array, nothing else.`;
+
+  try {
+    const result = await callGemini(prompt, p.openaiKey);
+    const match = result.match(/\[[\s\S]*?\]/);
+    if (!match) { toast('לא התקבלה המלצה'); return; }
+    const suggested = JSON.parse(match[0]);
+    const existing = new Set((p.schemas || []).map(s => s.type));
+    const missing = suggested.filter(t => !existing.has(t));
+    if (missing.length === 0) { toast('כל הסכמות המומלצות כבר קיימות!', 'success'); return; }
+    toast(`סכמות מומלצות: ${missing.join(', ')}. הוסיפו אותן בלשונית נתונים מובנים`, 'success');
+  } catch (e) {
+    toast('שגיאת AI: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#x2728; AI המלצות סכמות'; }
+  }
+}
+
+// ═══════════════════════════════════════════════════
 // AI-POWERED META SUGGESTIONS (Google Gemini)
 // ═══════════════════════════════════════════════════
 async function aiSuggestMeta(field) {
@@ -6301,23 +6476,7 @@ async function aiSuggestMeta(field) {
     : `Write an SEO-optimized meta description (120-155 characters) in ${lang} for this page. Include a call-to-action and the primary keyword. Return ONLY the description text, nothing else. No quotes.\n\n${context}`;
 
   try {
-    const resp = await fetch('/api/gemini', {
-      method: 'POST',
-      signal: makeAbortSignal(20000),
-      headers: { 'Content-Type': 'application/json', 'X-API-Key': p.openaiKey },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
-      })
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'API error ' + resp.status);
-    }
-
-    const data = await resp.json();
-    const suggestion = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim().replace(/^["']|["']$/g, '');
+    const suggestion = (await callGemini(prompt, p.openaiKey)).replace(/^["']|["']$/g, '');
 
     if (!suggestion) { toast('לא התקבלה הצעה'); return; }
 
