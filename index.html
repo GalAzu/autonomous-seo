@@ -1696,7 +1696,7 @@ const STORAGE_KEY = 'autonomous-seo-projects';
 const CURRENT_KEY = 'autonomous-seo-current';
 
 let projects = {};
-try { projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+try { projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); deobfuscateKeys(projects); }
 catch (e) { console.error('Corrupt localStorage, resetting:', e); projects = {}; localStorage.removeItem(STORAGE_KEY); }
 
 let currentProjectId = localStorage.getItem(CURRENT_KEY);
@@ -1737,9 +1737,29 @@ function getProject() {
   return projects[currentProjectId] || null;
 }
 
+// Obfuscate sensitive keys before storage, deobfuscate on load
+const KEY_FIELDS = ['openaiKey', 'psiApiKey'];
+function obfuscateKeys(data) {
+  const clone = JSON.parse(JSON.stringify(data));
+  Object.values(clone).forEach(p => {
+    KEY_FIELDS.forEach(f => { if (p[f]) p[f] = btoa(p[f]); });
+    if (p._keysObfuscated === undefined) p._keysObfuscated = true;
+  });
+  return clone;
+}
+function deobfuscateKeys(data) {
+  Object.values(data).forEach(p => {
+    if (p._keysObfuscated) {
+      KEY_FIELDS.forEach(f => { if (p[f]) try { p[f] = atob(p[f]); } catch(e) {} });
+      delete p._keysObfuscated;
+    }
+  });
+  return data;
+}
+
 function saveProjects() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obfuscateKeys(projects)));
     localStorage.setItem(CURRENT_KEY, currentProjectId || '');
   } catch (e) {
     if (e.name === 'QuotaExceededError' || e.code === 22) {
@@ -3704,10 +3724,10 @@ async function testPageSpeed(pageId) {
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span>'; }
 
   const fullUrl = p.url + (pg.path === '/' ? '' : pg.path);
-  const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(fullUrl)}&key=${p.psiApiKey}&strategy=mobile&category=performance`;
+  const apiUrl = `/api/psi?url=${encodeURIComponent(fullUrl)}&strategy=mobile`;
 
   try {
-    const resp = await fetch(apiUrl, { signal: makeAbortSignal(30000) });
+    const resp = await fetch(apiUrl, { signal: makeAbortSignal(30000), headers: { 'X-API-Key': p.psiApiKey } });
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
       throw new Error(err.error?.message || `HTTP ${resp.status}`);
@@ -5445,12 +5465,24 @@ function importProjectBackup(event) {
         toast('קובץ לא תקין — נדרש קובץ גיבוי של Autonomous SEO');
         return;
       }
+      // Sanitize all string fields in imported projects to prevent XSS
+      function sanitizeStrings(obj) {
+        if (!obj || typeof obj !== 'object') return obj;
+        if (Array.isArray(obj)) return obj.map(sanitizeStrings);
+        const clean = {};
+        for (const [k, v] of Object.entries(obj)) {
+          if (typeof v === 'string') clean[k] = v.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/javascript:/gi, '');
+          else if (typeof v === 'object' && v !== null) clean[k] = sanitizeStrings(v);
+          else clean[k] = v;
+        }
+        return clean;
+      }
       let imported = 0;
       Object.entries(data.projects).forEach(([id, proj]) => {
         if (projects[id]) {
-          if (!confirm(`הפרויקט "${proj.name}" כבר קיים. לדרוס?`)) return;
+          if (!confirm(`הפרויקט "${escapeHtml(proj.name)}" כבר קיים. לדרוס?`)) return;
         }
-        projects[id] = proj;
+        projects[id] = sanitizeStrings(proj);
         imported++;
       });
       if (imported === 0) { toast('לא יובאו פרויקטים'); return; }
@@ -6269,11 +6301,10 @@ async function aiSuggestMeta(field) {
     : `Write an SEO-optimized meta description (120-155 characters) in ${lang} for this page. Include a call-to-action and the primary keyword. Return ONLY the description text, nothing else. No quotes.\n\n${context}`;
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${p.openaiKey}`;
-    const resp = await fetch(apiUrl, {
+    const resp = await fetch('/api/gemini', {
       method: 'POST',
-      signal: makeAbortSignal(15000),
-      headers: { 'Content-Type': 'application/json' },
+      signal: makeAbortSignal(20000),
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': p.openaiKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
@@ -6519,6 +6550,14 @@ h1,h2,h3{font-family:'Rubik',sans-serif;}
 // LEAD CAPTURE
 // ═══════════════════════════════════════════════════
 const SEO_MAGNET_WEBHOOK = 'https://autonomous.n8n888.cloud/webhook/seo-magnet';
+const WEBHOOK_SECRET = 'autonomous-seo-2026';
+
+async function generateWebhookSignature(payload) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', encoder.encode(WEBHOOK_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(JSON.stringify(payload)));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 function showScoreReveal() {
   const p = getProject();
@@ -6609,21 +6648,21 @@ function unlockDashboard() {
   var projectScore = p ? scoreProject() : null;
   var geoResult = p ? scoreProjectGeo() : null;
 
-  fetch(SEO_MAGNET_WEBHOOK, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: name,
-      email: email,
-      phone: phone,
-      website: p ? p.url : '',
-      business: p ? p.name : '',
-      seoScore: String(projectScore ? projectScore.score : ''),
-      geoScore: String(geoResult ? geoResult.score : ''),
-      pageCount: p ? String(p.pages.length) : '0',
-      page: 'autonomous-seo.vercel.app',
-      source: 'score-reveal-gate'
-    })
+  const gatePayload = {
+    name: name, email: email, phone: phone,
+    website: p ? p.url : '', business: p ? p.name : '',
+    seoScore: String(projectScore ? projectScore.score : ''),
+    geoScore: String(geoResult ? geoResult.score : ''),
+    pageCount: p ? String(p.pages.length) : '0',
+    page: 'autonomous-seo.vercel.app', source: 'score-reveal-gate'
+  };
+  generateWebhookSignature(gatePayload).then(sig => {
+    fetch(SEO_MAGNET_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Webhook-Signature': sig },
+      body: JSON.stringify(gatePayload)
+    }).catch(() => {});
+  });
   }).catch(function() {});
 
   if (typeof fbq === 'function' && META_PIXEL_ID) fbq('track', 'Lead', { content_name: 'SEO Audit Gate', value: projectScore ? projectScore.score : 0 });
@@ -6777,22 +6816,22 @@ async function submitLead() {
   }
 
   try {
+    const leadPayload = {
+      name, email, phone,
+      website: websiteInput || (p ? p.url : ''),
+      business: p ? p.name : '',
+      seoScore: String(projectScore ? projectScore.score : ''),
+      geoScore: String(geoResult ? geoResult.score : ''),
+      pageCount: p ? String(p.pages.length) : '0',
+      page: 'autonomous-seo.vercel.app',
+      audit: auditData
+    };
+    const leadSig = await generateWebhookSignature(leadPayload);
     const resp = await fetch(SEO_MAGNET_WEBHOOK, {
       method: 'POST',
       signal: makeAbortSignal(15000),
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        email,
-        phone,
-        website: websiteInput || (p ? p.url : ''),
-        business: p ? p.name : '',
-        seoScore: String(projectScore ? projectScore.score : ''),
-        geoScore: String(geoResult ? geoResult.score : ''),
-        pageCount: p ? String(p.pages.length) : '0',
-        page: 'autonomous-seo.vercel.app',
-        audit: auditData
-      })
+      headers: { 'Content-Type': 'application/json', 'X-Webhook-Signature': leadSig },
+      body: JSON.stringify(leadPayload)
     });
 
     if (resp.ok) {
