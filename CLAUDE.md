@@ -17,7 +17,7 @@ A standalone, single-file SEO management tool built for Autonomous's clients and
 - **Structured Data Builder** — schema templates (LocalBusiness, FAQ, Service, Breadcrumb, Product, Article, Review)
 - **Sitemap Manager** — generate/edit/download sitemap.xml with auto-sync from pages
 - **Robots.txt Editor** — edit/download with built-in guide
-- **Keyword Strategy** — 4 sub-tabs: Keyword Map, Competitor Tracker, Content Gap Analysis, Keyword Clusters. Intent classification (informational/navigational/transactional/commercial), placement indicators (T/H1/D)
+- **Keyword Strategy** — 4 sub-tabs: Keyword Map, Competitor Tracker, Content Gap Analysis, Keyword Clusters. Intent classification (informational/navigational/transactional/commercial), placement indicators (T/H1/D). Keywords auto-extracted from page content (title, headings, description, body) during scan — no reliance on deprecated meta keywords tag
 - **GEO (Generative Engine Optimization)** — per-page AI readiness scoring with E-E-A-T, content structure, schema, and citation management
 - **Heading Analysis** — H1-H6 hierarchy per page
 - **Google Search Console Guide** — step-by-step GSC setup

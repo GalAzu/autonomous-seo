@@ -247,6 +247,7 @@
 
   .scan-progress { padding: 20px; text-align: center; }
   .scan-progress .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  .spinner-sm { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .insight-card { background: linear-gradient(135deg, var(--primary-glow), var(--accent-glow)); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; }
@@ -295,7 +296,7 @@
 
   @media (max-width: 768px) {
     .mobile-menu-btn { display: flex; }
-    .sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .sidebar { transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .sidebar.open { transform: translateX(0); }
     .main { margin-right: 0; padding: 16px; padding-top: 70px; }
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
@@ -792,7 +793,7 @@
                 <div class="tags-container" id="keywords-tags" onclick="document.getElementById('keyword-input').focus()">
                   <input type="text" class="tags-input" id="keyword-input" placeholder="הקלידו ולחצו Enter..." onkeydown="addKeyword(event)" />
                 </div>
-                <div class="hint">יעדי תוכן — שלבו בכותרות ובגוף הטקסט (לא meta keywords)</div>
+                <div class="hint">מחולצות אוטומטית מהתוכן בסריקה — ניתן לערוך ולהוסיף ידנית</div>
               </div>
               <div class="field">
                 <label>כותרות H (אחד בכל שורה, פורמט: H1: טקסט)</label>
@@ -862,6 +863,8 @@
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('BreadcrumbList')">BreadcrumbList</button>
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Product')">Product</button>
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Article')">Article</button>
+          <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('HowTo')">HowTo</button>
+          <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Organization')">Organization</button>
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Review')">Review</button>
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Custom')">JSON-LD מותאם</button>
         </div>
@@ -938,6 +941,26 @@
           <code style="color:var(--green)">Allow: /</code> — אפשרו גישה לכל העמודים<br/>
           <code style="color:var(--red)">Disallow: /admin/</code> — חסימת נתיב<br/>
           <code style="color:var(--accent)">Sitemap: https://example.com/sitemap.xml</code> — הפניה למפת האתר
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">&#x1f916; הנחיות בוטים של AI (2026)</div>
+          <button class="btn btn-sm btn-accent" onclick="addAiBotDirectives()">+ הוסף לקובץ</button>
+        </div>
+        <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">
+          <p style="margin-bottom:8px;"><strong>אסטרטגיה מומלצת:</strong> חסמו בוטים שמשתמשים בתוכן לאימון AI, אפשרו בוטים שמציגים את האתר בתוצאות חיפוש AI.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <div style="color:var(--green);font-weight:600;margin-bottom:4px;">&#x2713; לאפשר (הופעה בחיפוש AI)</div>
+              <code style="display:block;font-size:11px;line-height:1.6;">User-agent: ChatGPT-User<br/>Allow: /<br/><br/>User-agent: OAI-SearchBot<br/>Allow: /<br/><br/>User-agent: PerplexityBot<br/>Allow: /</code>
+            </div>
+            <div>
+              <div style="color:var(--red);font-weight:600;margin-bottom:4px;">&#x2717; לחסום (אימון AI)</div>
+              <code style="display:block;font-size:11px;line-height:1.6;">User-agent: GPTBot<br/>Disallow: /<br/><br/>User-agent: Google-Extended<br/>Disallow: /<br/><br/>User-agent: CCBot<br/>Disallow: /</code>
+            </div>
+          </div>
+          <p style="margin-top:8px;font-size:11px;color:var(--text-muted);">חסימת בוטי אימון <strong>לא משפיעה</strong> על דירוג בגוגל או Bing. רק מונעת שימוש בתוכן לאימון מודלים.</p>
         </div>
       </div>
     </div>
@@ -1024,6 +1047,23 @@
             <span class="badge primary" id="gsc-query-count">0</span>
           </div>
           <div id="gsc-opportunities" style="margin-bottom:16px;"></div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="gsc-filter-query" placeholder="חפש שאילתה..." oninput="filterGscTable()" style="flex:1;min-width:150px;font-size:12px;padding:6px 10px;direction:ltr;" />
+            <select id="gsc-filter-position" onchange="filterGscTable()" style="font-size:12px;padding:6px 10px;">
+              <option value="">כל המיקומים</option>
+              <option value="1-3">Top 3</option>
+              <option value="1-10">עמוד 1 (1-10)</option>
+              <option value="5-20">Quick Wins (5-20)</option>
+              <option value="20-100">עמוד 2+ (20+)</option>
+            </select>
+            <select id="gsc-filter-ctr" onchange="filterGscTable()" style="font-size:12px;padding:6px 10px;">
+              <option value="">כל CTR</option>
+              <option value="low">CTR נמוך (&lt;2%)</option>
+              <option value="medium">CTR בינוני (2-5%)</option>
+              <option value="high">CTR גבוה (&gt;5%)</option>
+            </select>
+            <span id="gsc-visible-count" style="font-size:11px;color:var(--text-dim);"></span>
+          </div>
           <div class="table-wrapper" style="max-height:400px;overflow-y:auto;">
             <table>
               <thead><tr>
@@ -1237,6 +1277,13 @@
           </div>
         </div>
         <div class="field"><label>מזהה Google Analytics</label><input type="text" id="settings-ga" style="direction:ltr;text-align:left;" onchange="updateProjectSettings()" /></div>
+        <div class="field">
+          <label>PageSpeed Insights API Key <span style="font-weight:400;color:var(--text-dim);">(חינם מ-Google Cloud Console)</span></label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="settings-psi-key" placeholder="AIzaSy..." style="direction:ltr;text-align:left;flex:1;" onchange="updateProjectSettings()" />
+            <a href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank" class="btn btn-sm btn-ghost" style="white-space:nowrap;">&#x1f517; השגת מפתח</a>
+          </div>
+        </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-primary" onclick="updateProjectSettings();toast('ההגדרות עודכנו','success');">שמירת הגדרות</button>
           <button class="btn btn-accent" id="rescan-btn" onclick="rescanProject()">&#x1f504; סריקה מחדש</button>
@@ -1349,8 +1396,12 @@
 const STORAGE_KEY = 'autonomous-seo-projects';
 const CURRENT_KEY = 'autonomous-seo-current';
 
-let projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-let currentProjectId = localStorage.getItem(CURRENT_KEY) || null;
+let projects = {};
+try { projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+catch (e) { console.error('Corrupt localStorage, resetting:', e); projects = {}; localStorage.removeItem(STORAGE_KEY); }
+
+let currentProjectId = localStorage.getItem(CURRENT_KEY);
+if (!currentProjectId || currentProjectId === 'null' || currentProjectId === 'undefined') currentProjectId = null;
 let currentPage = null;
 let currentExportTab = 'summary';
 let toastTimer = null;
@@ -1362,6 +1413,11 @@ let autoSaveTimer = null;
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Escape for use inside JS string literals in onclick/onchange attributes
+function escapeAttrJs(str) {
+  if (!str) return '';
+  return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/</g,'\\x3c').replace(/>/g,'\\x3e').replace(/&/g,'\\x26');
 }
 
 const SKIP_EXTENSIONS = /\.(jpg|jpeg|png|gif|svg|webp|avif|pdf|css|js|ico|woff2?|ttf|eot|mp4|mp3|zip|rar|gz|xml|json|txt|map)$/i;
@@ -1382,8 +1438,20 @@ function getProject() {
 }
 
 function saveProjects() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-  localStorage.setItem(CURRENT_KEY, currentProjectId);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    localStorage.setItem(CURRENT_KEY, currentProjectId || '');
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      // Trim GSC history to free space
+      Object.values(projects).forEach(p => { if (p.gscHistory && p.gscHistory.length > 3) p.gscHistory = p.gscHistory.slice(-3); });
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); }
+      catch (e2) { toast('אחסון מלא — מחקו פרויקטים ישנים או ייצאו גיבוי'); }
+    } else {
+      console.error('Save error:', e);
+      toast('שגיאה בשמירה — בדקו הגדרות דפדפן');
+    }
+  }
 }
 
 function generateId() {
@@ -1525,9 +1593,6 @@ function extractFromHTML(html, baseUrl) {
     } catch (e) {}
   });
 
-  // Meta keywords (deprecated — imported for user awareness only)
-  const metaKeywords = doc.querySelector('meta[name="keywords"]')?.getAttribute('content')?.trim() || '';
-
   // Feature 2: og:image
   const ogImage = doc.querySelector('meta[property="og:image"]')?.getAttribute('content')?.trim() || '';
 
@@ -1544,7 +1609,193 @@ function extractFromHTML(html, baseUrl) {
     if (src) images.push({ src, alt: alt || '' });
   });
 
-  return { title, metaDesc, canonical, ogTitle, ogDesc, ogImage, headings, links: [...links], schemas, lang, dir, ga, metaKeywords, images, noindex };
+  // ── Extract keywords from actual content ──
+  const extractedKeywords = extractKeywordsFromContent(title, metaDesc, headings, doc);
+
+  // Technical SEO signals
+  const hasViewport = !!doc.querySelector('meta[name="viewport"]');
+  const viewportValid = (doc.querySelector('meta[name="viewport"]')?.getAttribute('content') || '').includes('width=device-width');
+  const hasCharset = !!doc.querySelector('meta[charset]') || html.toLowerCase().includes('charset=utf-8');
+  const hasFavicon = !!doc.querySelector('link[rel~="icon"], link[rel="shortcut icon"]');
+  const h1Count = doc.querySelectorAll('h1').length;
+
+  // Performance hints
+  const renderBlockingScripts = doc.querySelectorAll('head script:not([async]):not([defer]):not([type="application/ld+json"])').length;
+  const imagesWithoutDimensions = [...doc.querySelectorAll('img')].filter(img => !img.getAttribute('width') || !img.getAttribute('height')).length;
+
+  // Mixed content detection (on HTTPS sites)
+  let mixedContentCount = 0;
+  if (baseUrl.startsWith('https://')) {
+    doc.querySelectorAll('img[src], script[src], iframe[src], link[href]').forEach(el => {
+      const src = el.getAttribute('src') || el.getAttribute('href') || '';
+      if (src.startsWith('http://')) mixedContentCount++;
+    });
+  }
+
+  // Hreflang detection
+  const hreflangTags = [];
+  doc.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => {
+    hreflangTags.push({ lang: el.getAttribute('hreflang'), href: el.getAttribute('href') });
+  });
+
+  // Word count from body text
+  const bodyText = (doc.body?.textContent || '').replace(/\s+/g, ' ').trim();
+  const wordCount = bodyText.split(/\s+/).filter(w => w.length > 1).length;
+
+  const techSignals = { hasViewport, viewportValid, hasCharset, hasFavicon, h1Count, renderBlockingScripts, imagesWithoutDimensions, mixedContentCount, hreflangTags, wordCount };
+
+  // ── GEO Signal Extraction ──
+  const geoSignals = extractGeoSignals(doc, html, schemas, headings, baseUrl);
+
+  return { title, metaDesc, canonical, ogTitle, ogDesc, ogImage, headings, links: [...links], schemas, lang, dir, ga, extractedKeywords, images, noindex, geoSignals, techSignals };
+}
+
+function extractKeywordsFromContent(title, description, headings, doc) {
+  const stopWords = new Set(['של','את','על','עם','או','גם','לא','כי','אם','הם','היא','הוא','זה','זו','אלו','אלה','אני','אנחנו','שלנו','שלכם','אותו','אותה','כל','עוד','יותר','אין','יש','בין','כמו','רק','אחד','אחת','פי','מאוד','כבר','לפני','אחרי','בגלל','משום','שלי','מה','איך','למה','אבל','בו','בה','להם','לו','לה','לנו','ואת','ועל','ולא','שהם','שהיא','שהוא','כדי','ידי','היה','היו','הזה','הזו','אלא','עד','בכל','כאן','שם','מי','אך','the','and','for','with','this','that','from','are','was','you','your','our','more','about','all','but','not','has','can','will','been','have','each','which','their','what','how','who','when','where','why','its','also','into','than','them','these','those','other','some','such','only','then','any','very','just','should','now','would','could','may','might','most','both','few','own','same','being','because','does','did','here','there','get','got','let','make','like','use','per','one','two','new','out','over','even']);
+
+  const freq = {};
+  const boost = (text, weight) => {
+    if (!text) return;
+    const words = text.toLowerCase().split(/[\s,.;:!?\-\u200f\u200e()\[\]{}"'\/|–—•·\u00AB\u00BB\u2018\u2019\u201C\u201D]+/).filter(w => w.length > 2 && !stopWords.has(w) && !/^\d+$/.test(w));
+    words.forEach(w => { freq[w] = (freq[w] || 0) + weight; });
+    // 2-word phrases from titles/headings
+    if (weight >= 3) {
+      for (let i = 0; i < words.length - 1; i++) {
+        if (!stopWords.has(words[i]) && !stopWords.has(words[i + 1])) {
+          const phrase = words[i] + ' ' + words[i + 1];
+          freq[phrase] = (freq[phrase] || 0) + weight;
+        }
+      }
+    }
+  };
+
+  // Weight by position: title > H1 > description > H2 > H3+ > body
+  boost(title, 5);
+  (headings || []).forEach(h => {
+    const text = h.replace(/^H\d:\s*/, '');
+    if (h.startsWith('H1')) boost(text, 4);
+    else if (h.startsWith('H2')) boost(text, 3);
+    else boost(text, 2);
+  });
+  boost(description, 3);
+
+  // Sample body text (first ~2000 chars to keep it fast)
+  const body = doc.body ? doc.body.textContent || '' : '';
+  boost(body.substring(0, 2000), 1);
+
+  // Sort by score, return top 5
+  return Object.entries(freq)
+    .filter(([w, s]) => s >= 3)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([w]) => w);
+}
+
+function extractGeoSignals(doc, html, schemas, headings, baseUrl) {
+  const geo = { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' };
+  const baseHost = new URL(baseUrl).hostname;
+
+  // 1. Author info from JSON-LD schemas
+  for (const s of schemas) {
+    const type = s['@type'] || '';
+    const author = s.author || s.creator;
+    if (author) {
+      const authorObj = Array.isArray(author) ? author[0] : author;
+      if (typeof authorObj === 'string') {
+        if (!geo.authorName) geo.authorName = authorObj;
+      } else if (authorObj) {
+        if (!geo.authorName && authorObj.name) geo.authorName = authorObj.name;
+        if (!geo.authorCredentials && authorObj.jobTitle) geo.authorCredentials = authorObj.jobTitle;
+        if (!geo.authorUrl && authorObj.url) geo.authorUrl = authorObj.url;
+      }
+    }
+    // dateModified for lastReviewedDate
+    if (s.dateModified && !geo.lastReviewedDate) {
+      geo.lastReviewedDate = s.dateModified.split('T')[0];
+    }
+  }
+
+  // 2. Fallback author from meta tags
+  if (!geo.authorName) {
+    const metaAuthor = doc.querySelector('meta[name="author"]')?.getAttribute('content')?.trim();
+    if (metaAuthor) geo.authorName = metaAuthor;
+  }
+  // article:author meta
+  if (!geo.authorName) {
+    const articleAuthor = doc.querySelector('meta[property="article:author"]')?.getAttribute('content')?.trim();
+    if (articleAuthor) geo.authorName = articleAuthor;
+  }
+
+  // 3. Fallback author from visible bylines (common patterns)
+  if (!geo.authorName) {
+    const bylineSelectors = ['.author', '.byline', '[rel="author"]', '.post-author', '.entry-author', '[itemprop="author"]', '.article-author'];
+    for (const sel of bylineSelectors) {
+      const el = doc.querySelector(sel);
+      if (el) {
+        const text = el.textContent.trim().replace(/^(by|מאת|נכתב על ידי)\s*/i, '').trim();
+        if (text && text.length > 1 && text.length < 80) { geo.authorName = text; break; }
+      }
+    }
+  }
+
+  // 4. Detect Q&A / FAQ format
+  // Check JSON-LD for FAQPage
+  const hasFaqSchema = schemas.some(s => (s['@type'] || '') === 'FAQPage');
+  // Check headings for question patterns
+  const questionPatterns = /^H[1-6]:\s*(מה|איך|למה|מתי|האם|כמה|מי|איפה|what|how|why|when|does|can|is|are|which|where|who)\b|\?$/i;
+  const questionHeadings = headings.filter(h => questionPatterns.test(h));
+  // Check for FAQ-like sections in HTML
+  const hasFaqSection = !!doc.querySelector('[itemtype*="FAQPage"], .faq, #faq, .faqs, #faqs, [class*="faq"], details summary, .accordion');
+  geo.hasQAFormat = hasFaqSchema || questionHeadings.length >= 2 || hasFaqSection;
+
+  // 5. Detect statistics / numbers in content
+  const bodyText = doc.body?.textContent || '';
+  const statPatterns = /(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*(%|אחוז|percent|₪|NIS|\$|€|שקל)/gi;
+  const numberClaims = /\b\d+\s*(שנ|לקוח|פרויקט|years?|clients?|projects?|customers?|users?|companies|businesses)\b/gi;
+  const statMatches = (bodyText.match(statPatterns) || []).length + (bodyText.match(numberClaims) || []).length;
+  geo.hasStatistics = statMatches >= 2;
+
+  // 6. Detect definitive statements
+  const definitivePatterns = /(המומח|המוביל|הטוב ביותר|מספר 1|#1|המקצועי|leading|expert|best|top-rated|award|certified|מוסמך|פרס|בעל ניסיון)/gi;
+  const definitiveMatches = (bodyText.match(definitivePatterns) || []).length;
+  geo.hasDefinitiveStatements = definitiveMatches >= 1;
+
+  // 7. Extract external links as citations
+  const externalLinks = [];
+  doc.querySelectorAll('a[href]').forEach(a => {
+    try {
+      const href = a.getAttribute('href');
+      if (!href || !href.startsWith('http')) return;
+      const linkHost = new URL(href).hostname;
+      if (linkHost === baseHost) return;
+      // Skip social media and common non-citation links
+      if (/facebook\.com|twitter\.com|instagram\.com|linkedin\.com|youtube\.com|wa\.me|t\.me|tiktok\.com|pinterest\.com/i.test(linkHost)) return;
+      const text = a.textContent.trim().substring(0, 100);
+      if (text && text.length > 2) {
+        externalLinks.push({ text, url: href });
+      }
+    } catch (e) {}
+  });
+  // Dedupe by URL and take up to 10
+  const seen = new Set();
+  for (const link of externalLinks) {
+    if (!seen.has(link.url) && geo.citations.length < 10) {
+      seen.add(link.url);
+      geo.citations.push(link);
+    }
+  }
+
+  // 8. Last reviewed date fallbacks
+  if (!geo.lastReviewedDate) {
+    const articleModified = doc.querySelector('meta[property="article:modified_time"]')?.getAttribute('content')?.trim();
+    if (articleModified) geo.lastReviewedDate = articleModified.split('T')[0];
+  }
+  if (!geo.lastReviewedDate) {
+    const timeEl = doc.querySelector('time[datetime]');
+    if (timeEl) geo.lastReviewedDate = (timeEl.getAttribute('datetime') || '').split('T')[0];
+  }
+
+  return geo;
 }
 
 function normalizeUrl(raw) {
@@ -1609,12 +1860,22 @@ async function _doScan(rawUrl, name) {
   scanLog(`  Internal links: ${homeData.links.length} discovered`, 'info');
   if (homeData.schemas.length > 0) scanLog(`  JSON-LD schemas: ${homeData.schemas.length} found`, 'ok');
   if (homeData.ga) scanLog(`  Google Analytics: ${homeData.ga}`, 'ok');
+  if (homeData.extractedKeywords && homeData.extractedKeywords.length > 0) scanLog(`  Keywords (from content): ${homeData.extractedKeywords.join(', ')}`, 'ok');
   if (homeData.noindex) scanLog('  \u26A0 Noindex directive detected!', 'warn');
+  if (homeData.geoSignals) {
+    const g = homeData.geoSignals;
+    const geoFound = [];
+    if (g.authorName) geoFound.push(`Author: ${g.authorName}`);
+    if (g.hasQAFormat) geoFound.push('Q&A format');
+    if (g.hasStatistics) geoFound.push('Statistics');
+    if (g.citations.length > 0) geoFound.push(`${g.citations.length} citations`);
+    if (geoFound.length > 0) scanLog(`  GEO: ${geoFound.join(', ')}`, 'ok');
+  }
 
   document.getElementById('scan-status').textContent = '\u05E1\u05D5\u05E8\u05E7 \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD \u05E4\u05E0\u05D9\u05DE\u05D9\u05D9\u05DD...';
 
   // 2. Crawl discovered pages (up to 20)
-  const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, ogImage: homeData.ogImage || '', headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.metaKeywords ? homeData.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [], images: homeData.images || [], outgoingLinks: homeData.links.length, linkPaths: homeData.links.map(l => normalizePath(l)), noindex: homeData.noindex || false }];
+  const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, ogImage: homeData.ogImage || '', headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.extractedKeywords || [], images: homeData.images || [], outgoingLinks: homeData.links.length, linkPaths: homeData.links.map(l => normalizePath(l)), noindex: homeData.noindex || false, geoSignals: homeData.geoSignals || null, techSignals: homeData.techSignals || null }];
   const visited = new Set(['/']);
   const toVisit = homeData.links
     .map(l => normalizePath(l))
@@ -1650,11 +1911,13 @@ async function _doScan(rawUrl, name) {
       ogImage: data.ogImage || '',
       headings: data.headings,
       schemas: data.schemas.map(s => s['@type'] || 'Unknown'),
-      keywords: data.metaKeywords ? data.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [],
+      keywords: data.extractedKeywords || [],
       images: data.images || [],
       outgoingLinks: data.links.length,
       linkPaths: data.links.map(l => normalizePath(l)),
-      noindex: data.noindex || false
+      noindex: data.noindex || false,
+      geoSignals: data.geoSignals || null,
+      techSignals: data.techSignals || null
     });
 
     // Discover deeper pages
@@ -1720,7 +1983,7 @@ async function _doScan(rawUrl, name) {
 
   const withTitle = discoveredPages.filter(p => p.title).length;
   const withDesc = discoveredPages.filter(p => p.description).length;
-  const withSchema = discoveredPages.filter(p => p.schemas.length > 0).length;
+  const withSchema = discoveredPages.filter(p => (p.schemas || []).length > 0).length;
   const noindexCount = discoveredPages.filter(p => p.noindex).length;
 
   document.getElementById('scan-results-stats').innerHTML = `
@@ -1796,6 +2059,37 @@ function guessPageName(path) {
   return slug.replace(/[-_]/g, ' ').replace(/\b[a-zA-Z]/g, c => c.toUpperCase());
 }
 
+function buildGeoSettings(pages, scannedData) {
+  const settings = { businessExpertise: '', aboutPageUrl: '', trustSignals: [] };
+  if (!scannedData) return settings;
+
+  // Detect about page
+  const aboutPage = pages.find(pg => /\/(about|אודות|company|team)\/?$/i.test(pg.path));
+  if (aboutPage) settings.aboutPageUrl = aboutPage.path;
+
+  // Extract business expertise from schemas
+  for (const s of (scannedData.schemas || [])) {
+    const type = s['@type'] || '';
+    if (s.description && !settings.businessExpertise) {
+      settings.businessExpertise = (s.description || '').substring(0, 200);
+    }
+    // Trust signals from organization schema
+    if (type === 'Organization' || type === 'LocalBusiness' || type === 'ProfessionalService') {
+      if (s.award) settings.trustSignals.push(Array.isArray(s.award) ? s.award[0] : s.award);
+      if (s.memberOf) settings.trustSignals.push(typeof s.memberOf === 'string' ? s.memberOf : s.memberOf.name || '');
+      if (s.knowsAbout) {
+        const topics = Array.isArray(s.knowsAbout) ? s.knowsAbout : [s.knowsAbout];
+        topics.slice(0, 3).forEach(t => settings.trustSignals.push(typeof t === 'string' ? t : t.name || ''));
+      }
+    }
+  }
+
+  // Filter empty trust signals
+  settings.trustSignals = settings.trustSignals.filter(t => t && t.trim().length > 0);
+
+  return settings;
+}
+
 function finishSetup() {
   const lang = document.getElementById('setup-lang').value;
   const businessType = document.getElementById('setup-business-type').value;
@@ -1827,7 +2121,9 @@ function finishSetup() {
       outgoingLinks: p.outgoingLinks || 0,
       incomingLinks: 0,
       order: i,
-      geo: { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }
+      geo: p.geoSignals || { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' },
+      techSignals: p.techSignals || null,
+      wordCount: p.wordCount || (p.techSignals ? p.techSignals.wordCount : 0)
     }));
     // Calculate incoming links from the link graph
     const pathSet = new Set(pages.map(pg => pg.path));
@@ -1899,9 +2195,10 @@ function finishSetup() {
     redirects: [],
     gscHistory: [],
     hreflang: { languages: [], mappings: [] },
-    geoSettings: { businessExpertise: '', aboutPageUrl: '', trustSignals: [] },
+    geoSettings: buildGeoSettings(pages, scannedData),
     competitors: [],
     keywordClusters: [],
+    psiApiKey: '',
     createdAt: new Date().toISOString()
   };
 
@@ -1945,6 +2242,14 @@ function migrateProjectData() {
     if (!p.geoSettings) { p.geoSettings = { businessExpertise: '', aboutPageUrl: '', trustSignals: [] }; changed = true; }
     if (!p.competitors) { p.competitors = []; changed = true; }
     if (!p.keywordClusters) { p.keywordClusters = []; changed = true; }
+    if (!p.gscHistory) { p.gscHistory = []; changed = true; }
+    if (!p.hreflang) { p.hreflang = { languages: [], mappings: [] }; changed = true; }
+    if (!p.redirects) { p.redirects = []; changed = true; }
+    if (!p.sitemap) { p.sitemap = []; changed = true; }
+    if (!p.schemas) { p.schemas = []; changed = true; }
+    if (!p.checklist) { p.checklist = {}; changed = true; }
+    if (!p.url) { p.url = ''; changed = true; }
+    if (p.psiApiKey === undefined) { p.psiApiKey = ''; changed = true; }
     // Add missing page fields
     p.pages.forEach(pg => {
       if (!pg.geo) { pg.geo = { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }; changed = true; }
@@ -1952,6 +2257,12 @@ function migrateProjectData() {
         pg.keywordData = (pg.keywords || []).map(kw => ({ keyword: kw, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' }));
         changed = true;
       }
+      if (!pg.images) { pg.images = []; changed = true; }
+      if (!pg.headings) { pg.headings = []; changed = true; }
+      if (!pg.schema) { pg.schema = []; changed = true; }
+      if (!pg.keywords) { pg.keywords = []; changed = true; }
+      if (pg.outgoingLinks === undefined) { pg.outgoingLinks = 0; changed = true; }
+      if (pg.incomingLinks === undefined) { pg.incomingLinks = 0; changed = true; }
     });
   });
   if (changed) saveProjects();
@@ -2183,7 +2494,7 @@ function scorePage(pg) {
   const images = pg.images || [];
   let imgPts = 0;
   if (images.length === 0) {
-    imgPts = 2; // no images — not ideal, not terrible
+    imgPts = 0; // no images — content pages NEED images
   } else {
     const withAlt = images.filter(img => img.alt && img.alt.length > 0).length;
     const altRatio = withAlt / images.length;
@@ -2246,9 +2557,9 @@ function scoreProject() {
 
   // Schema variety (6 pts)
   let schemaTypePts = 0;
-  const schemaCount = (p.schemas || []).length;
-  if (schemaCount >= 3) schemaTypePts = 6;
-  else if (schemaCount >= 1) schemaTypePts = Math.min(6, schemaCount * 2);
+  const uniqueSchemaTypes = new Set((p.schemas || []).map(s => s.type || s)).size;
+  if (uniqueSchemaTypes >= 3) schemaTypePts = 6;
+  else if (uniqueSchemaTypes >= 1) schemaTypePts = Math.min(6, uniqueSchemaTypes * 2);
   siteScore += schemaTypePts;
   siteBreakdown.schemas = { score: schemaTypePts, max: 6 };
 
@@ -2261,7 +2572,7 @@ function scoreProject() {
   // Image health (5 pts)
   const allImgs = p.pages.reduce((arr, pg) => arr.concat(pg.images || []), []);
   let imgHealthPts = 0;
-  if (allImgs.length === 0) imgHealthPts = 3;
+  if (allImgs.length === 0) imgHealthPts = 0;
   else {
     const withAlt = allImgs.filter(img => img.alt && img.alt.length > 0).length;
     imgHealthPts = Math.round((withAlt / allImgs.length) * 5);
@@ -2276,7 +2587,8 @@ function scoreProject() {
 
   // No accidental noindex (3 pts)
   const noindexPages = p.pages.filter(pg => pg.noindex).length;
-  const noindexPts = noindexPages === 0 ? 3 : 0;
+  const indexableRatio = p.pages.length > 0 ? (p.pages.length - noindexPages) / p.pages.length : 1;
+  const noindexPts = Math.round(indexableRatio * 3);
   siteScore += noindexPts;
   siteBreakdown.indexHealth = { score: noindexPts, max: 3 };
 
@@ -2289,13 +2601,26 @@ function scoreProject() {
   const siteNormalized = siteMax > 0 ? (siteScore / siteMax) * 100 : 0;
   const finalScore = Math.round((avgPageScore * 0.70) + (siteNormalized * 0.30));
 
+  // GSC bonus — reward projects that have real search performance data
+  let gscBonus = 0;
+  if (p.gscData && p.gscData.length > 0) {
+    const totalClicks = p.gscData.reduce((s, r) => s + (r.clicks || 0), 0);
+    const avgCtr = p.gscData.reduce((s, r) => s + (r.ctr || 0), 0) / p.gscData.length;
+    const avgPos = p.gscData.reduce((s, r) => s + (r.position || 0), 0) / p.gscData.length;
+    // Up to 5 bonus points for having GSC data + decent metrics
+    if (totalClicks > 0) gscBonus += 2;
+    if (avgCtr > 3) gscBonus += 1;
+    if (avgPos < 30) gscBonus += 2;
+  }
+
   return {
-    score: Math.min(100, finalScore),
+    score: Math.min(100, finalScore + gscBonus),
     details,
     totalPages: p.pages.length,
     avgPageScore: Math.round(avgPageScore),
     siteScore: Math.round(siteNormalized),
-    siteBreakdown
+    siteBreakdown,
+    gscBonus
   };
 }
 
@@ -2350,7 +2675,9 @@ function scorePageGeo(pg, project) {
   if (citations.length >= 3) citePts += 10;
   else if (citations.length >= 1) citePts += 5;
   if (geo.hasDefinitiveStatements) citePts += 5;
-  if (geo.hasStatistics) citePts += 5;
+  // Credible sources linked
+  const hasCredibleSources = citations.some(c => c.url && c.url.length > 10);
+  if (hasCredibleSources) citePts += 5;
   citePts = Math.min(20, citePts);
   s += citePts;
   breakdown.citations = { score: citePts, max: 20, label: '\u05DE\u05D5\u05DB\u05E0\u05D5\u05EA \u05DC\u05E6\u05D9\u05D8\u05D5\u05D8' };
@@ -2374,8 +2701,9 @@ function scoreProjectGeo() {
   // Site-wide (30%)
   let sitePts = 0;
   const gs = p.geoSettings || {};
-  if (gs.trustSignals && gs.trustSignals.length > 0) sitePts += 30;
-  else sitePts += 0;
+  const trustCount = (gs.trustSignals || []).length;
+  if (trustCount >= 3) sitePts += 30;
+  else if (trustCount >= 1) sitePts += trustCount * 10;
   if (gs.aboutPageUrl) sitePts += 20;
   if (gs.businessExpertise) sitePts += 15;
   // FAQ schema somewhere
@@ -2407,6 +2735,11 @@ function renderGeo() {
 
   // Overview — compact stats + inline settings
   document.getElementById('geo-overview').innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button class="btn btn-sm btn-ghost" onclick="rescanGeoData()" id="geo-rescan-btn" style="font-size:11px;gap:4px;">
+        <span>&#x1F50D;</span> סריקת GEO מחדש
+      </button>
+    </div>
     <div class="grid-4" style="margin-bottom:16px;">
       <div class="card stat">
         <div class="score-ring ${scoreClass}" style="--pct:${geoResult.score}; margin:0 auto 8px;"><span>${geoResult.score}</span></div>
@@ -2433,7 +2766,7 @@ function renderGeo() {
           <input type="text" value="${escapeHtml(gs.aboutPageUrl || '')}" onchange="saveGeoSetting('aboutPageUrl', this.value)" placeholder="עמוד אודות (/about)" style="font-size:12px;padding:7px 10px;direction:ltr;text-align:left;" />
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);min-height:34px;">
-          ${(gs.trustSignals || []).map(t => `<span class="tag" data-val="${escapeHtml(t)}">${escapeHtml(t)} <span style="cursor:pointer;margin-right:4px;" onclick="removeTrustSignal('${escapeHtml(t)}')">&times;</span></span>`).join('')}
+          ${(gs.trustSignals || []).map(t => `<span class="tag" data-val="${escapeHtml(t)}">${escapeHtml(t)} <span style="cursor:pointer;margin-right:4px;" onclick="removeTrustSignal('${escapeAttrJs(t)}')">&times;</span></span>`).join('')}
           <input type="text" id="trust-signal-input" placeholder="אותות אמון + Enter" style="border:none;background:none;flex:1;min-width:100px;color:var(--text);font-size:12px;outline:none;" onkeydown="if(event.key==='Enter'){event.preventDefault();addTrustSignal(this.value);this.value='';}" />
         </div>
       </div>
@@ -2494,24 +2827,43 @@ function getGeoRecommendations(pg, geoScore) {
   const recs = [];
   const geo = pg.geo || {};
   const b = geoScore.breakdown;
+  const headings = pg.headings || [];
+  const words = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
 
+  // E-E-A-T (2026: critical for AI Overview citation)
   if (b.eeat.score < 15) {
-    if (!geo.authorName) recs.push('חסר שם מחבר');
-    if (!geo.authorCredentials) recs.push('חסר תפקיד/מומחיות');
-    if (!geo.authorUrl) recs.push('חסר קישור לפרופיל');
+    if (!geo.authorName) recs.push('חסר שם מחבר — AI מנועים מעדיפים תוכן עם זיהוי מחבר');
+    if (!geo.authorCredentials) recs.push('חסר תפקיד/מומחיות — הוסיפו credentials');
+    if (!geo.authorUrl) recs.push('חסר קישור לפרופיל מחבר');
   }
+  if (!geo.lastReviewedDate) recs.push('חסר תאריך עדכון — AI מנועים מעניקים עדיפות לתוכן טרי');
+
+  // AI-Friendly Content (2026: atomic answers + H2-as-query)
   if (b.aiContent.score < 15) {
-    if (!geo.hasQAFormat) recs.push('סמנו Q&A אם יש מבנה שאלה-תשובה');
-    if (!geo.hasStatistics) recs.push('שלבו נתונים ומספרים');
-    const words = (pg.content || '').split(/\s+/).filter(w => w.length > 0).length;
-    if (words < 300) recs.push('תוכן דליל — הרחיבו ל-300+ מילים');
+    if (!geo.hasQAFormat) recs.push('הוסיפו מבנה שאלה-תשובה (Q&A) — AI Overviews מעדיפים תשובות ישירות');
+    if (!geo.hasStatistics) recs.push('שלבו נתונים ומספרים — AI מצטט עובדות מדידות');
+    if (words < 500) recs.push('תוכן דליל — הרחיבו ל-500+ מילים לסיכוי ציטוט ב-AI');
   }
+
+  // H2 headers as questions (2026 best practice: match conversational queries)
+  const questionH2s = headings.filter(h => h.startsWith('H2') && /\?|מה |איך |למה |מתי |האם |כמה /.test(h));
+  if (questionH2s.length === 0 && headings.filter(h => h.startsWith('H2')).length > 0) {
+    recs.push('נסחו H2 כשאלות — AI Overviews מתאימים כותרות לשאילתות חיפוש');
+  }
+
+  // Schema for AI
   if (b.aiSchema.score < 10) {
-    if (!(pg.schema || []).includes('FAQPage')) recs.push('הוסיפו סכמת FAQPage');
+    if (!(pg.schema || []).includes('FAQPage')) recs.push('הוסיפו סכמת FAQPage — הסכמה הכי חשובה ל-AI');
+    if (!(pg.schema || []).includes('Article') && !(pg.schema || []).includes('BlogPosting')) {
+      recs.push('הוסיפו סכמת Article עם פרטי מחבר');
+    }
   }
+
+  // Citations (2026: source diversity matters)
   if (b.citations.score < 10) {
-    if ((geo.citations || []).length < 3) recs.push('הוסיפו 3+ מקורות');
+    if ((geo.citations || []).length < 3) recs.push('הוסיפו 3+ מקורות חיצוניים — AI מנועים מעדיפים תוכן עם אסמכתאות');
   }
+
   return recs;
 }
 
@@ -2599,6 +2951,68 @@ function removeCitation(pageId, index) {
   renderGeo();
 }
 
+async function rescanGeoData() {
+  const p = getProject();
+  if (!p || !p.url) { toast('אין כתובת אתר לסריקה'); return; }
+
+  const btn = document.getElementById('geo-rescan-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span> סורק...'; }
+
+  const baseUrl = p.url;
+  let scannedCount = 0;
+
+  for (const pg of p.pages) {
+    try {
+      const fullUrl = baseUrl + (pg.path === '/' ? '' : pg.path);
+      const html = await fetchWithProxy(fullUrl);
+      if (!html) continue;
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Flatten JSON-LD schemas
+      const schemas = [];
+      doc.querySelectorAll('script[type="application/ld+json"]').forEach(s => {
+        try {
+          const parsed = JSON.parse(s.textContent);
+          if (parsed['@graph'] && Array.isArray(parsed['@graph'])) parsed['@graph'].forEach(item => schemas.push(item));
+          else schemas.push(parsed);
+        } catch (e) {}
+      });
+
+      const geoSignals = extractGeoSignals(doc, html, schemas, pg.headings || [], baseUrl);
+
+      // Merge: only overwrite empty fields (preserve manual edits)
+      if (!pg.geo) pg.geo = {};
+      if (!pg.geo.authorName && geoSignals.authorName) pg.geo.authorName = geoSignals.authorName;
+      if (!pg.geo.authorCredentials && geoSignals.authorCredentials) pg.geo.authorCredentials = geoSignals.authorCredentials;
+      if (!pg.geo.authorUrl && geoSignals.authorUrl) pg.geo.authorUrl = geoSignals.authorUrl;
+      if (!pg.geo.lastReviewedDate && geoSignals.lastReviewedDate) pg.geo.lastReviewedDate = geoSignals.lastReviewedDate;
+      // Booleans: upgrade to true but don't downgrade
+      if (geoSignals.hasQAFormat) pg.geo.hasQAFormat = true;
+      if (geoSignals.hasStatistics) pg.geo.hasStatistics = true;
+      if (geoSignals.hasDefinitiveStatements) pg.geo.hasDefinitiveStatements = true;
+      // Citations: merge new ones (skip duplicates by URL)
+      if (!pg.geo.citations) pg.geo.citations = [];
+      const existingUrls = new Set(pg.geo.citations.map(c => c.url));
+      for (const cit of (geoSignals.citations || [])) {
+        if (!existingUrls.has(cit.url)) { pg.geo.citations.push(cit); existingUrls.add(cit.url); }
+      }
+
+      scannedCount++;
+    } catch (e) { console.error('GEO rescan error for', pg.path, e); }
+  }
+
+  // Also update geoSettings
+  const newSettings = buildGeoSettings(p.pages, { schemas: [] });
+  if (!p.geoSettings.aboutPageUrl && newSettings.aboutPageUrl) p.geoSettings.aboutPageUrl = newSettings.aboutPageUrl;
+
+  saveProjects();
+  renderedTabs.delete('geo');
+  renderGeo();
+  toast(`סריקת GEO הושלמה — ${scannedCount} עמודים נסרקו`);
+}
+
 // ═══════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════
@@ -2606,7 +3020,7 @@ function renderDashboard() {
   const p = getProject();
   if (!p) return;
   const { score, details } = scoreProject();
-  const domain = p.url.replace('https://', '').replace('http://', '');
+  const domain = (p.url || '').replace('https://', '').replace('http://', '') || 'unknown';
 
   document.getElementById('dashboard-subtitle').textContent = `בריאות ה-SEO של ${domain}`;
 
@@ -2642,9 +3056,16 @@ function renderDashboard() {
     { label: 'מבנה כותרות', count: details.headings, icon: details.headings > 0 ? '\u2713' : '!', color: details.headings === p.pages.length ? 'green' : 'yellow' },
     { label: 'קישורים פנימיים', count: details.linking, icon: details.linking > 0 ? '\u2713' : '!', color: details.linking === p.pages.length ? 'green' : details.linking > 0 ? 'yellow' : 'red' },
     { label: 'עומק תוכן', count: details.contentDepth, icon: details.contentDepth > 0 ? '\u2713' : '!', color: details.contentDepth === p.pages.length ? 'green' : details.contentDepth > 0 ? 'yellow' : 'red' },
-    { label: 'מפת אתר', count: p.sitemap.length, icon: p.sitemap.length > 0 ? '\u2713' : '!', color: p.sitemap.length > 0 ? 'green' : 'red' },
+    { label: 'מפת אתר', count: Math.min((p.sitemap || []).length, p.pages.length), icon: (p.sitemap || []).length > 0 ? '\u2713' : '!', color: (p.sitemap || []).length >= p.pages.length ? 'green' : (p.sitemap || []).length > 0 ? 'yellow' : 'red' },
     { label: 'תמונות (Alt)', count: details.images, icon: details.images > 0 ? '\u2713' : '!', color: details.images === p.pages.length ? 'green' : details.images > 0 ? 'yellow' : 'red' },
   ];
+
+  // Technical health from techSignals (if available from scan)
+  const techPages = p.pages.filter(pg => pg.techSignals);
+  if (techPages.length > 0) {
+    const viewportOk = techPages.filter(pg => pg.techSignals.viewportValid).length;
+    items.push({ label: 'Viewport (מובייל)', count: viewportOk, icon: viewportOk === techPages.length ? '\u2713' : '!', color: viewportOk === techPages.length ? 'green' : viewportOk > 0 ? 'yellow' : 'red' });
+  }
 
   document.getElementById('dashboard-health').innerHTML = items.map(it => `
     <div class="card">
@@ -2708,6 +3129,38 @@ function renderDashboard() {
   const noindexPages = p.pages.filter(pg => pg.noindex);
   if (noindexPages.length > 0) priorities.push({ severity: 1, icon: 'todo', text: `${noindexPages.length} עמודים עם noindex`, sub: 'עמודים אלה לא יופיעו בחיפוש: ' + noindexPages.map(pg => pg.name).join(', ') });
 
+  // Duplicate title detection
+  const titleMap = {};
+  p.pages.forEach(pg => { if (pg.title) { if (!titleMap[pg.title]) titleMap[pg.title] = []; titleMap[pg.title].push(pg.name); } });
+  const dupTitles = Object.entries(titleMap).filter(([t, pages]) => pages.length > 1);
+  if (dupTitles.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${dupTitles.length} כותרות כפולות`, sub: dupTitles.map(([t, pages]) => `"${t.substring(0, 40)}..." — ${pages.join(', ')}`).join('; ') });
+
+  // Duplicate description detection
+  const descMap = {};
+  p.pages.forEach(pg => { if (pg.description) { if (!descMap[pg.description]) descMap[pg.description] = []; descMap[pg.description].push(pg.name); } });
+  const dupDescs = Object.entries(descMap).filter(([d, pages]) => pages.length > 1);
+  if (dupDescs.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${dupDescs.length} תיאורים כפולים`, sub: 'עמודים שונים חולקים אותו תיאור — זה פוגע ב-SEO' });
+
+  // Technical health from scan (techSignals)
+  if (techPages.length > 0) {
+    const noViewport = techPages.filter(pg => !pg.techSignals.viewportValid);
+    if (noViewport.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${noViewport.length} עמודים ללא viewport תקין`, sub: 'נדרש לאינדוקס Mobile-First — הוסיפו meta viewport' });
+    const mixedContent = techPages.filter(pg => pg.techSignals.mixedContentCount > 0);
+    if (mixedContent.length > 0) priorities.push({ severity: 2, icon: 'todo', text: `${mixedContent.length} עמודים עם תוכן מעורב (HTTP על HTTPS)`, sub: 'משאבים לא מאובטחים — עדכנו קישורים ל-HTTPS' });
+    const renderBlocking = techPages.filter(pg => pg.techSignals.renderBlockingScripts > 2);
+    if (renderBlocking.length > 0) priorities.push({ severity: 1, icon: 'todo', text: `${renderBlocking.length} עמודים עם סקריפטים חוסמי עיבוד`, sub: 'הוסיפו async/defer לסקריפטים ב-head — משפיע על Core Web Vitals' });
+    const noFavicon = techPages.filter(pg => !pg.techSignals.hasFavicon);
+    if (noFavicon.length > 0 && noFavicon.length === techPages.length) priorities.push({ severity: 1, icon: 'todo', text: 'חסר favicon', sub: 'הוסיפו אייקון אתר — משפיע על אמינות ו-CTR בתוצאות' });
+    const imgNoDims = techPages.filter(pg => pg.techSignals.imagesWithoutDimensions > 3);
+    if (imgNoDims.length > 0) priorities.push({ severity: 1, icon: 'todo', text: `${imgNoDims.length} עמודים עם תמונות ללא מידות`, sub: 'הוסיפו width/height לתמונות — מונע CLS (Layout Shift)' });
+  }
+
+  // AI readiness check
+  const robotsText = p.robots || '';
+  if (!robotsText.includes('ChatGPT-User') && !robotsText.includes('PerplexityBot')) {
+    priorities.push({ severity: 1, icon: 'todo', text: 'בוטים של AI לא מוגדרים ב-robots.txt', sub: 'הגדירו הנחיות לבוטי AI — אפשרו חיפוש, חסמו אימון. ראו לשונית Robots.txt' });
+  }
+
   // Sort by severity (highest first)
   priorities.sort((a, b) => b.severity - a.severity);
 
@@ -2756,7 +3209,7 @@ function renderPagesTable() {
     const dl = (pg.description || '').length;
     const tb = tl >= 30 && tl <= 60 ? '<span class="badge green">OK</span>' : tl > 60 ? '<span class="badge yellow">&#x2191;</span>' : tl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
     const db = dl >= 100 && dl <= 160 ? '<span class="badge green">OK</span>' : dl > 160 ? '<span class="badge yellow">&#x2191;</span>' : dl > 0 ? '<span class="badge yellow">&#x2193;</span>' : '<span class="badge red">-</span>';
-    const sb = pg.schema && pg.schema.length > 0 ? `<span class="badge green">${pg.schema.join(', ')}</span>` : '<span class="badge red">-</span>';
+    const sb = pg.schema && pg.schema.length > 0 ? `<span class="badge green">${escapeHtml(pg.schema.join(', '))}</span>` : '<span class="badge red">-</span>';
     const indexBadge = pg.noindex ? '<span class="badge red">Noindex</span>' : '<span class="badge green">Index</span>';
     const psResult = scorePage(pg);
     const ps = psResult.score;
@@ -2769,9 +3222,11 @@ function renderPagesTable() {
       <td>${sb}</td>
       <td>${indexBadge}</td>
       <td><span class="badge ${psColor}">${ps}%</span></td>
-      <td>
+      <td style="white-space:nowrap;">
         <button class="btn btn-sm btn-ghost" onclick="editPage('${pg.id}')">&#x270f;</button>
+        ${p.psiApiKey ? `<button class="btn btn-sm btn-ghost" onclick="testPageSpeed('${pg.id}')" id="psi-btn-${pg.id}" title="Core Web Vitals">&#x26a1;</button>` : ''}
         <button class="btn btn-sm btn-ghost" onclick="removePage('${pg.id}')" style="color:var(--red);">&times;</button>
+        ${pg.psiData ? `<span style="font-size:10px;margin-right:4px;" title="LCP: ${pg.psiData.lcp || '?'} | CLS: ${pg.psiData.cls || '?'} | Speed: ${pg.psiData.score || '?'}"><span class="badge ${(pg.psiData.score || 0) >= 90 ? 'green' : (pg.psiData.score || 0) >= 50 ? 'yellow' : 'red'}">${pg.psiData.score || '?'}</span></span>` : ''}
       </td>
     </tr>`;
   }).join('');
@@ -2792,6 +3247,64 @@ function removePage(pageId) {
   saveProjects();
   renderAll();
   toast('העמוד נמחק');
+}
+
+async function testPageSpeed(pageId) {
+  const p = getProject();
+  if (!p || !p.psiApiKey) { toast('הזינו PSI API Key בהגדרות'); return; }
+  const pg = p.pages.find(x => x.id === pageId);
+  if (!pg) return;
+
+  const btn = document.getElementById('psi-btn-' + pageId);
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span>'; }
+
+  const fullUrl = p.url + (pg.path === '/' ? '' : pg.path);
+  const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(fullUrl)}&key=${p.psiApiKey}&strategy=mobile&category=performance`;
+
+  try {
+    const resp = await fetch(apiUrl, { signal: makeAbortSignal(30000) });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${resp.status}`);
+    }
+    const data = await resp.json();
+
+    const lighthouse = data.lighthouseResult || {};
+    const categories = lighthouse.categories || {};
+    const audits = lighthouse.audits || {};
+    const score = Math.round((categories.performance?.score || 0) * 100);
+
+    // Core Web Vitals from field data (CrUX) or lab data
+    const crux = data.loadingExperience?.metrics || {};
+    const lcp = crux.LARGEST_CONTENTFUL_PAINT_MS?.percentile || Math.round(parseFloat(audits['largest-contentful-paint']?.numericValue || 0));
+    const cls = crux.CUMULATIVE_LAYOUT_SHIFT_SCORE?.percentile != null
+      ? (crux.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile / 100).toFixed(2)
+      : parseFloat(audits['cumulative-layout-shift']?.numericValue || 0).toFixed(2);
+    const inp = crux.INTERACTION_TO_NEXT_PAINT?.percentile || null;
+
+    pg.psiData = {
+      score,
+      lcp: lcp > 1000 ? (lcp / 1000).toFixed(1) + 's' : lcp + 'ms',
+      cls,
+      inp: inp ? (inp + 'ms') : null,
+      lcpRaw: lcp,
+      clsRaw: parseFloat(cls),
+      inpRaw: inp,
+      lcpGood: lcp <= 2500,
+      clsGood: parseFloat(cls) <= 0.1,
+      inpGood: inp ? inp <= 200 : null,
+      testedAt: new Date().toISOString().split('T')[0],
+      strategy: 'mobile'
+    };
+
+    saveProjects();
+    renderPagesTable();
+    toast(`${pg.name}: ציון ${score}/100 | LCP ${pg.psiData.lcp} | CLS ${cls}`, score >= 90 ? 'success' : '');
+  } catch (e) {
+    console.error('PSI error:', e);
+    toast('שגיאת PSI: ' + e.message);
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#x26a1;'; }
+  }
 }
 
 function openAddPageModal() {
@@ -2830,7 +3343,8 @@ function addPageFromModal() {
     outgoingLinks: 0,
     incomingLinks: 0,
     order: p.pages.length,
-    geo: { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' }
+    geo: { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' },
+    keywordData: []
   });
 
   saveProjects();
@@ -2899,11 +3413,11 @@ function updatePreview() {
   document.getElementById('serp-desc').textContent = d.length > 160 ? d.substring(0, 157) + '...' : d;
 
   const tc = document.getElementById('title-count');
-  tc.textContent = `${t.length} / 60 characters`;
+  tc.textContent = `${t.length} / 60 תווים`;
   tc.className = 'char-count' + (t.length > 60 ? ' over' : t.length >= 30 && t.length <= 60 ? ' good' : t.length > 0 ? ' warn' : '');
 
   const dc = document.getElementById('desc-count');
-  dc.textContent = `${d.length} / 160 characters`;
+  dc.textContent = `${d.length} / 160 תווים`;
   dc.className = 'char-count' + (d.length > 160 ? ' over' : d.length >= 100 && d.length <= 160 ? ' good' : d.length > 0 ? ' warn' : '');
 }
 
@@ -2953,7 +3467,14 @@ function _doAutoSave() {
   document.getElementById('noindex-label').textContent = page.noindex ? 'Noindex' : 'Index';
 
   const tags = document.querySelectorAll('#keywords-tags .tag');
-  page.keywords = Array.from(tags).map(t => t.dataset.kw);
+  const newKeywords = Array.from(tags).map(t => t.dataset.kw);
+
+  // Sync keywordData with keywords — preserve existing intent/metadata
+  const oldKwData = page.keywordData || [];
+  const kwDataMap = {};
+  oldKwData.forEach(kd => { kwDataMap[kd.keyword] = kd; });
+  page.keywords = newKeywords;
+  page.keywordData = newKeywords.map(kw => kwDataMap[kw] || { keyword: kw, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' });
 
   currentPage = page;
   saveProjects();
@@ -2965,7 +3486,9 @@ function autoSave() {
 }
 
 function savePageChanges() {
-  autoSave();
+  clearTimeout(autoSaveTimer);
+  _doAutoSave();
+  renderedTabs.clear();
   renderDashboard();
   renderPagesTable();
   updatePageChecklist(currentPage);
@@ -3008,7 +3531,9 @@ const schemaTemplates = {
   Service: { "@context": "https://schema.org", "@type": "Service", "name": "", "description": "", "provider": { "@type": "LocalBusiness", "name": "", "url": "" }, "areaServed": { "@type": "Country", "name": "Israel" } },
   BreadcrumbList: { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "ראשי", "item": "" }] },
   Product: { "@context": "https://schema.org", "@type": "Product", "name": "", "description": "", "brand": { "@type": "Brand", "name": "" }, "offers": { "@type": "Offer", "price": "", "priceCurrency": "ILS", "availability": "https://schema.org/InStock" } },
-  Article: { "@context": "https://schema.org", "@type": "Article", "headline": "", "description": "", "author": { "@type": "Person", "name": "" }, "datePublished": new Date().toISOString().split('T')[0] },
+  Article: { "@context": "https://schema.org", "@type": "Article", "headline": "", "description": "", "author": { "@type": "Person", "name": "", "jobTitle": "" }, "datePublished": new Date().toISOString().split('T')[0], "dateModified": new Date().toISOString().split('T')[0] },
+  HowTo: { "@context": "https://schema.org", "@type": "HowTo", "name": "", "description": "", "step": [{ "@type": "HowToStep", "name": "שלב 1", "text": "" }, { "@type": "HowToStep", "name": "שלב 2", "text": "" }] },
+  Organization: { "@context": "https://schema.org", "@type": "Organization", "name": "", "url": "", "logo": "", "description": "", "contactPoint": { "@type": "ContactPoint", "telephone": "", "contactType": "customer service" }, "sameAs": [] },
   Review: { "@context": "https://schema.org", "@type": "AggregateRating", "itemReviewed": { "@type": "LocalBusiness", "name": "" }, "ratingValue": "4.8", "bestRating": "5", "ratingCount": "50" },
   Custom: { "@context": "https://schema.org", "@type": "" }
 };
@@ -3208,7 +3733,7 @@ function resetRobots() {
   p.robots = `User-agent: *\nAllow: /\n\nSitemap: ${p.url}/sitemap.xml`;
   saveProjects();
   renderRobots();
-  toast('robots.txt אופס');
+  toast('robots.txt אופס לברירת מחדל');
 }
 
 function downloadRobots() {
@@ -3217,6 +3742,17 @@ function downloadRobots() {
   const blob = new Blob([p.robots || ''], { type: 'text/plain' });
   downloadBlob(blob, 'robots.txt');
   toast('robots.txt הורד', 'success');
+}
+
+function addAiBotDirectives() {
+  const p = getProject();
+  if (!p) return;
+  const aiDirectives = `\n# ── AI Search Bots (allow retrieval) ──\nUser-agent: ChatGPT-User\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\n# ── AI Training Bots (block) ──\nUser-agent: GPTBot\nDisallow: /\n\nUser-agent: Google-Extended\nDisallow: /\n\nUser-agent: CCBot\nDisallow: /\n\nUser-agent: anthropic-ai\nDisallow: /`;
+  if (p.robots && p.robots.includes('GPTBot')) { toast('הנחיות AI כבר קיימות בקובץ'); return; }
+  p.robots = (p.robots || '') + '\n' + aiDirectives;
+  saveProjects();
+  renderRobots();
+  toast('הנחיות בוטים של AI נוספו', 'success');
 }
 
 // ═══════════════════════════════════════════════════
@@ -3252,7 +3788,13 @@ function renderKeywordMap(p, el) {
   const pagesWithoutKw = p.pages.filter(pg => !pg.keywords || pg.keywords.length === 0);
 
   let html = pagesWithKw.map(pg => {
-    const kwData = pg.keywordData || pg.keywords.map(k => ({ keyword: k, intent: '', searchVolume: null, competition: '', currentRanking: null }));
+    // Ensure keywordData is synced with keywords
+    if (!pg.keywordData || pg.keywordData.length !== pg.keywords.length) {
+      const existing = {};
+      (pg.keywordData || []).forEach(kd => { existing[kd.keyword] = kd; });
+      pg.keywordData = pg.keywords.map(k => existing[k] || { keyword: k, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' });
+    }
+    const kwData = pg.keywordData;
     const kws = pg.keywords || [];
     const titleLower = (pg.title || '').toLowerCase();
     const h1Text = ((pg.headings || []).find(h => h.startsWith('H1')) || '').replace(/^H1:\s*/, '').toLowerCase();
@@ -3282,7 +3824,7 @@ function renderKeywordMap(p, el) {
                 <span class="badge ${inH1 ? 'green' : 'red'}" title="\u05D1-H1" style="font-size:10px;">H1 ${inH1 ? '\u2713' : '\u2717'}</span>
                 <span class="badge ${inDesc ? 'green' : 'red'}" title="\u05D1\u05EA\u05D9\u05D0\u05D5\u05E8" style="font-size:10px;">D ${inDesc ? '\u2713' : '\u2717'}</span>
                 <span style="font-size:10px;color:var(--text-dim);">${kd.competition ? getDifficultyLabel(kd.competition) : ''}</span>
-                <select style="font-size:10px;padding:2px 4px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);" onchange="updateKeywordIntent('${pg.id}','${escapeHtml(kw)}',this.value)" title="\u05DB\u05D5\u05D5\u05E0\u05EA \u05D7\u05D9\u05E4\u05D5\u05E9">
+                <select style="font-size:10px;padding:2px 4px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);" onchange="updateKeywordIntent('${pg.id}','${escapeAttrJs(kw)}',this.value)" title="\u05DB\u05D5\u05D5\u05E0\u05EA \u05D7\u05D9\u05E4\u05D5\u05E9">
                   <option value="" ${!kd.intent ? 'selected' : ''}>\u05DB\u05D5\u05D5\u05E0\u05D4</option>
                   <option value="informational" ${kd.intent === 'informational' ? 'selected' : ''}>\u05DE\u05D9\u05D3\u05E2\u05D9\u05EA</option>
                   <option value="navigational" ${kd.intent === 'navigational' ? 'selected' : ''}>\u05E0\u05D9\u05D5\u05D5\u05D8\u05D9\u05EA</option>
@@ -3473,7 +4015,7 @@ function renderContentGaps(p, el) {
             ${g.intent ? `<span class="intent-badge intent-${g.intent === 'informational' ? 'info' : g.intent === 'navigational' ? 'nav' : g.intent === 'transactional' ? 'trans' : 'comm'}">${getIntentLabel(g.intent)}</span>` : ''}
             <span style="font-size:10px;color:var(--text-dim);margin-right:6px;">\u05DE\u05EA\u05D7\u05E8\u05D4: ${escapeHtml(g.competitor)}${g.position ? ` (\u05DE\u05D9\u05E7\u05D5\u05DD ~${g.position})` : ''}</span>
           </div>
-          <button class="btn btn-sm btn-accent" onclick="addGapKeywordToPage('${escapeHtml(g.keyword)}')">+ \u05D4\u05D5\u05E1\u05E3 \u05DC\u05E2\u05DE\u05D5\u05D3</button>
+          <button class="btn btn-sm btn-accent" onclick="addGapKeywordToPage('${escapeAttrJs(g.keyword)}')">+ \u05D4\u05D5\u05E1\u05E3 \u05DC\u05E2\u05DE\u05D5\u05D3</button>
         </div>
       `).join('')}
     </div>
@@ -3651,7 +4193,7 @@ function parseGscCsv(text) {
       page: pageIdx >= 0 ? cols[pageIdx] || '' : '',
       clicks: clickIdx >= 0 ? parseInt(cols[clickIdx]) || 0 : 0,
       impressions: impIdx >= 0 ? parseInt(cols[impIdx]) || 0 : 0,
-      ctr: ctrIdx >= 0 ? parseFloat(cols[ctrIdx]?.replace('%', '')) || 0 : 0,
+      ctr: ctrIdx >= 0 ? (() => { let v = parseFloat((cols[ctrIdx] || '').replace('%', '').replace(',', '.')); if (isNaN(v)) return 0; return v < 1 && !cols[ctrIdx]?.includes('%') ? v * 100 : v; })() : 0,
       position: posIdx >= 0 ? parseFloat(cols[posIdx]) || 0 : 0,
     };
     if (row.query || row.page) rows.push(row);
@@ -3674,6 +4216,7 @@ function importGscData() {
     if (!p.gscHistory) p.gscHistory = [];
     if (p.gscData && p.gscData.length > 0) {
       p.gscHistory.push({ date: new Date().toISOString().split('T')[0], data: p.gscData });
+      if (p.gscHistory.length > 5) p.gscHistory = p.gscHistory.slice(-5);
     }
     p.gscData = rows;
     saveProjects();
@@ -3698,6 +4241,7 @@ function handleGscFile(event) {
       if (!p.gscHistory) p.gscHistory = [];
       if (p.gscData && p.gscData.length > 0) {
         p.gscHistory.push({ date: new Date().toISOString().split('T')[0], data: p.gscData });
+        if (p.gscHistory.length > 5) p.gscHistory = p.gscHistory.slice(-5);
       }
       p.gscData = rows;
       saveProjects();
@@ -3739,6 +4283,7 @@ function renderGscData() {
   const p = getProject();
   const historyCount = (p && p.gscHistory) ? p.gscHistory.length : 0;
   const prevData = (p && p.gscHistory && p.gscHistory.length > 0) ? p.gscHistory[p.gscHistory.length - 1].data : null;
+  const lastImportDate = (p && p.gscHistory && p.gscHistory.length > 0) ? p.gscHistory[p.gscHistory.length - 1].date : null;
   // Build previous position lookup
   const prevPositions = {};
   if (prevData) {
@@ -3751,7 +4296,7 @@ function renderGscData() {
     <div class="card stat"><div class="stat-value" style="color:var(--green)">${avgCtr}%</div><div class="stat-label">CTR ממוצע</div></div>
     <div class="card stat">
       <div class="stat-value" style="color:var(--orange)">${avgPos}</div>
-      <div class="stat-label">מיקום ממוצע ${historyCount > 0 ? '<span class="badge purple" style="margin-right:4px;">' + historyCount + ' ייבואים</span>' : ''}</div>
+      <div class="stat-label">מיקום ממוצע ${historyCount > 0 ? '<span class="badge purple" style="margin-right:4px;">' + historyCount + ' ייבואים</span>' + (lastImportDate ? '<br><span style="font-size:10px;color:var(--text-muted);">עדכון אחרון: ' + lastImportDate + '</span>' : '') : ''}</div>
     </div>
   `;
 
@@ -3775,7 +4320,7 @@ function renderGscData() {
     return gscSortDir * (typeof av === 'string' ? av.localeCompare(bv) : av - bv);
   });
 
-  document.getElementById('gsc-queries-table').innerHTML = sorted.slice(0, 100).map(r => {
+  document.getElementById('gsc-queries-table').innerHTML = sorted.slice(0, 200).map(r => {
     let status = '', statusClass = '';
     if (r.position <= 3) { status = 'מוביל'; statusClass = 'green'; }
     else if (r.position <= 10) { status = 'עמוד 1'; statusClass = 'blue'; }
@@ -3789,7 +4334,7 @@ function renderGscData() {
       else if (diff < -0.5) trend = ' <span style="color:var(--red);" title="ירידה של ' + Math.abs(diff).toFixed(1) + ' מקומות">\u2193</span>';
       else trend = ' <span style="color:var(--text-dim);">\u2192</span>';
     }
-    return `<tr>
+    return `<tr data-query="${escapeHtml(r.query || r.page)}" data-position="${r.position}" data-ctr="${r.ctr}">
       <td style="font-size:12px;direction:ltr;text-align:right;">${escapeHtml(r.query || r.page)}</td>
       <td style="font-weight:600;">${r.clicks}</td>
       <td>${r.impressions.toLocaleString()}</td>
@@ -3798,6 +4343,41 @@ function renderGscData() {
       <td><span class="badge ${statusClass}">${status}</span></td>
     </tr>`;
   }).join('');
+
+  // Update visible count after render
+  const totalRendered = document.querySelectorAll('#gsc-queries-table tr').length;
+  const countEl = document.getElementById('gsc-visible-count');
+  if (countEl) countEl.textContent = `${totalRendered}/${gscRows.length}`;
+}
+
+function filterGscTable() {
+  const queryFilter = (document.getElementById('gsc-filter-query')?.value || '').toLowerCase();
+  const posFilter = document.getElementById('gsc-filter-position')?.value || '';
+  const ctrFilter = document.getElementById('gsc-filter-ctr')?.value || '';
+
+  const rows = document.querySelectorAll('#gsc-queries-table tr');
+  rows.forEach(row => {
+    const query = (row.dataset.query || '').toLowerCase();
+    const pos = parseFloat(row.dataset.position) || 0;
+    const ctr = parseFloat(row.dataset.ctr) || 0;
+
+    let show = true;
+    if (queryFilter && !query.includes(queryFilter)) show = false;
+    if (posFilter) {
+      const [min, max] = posFilter.split('-').map(Number);
+      if (pos < min || pos > max) show = false;
+    }
+    if (ctrFilter === 'low' && ctr >= 2) show = false;
+    if (ctrFilter === 'medium' && (ctr < 2 || ctr > 5)) show = false;
+    if (ctrFilter === 'high' && ctr <= 5) show = false;
+
+    row.style.display = show ? '' : 'none';
+  });
+
+  // Update visible count
+  const visible = document.querySelectorAll('#gsc-queries-table tr:not([style*="display: none"])').length;
+  const countEl2 = document.getElementById('gsc-visible-count');
+  if (countEl2) countEl2.textContent = `${visible}/${rows.length}`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -3824,7 +4404,7 @@ function renderChecklist() {
     {
       title: '\uD83E\uDDE9 נתונים מובנים',
       items: [
-        { key: 'schema-business', text: 'סכמת ' + (p.businessType || 'LocalBusiness'), auto: () => p.schemas && p.schemas.some(s => s.type === 'LocalBusiness' || s.json['@type'] === p.businessType) },
+        { key: 'schema-business', text: 'סכמת ' + (p.businessType || 'LocalBusiness'), auto: () => p.schemas && p.schemas.some(s => s.type === 'LocalBusiness' || (s.json && s.json['@type'] === p.businessType)) },
         { key: 'schema-faq', text: 'סכמת FAQPage', check: true },
         { key: 'schema-service', text: 'סכמת Service בעמודי שירות', check: true },
         { key: 'schema-breadcrumb', text: 'סכמת BreadcrumbList', check: true },
@@ -3860,6 +4440,17 @@ function renderChecklist() {
         { key: 'geo-stats', text: '\u05E0\u05EA\u05D5\u05E0\u05D9\u05DD \u05D5\u05E1\u05D8\u05D8\u05D9\u05E1\u05D8\u05D9\u05E7\u05D5\u05EA \u05D1\u05EA\u05D5\u05DB\u05DF', check: true },
         { key: 'geo-about', text: '\u05E2\u05DE\u05D5\u05D3 \u05D0\u05D5\u05D3\u05D5\u05EA \u05E2\u05DD \u05DE\u05D5\u05DE\u05D7\u05D9\u05D5\u05EA', auto: () => p.geoSettings && p.geoSettings.aboutPageUrl },
       ]
+    },
+    {
+      title: '\uD83C\uDF10 מוכנות AI (2026)',
+      items: [
+        { key: 'ai-robots', text: 'הנחיות בוטים של AI ב-robots.txt', auto: () => (p.robots || '').includes('ChatGPT-User') || (p.robots || '').includes('PerplexityBot') },
+        { key: 'ai-training-blocked', text: 'בוטי אימון AI חסומים (GPTBot, Google-Extended)', auto: () => (p.robots || '').includes('GPTBot') && (p.robots || '').includes('Google-Extended') },
+        { key: 'ai-atomic-answers', text: 'תשובות ישירות (Atomic Answers) בתוכן', check: true },
+        { key: 'ai-h2-questions', text: 'כותרות H2 מנוסחות כשאלות', auto: () => p.pages.some(pg => (pg.headings || []).some(h => h.startsWith('H2') && /\?/.test(h))) },
+        { key: 'ai-freshness', text: 'תוכן עודכן ב-6 חודשים אחרונים', auto: () => { const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6); return p.pages.some(pg => pg.geo && pg.geo.lastReviewedDate && new Date(pg.geo.lastReviewedDate) > sixMonthsAgo); } },
+        { key: 'ai-viewport', text: 'תג viewport תקין (Mobile-First)', auto: () => p.pages.some(pg => pg.techSignals && pg.techSignals.viewportValid) },
+      ]
     }
   ];
 
@@ -3870,13 +4461,25 @@ function renderChecklist() {
     const itemsHtml = cat.items.map(item => {
       const isAuto = item.auto ? item.auto() : false;
       const isManual = cl[item.key] === true;
-      const isDone = isAuto || isManual;
+      const isManualOff = cl[item.key] === false; // explicit override to "not done"
+      const isDone = isManualOff ? false : (isAuto || isManual);
       totalItems++;
       if (isDone) doneItems++;
 
+      // All items are clickable — auto items can be manually overridden
+      const clickable = true;
+      let subText;
+      if (item.auto) {
+        if (isManualOff) subText = '<div class="sub" style="cursor:pointer;color:var(--yellow);" onclick="toggleChecklist(\'' + item.key + '\')">זוהה אוטומטית — דרסתם ידנית (לחצו לביטול)</div>';
+        else if (isAuto) subText = '<div class="sub" style="cursor:pointer;" onclick="toggleChecklist(\'' + item.key + '\')">זוהה אוטומטית (לחצו לדרוס)</div>';
+        else subText = '<div class="sub" style="cursor:pointer;color:var(--primary);" onclick="toggleChecklist(\'' + item.key + '\')">לא זוהה (לחצו לסימון ידני)</div>';
+      } else {
+        subText = '<div class="sub" style="cursor:pointer;color:var(--primary);" onclick="toggleChecklist(\'' + item.key + '\')">' + (isManual ? 'הושלם (לחצו לביטול)' : 'לחצו לסימון') + '</div>';
+      }
+
       return `<div class="checklist-item">
-        <div class="check-icon ${isDone ? 'done' : 'todo'}" style="cursor:${item.check ? 'pointer' : 'default'};" onclick="${item.check ? `toggleChecklist('${item.key}')` : ''}">${isDone ? '\u2713' : '~'}</div>
-        <div class="checklist-text"><div>${item.text}</div>${item.auto ? '<div class="sub">' + (isAuto ? 'זוהה אוטומטית' : 'לא זוהה') + '</div>' : '<div class="sub" style="cursor:pointer;color:var(--primary);" onclick="toggleChecklist(\'' + item.key + '\')">' + (isManual ? 'הושלם (לחצו לביטול)' : 'לחצו לסימון') + '</div>'}</div>
+        <div class="check-icon ${isDone ? 'done' : 'todo'}" style="cursor:pointer;" onclick="toggleChecklist('${item.key}')">${isDone ? '\u2713' : '~'}</div>
+        <div class="checklist-text"><div>${item.text}</div>${subText}</div>
       </div>`;
     }).join('');
 
@@ -3903,7 +4506,17 @@ function toggleChecklist(key) {
   const p = getProject();
   if (!p) return;
   if (!p.checklist) p.checklist = {};
-  p.checklist[key] = !p.checklist[key];
+  const current = p.checklist[key];
+  if (current === true) {
+    // Was manually checked → uncheck (set false = explicit override)
+    p.checklist[key] = false;
+  } else if (current === false) {
+    // Was explicitly overridden → clear override (back to auto/default)
+    delete p.checklist[key];
+  } else {
+    // Was undefined (default) → manually check
+    p.checklist[key] = true;
+  }
   saveProjects();
   renderChecklist();
 }
@@ -3919,6 +4532,7 @@ function renderSettings() {
   document.getElementById('settings-lang').value = p.lang || 'he';
   document.getElementById('settings-business-type').value = p.businessType || 'LocalBusiness';
   document.getElementById('settings-ga').value = p.ga || '';
+  document.getElementById('settings-psi-key').value = p.psiApiKey || '';
 }
 
 function updateProjectSettings() {
@@ -3929,6 +4543,7 @@ function updateProjectSettings() {
   p.lang = document.getElementById('settings-lang').value;
   p.businessType = document.getElementById('settings-business-type').value;
   p.ga = document.getElementById('settings-ga').value.trim();
+  p.psiApiKey = document.getElementById('settings-psi-key').value.trim();
   saveProjects();
   populateProjectSelector();
 }
@@ -4043,7 +4658,31 @@ async function rescanProject() {
         existing.noindex = sp.noindex;
         existing.outgoingLinks = sp.links.length;
         existing.incomingLinks = incomingCounts[sp.path] || 0;
-        // Preserve: keywords, content, schema (user-edited)
+        // Preserve user-edited keywords; auto-fill if empty
+        if ((!existing.keywords || existing.keywords.length === 0) && sp.extractedKeywords && sp.extractedKeywords.length > 0) {
+          existing.keywords = sp.extractedKeywords;
+        }
+        // Update schemas from scan (merge with existing)
+        if (sp.schemas && sp.schemas.length > 0) {
+          const scannedTypes = sp.schemas.map(s => (typeof s === 'string') ? s : (s['@type'] || 'Unknown'));
+          const existingTypes = new Set(existing.schema || []);
+          scannedTypes.forEach(t => existingTypes.add(t));
+          existing.schema = [...existingTypes];
+        }
+        // Update GEO signals from rescan (merge, don't overwrite manual edits)
+        if (sp.geoSignals) {
+          if (!existing.geo) existing.geo = {};
+          if (!existing.geo.authorName && sp.geoSignals.authorName) existing.geo.authorName = sp.geoSignals.authorName;
+          if (!existing.geo.authorCredentials && sp.geoSignals.authorCredentials) existing.geo.authorCredentials = sp.geoSignals.authorCredentials;
+          if (!existing.geo.authorUrl && sp.geoSignals.authorUrl) existing.geo.authorUrl = sp.geoSignals.authorUrl;
+          if (!existing.geo.lastReviewedDate && sp.geoSignals.lastReviewedDate) existing.geo.lastReviewedDate = sp.geoSignals.lastReviewedDate;
+          if (sp.geoSignals.hasQAFormat) existing.geo.hasQAFormat = true;
+          if (sp.geoSignals.hasStatistics) existing.geo.hasStatistics = true;
+          if (sp.geoSignals.hasDefinitiveStatements) existing.geo.hasDefinitiveStatements = true;
+          if (!existing.geo.citations) existing.geo.citations = [];
+          const existUrls = new Set(existing.geo.citations.map(c => c.url));
+          (sp.geoSignals.citations || []).forEach(c => { if (!existUrls.has(c.url)) { existing.geo.citations.push(c); existUrls.add(c.url); } });
+        }
         updatedPages++;
       } else {
         // New page discovered
@@ -4055,12 +4694,14 @@ async function rescanProject() {
           canonical: sp.canonical || sp.path,
           ogTitle: sp.ogTitle || '', ogDesc: sp.ogDesc || '', ogImage: sp.ogImage || '',
           noindex: sp.noindex, content: '',
-          keywords: sp.metaKeywords ? sp.metaKeywords.split(',').map(k => k.trim()).filter(Boolean) : [],
-          headings: sp.headings || [], schema: sp.schemas ? sp.schemas.map(s => s['@type'] || 'Unknown') : [],
+          keywords: sp.extractedKeywords || [],
+          headings: sp.headings || [], schema: sp.schemas ? sp.schemas.map(s => (typeof s === 'string') ? s : (s['@type'] || 'Unknown')) : [],
           images: sp.images || [],
           outgoingLinks: sp.links.length,
           incomingLinks: incomingCounts[sp.path] || 0,
-          order: p.pages.length
+          order: p.pages.length,
+          geo: sp.geoSignals || { authorName: '', authorCredentials: '', authorUrl: '', citations: [], hasStatistics: false, hasDefinitiveStatements: false, hasQAFormat: false, lastReviewedDate: '' },
+          keywordData: (sp.extractedKeywords || []).map(kw => ({ keyword: kw, intent: '', searchVolume: null, competition: '', currentRanking: null, cluster: '' }))
         });
         newPages++;
       }
@@ -4187,38 +4828,38 @@ function renderExport() {
 
   switch (currentExportTab) {
     case 'summary':
-      output = `# SEO Export — ${p.name} (${domain})\n# Generated: ${new Date().toISOString()}\n# Tool: Autonomous SEO v1.0\n\n`;
-      output += `== Project ==\nURL: ${p.url}\nBusiness: ${p.name}\nType: ${p.businessType}\nLang: ${p.lang}\nPages: ${p.pages.length}\nSchemas: ${p.schemas ? p.schemas.length : 0}\nSitemap entries: ${p.sitemap.length}\n\n`;
+      output = `# ייצוא SEO — ${p.name} (${domain})\n# נוצר: ${new Date().toISOString()}\n# כלי: Autonomous SEO v1.0\n\n`;
+      output += `== פרויקט ==\nכתובת: ${p.url}\nעסק: ${p.name}\nסוג: ${p.businessType}\nשפה: ${p.lang}\nעמודים: ${p.pages.length}\nסכמות: ${p.schemas ? p.schemas.length : 0}\nרשומות מפת אתר: ${(p.sitemap || []).length}\n\n`;
       const { score } = scoreProject();
-      output += `== SEO Score: ${score}/100 ==\n\n`;
-      output += `== Pages Summary ==\n`;
+      output += `== ציון SEO: ${score}/100 ==\n\n`;
+      output += `== סיכום עמודים ==\n`;
       p.pages.forEach(pg => {
         output += `\n--- ${pg.name} (${pg.path}) ---\n`;
-        output += `  Title: ${pg.title || '(empty)'}\n`;
-        output += `  Description: ${pg.description || '(empty)'}\n`;
+        output += `  כותרת: ${pg.title || '(ריק)'}\n`;
+        output += `  תיאור: ${pg.description || '(ריק)'}\n`;
         output += `  Canonical: ${pg.canonical || '-'}\n`;
-        output += `  Keywords: ${(pg.keywords || []).join(', ') || '-'}\n`;
-        output += `  Headings: ${(pg.headings || []).join(' | ') || '-'}\n`;
-        output += `  Score: ${scorePage(pg).score}%\n`;
+        output += `  מילות מפתח: ${(pg.keywords || []).join(', ') || '-'}\n`;
+        output += `  כותרות: ${(pg.headings || []).join(' | ') || '-'}\n`;
+        output += `  ציון: ${scorePage(pg).score}%\n`;
       });
       const geoResult = scoreProjectGeo();
-      output += `\n== GEO Score: ${geoResult.score}/100 ==\n`;
-      output += `Site-wide GEO: ${geoResult.siteScore}/100\n`;
-      output += `Average page GEO: ${geoResult.avgPage}/100\n`;
+      output += `\n== ציון GEO: ${geoResult.score}/100 ==\n`;
+      output += `GEO כלל-אתר: ${geoResult.siteScore}/100\n`;
+      output += `ממוצע GEO עמודים: ${geoResult.avgPage}/100\n`;
       break;
 
     case 'meta':
-      output = `# Meta Data Export — ${domain}\n\n`;
+      output = `# ייצוא מטא — ${domain}\n\n`;
       p.pages.forEach(pg => {
         output += `--- ${pg.name} (${pg.file || pg.path}) ---\n`;
-        output += `title: "${pg.title}"\n`;
-        output += `description: "${pg.description}"\n`;
+        output += `כותרת: "${pg.title}"\n`;
+        output += `תיאור: "${pg.description}"\n`;
         output += `canonical: "${(p.url || '') + pg.canonical}"\n`;
         if (pg.ogTitle) output += `og:title: "${pg.ogTitle}"\n`;
         if (pg.ogDesc) output += `og:description: "${pg.ogDesc}"\n`;
         if (pg.ogImage) output += `og:image: "${pg.ogImage}"\n`;
         if (pg.noindex) output += `<meta name="robots" content="noindex, nofollow">\n`;
-        if (pg.keywords && pg.keywords.length > 0) output += `keywords: [${pg.keywords.join(', ')}]\n`;
+        if (pg.keywords && pg.keywords.length > 0) output += `מילות מפתח: [${pg.keywords.join(', ')}]\n`;
         output += '\n';
       });
       break;
@@ -4234,7 +4875,7 @@ function renderExport() {
           output += `<script type="application/ld+json">\n${JSON.stringify(s.json, null, 2)}\n<\/script>\n\n`;
         });
       } else {
-        output = '(no schemas defined)';
+        output = '(לא הוגדרו סכמות)';
       }
       break;
 
@@ -4244,17 +4885,17 @@ function renderExport() {
 
     case 'geo':
       const geoR = scoreProjectGeo();
-      output = `# GEO Export \u2014 ${p.name} (${domain})\n# Score: ${geoR.score}/100\n\n`;
+      output = `# ייצוא GEO \u2014 ${p.name} (${domain})\n# ציון: ${geoR.score}/100\n\n`;
       p.pages.forEach(pg => {
         const gs = scorePageGeo(pg, p);
         const geo = pg.geo || {};
         output += `--- ${pg.name} (${pg.path}) \u2014 GEO: ${gs.score}% ---\n`;
-        output += `  Author: ${geo.authorName || '(none)'}\n`;
-        output += `  Credentials: ${geo.authorCredentials || '(none)'}\n`;
-        output += `  Citations: ${(geo.citations || []).length}\n`;
-        output += `  Q&A Format: ${geo.hasQAFormat ? 'Yes' : 'No'}\n`;
-        output += `  Statistics: ${geo.hasStatistics ? 'Yes' : 'No'}\n`;
-        output += `  Definitive Statements: ${geo.hasDefinitiveStatements ? 'Yes' : 'No'}\n`;
+        output += `  מחבר: ${geo.authorName || '(ריק)'}\n`;
+        output += `  תפקיד: ${geo.authorCredentials || '(ריק)'}\n`;
+        output += `  מקורות: ${(geo.citations || []).length}\n`;
+        output += `  מבנה Q&A: ${geo.hasQAFormat ? 'כן' : 'לא'}\n`;
+        output += `  נתונים סטטיסטיים: ${geo.hasStatistics ? 'כן' : 'לא'}\n`;
+        output += `  הצהרות ברורות: ${geo.hasDefinitiveStatements ? 'כן' : 'לא'}\n`;
         Object.entries(gs.breakdown).forEach(([k, v]) => { output += `  ${v.label}: ${v.score}/${v.max}\n`; });
         output += '\n';
       });
@@ -4272,9 +4913,12 @@ function copyExport() {
 function downloadExport() {
   const p = getProject();
   const content = document.getElementById('export-content').textContent;
-  const ext = currentExportTab === 'sitemap' ? 'xml' : currentExportTab === 'robots' ? 'txt' : currentExportTab === 'schemas' ? 'html' : 'txt';
+  const extMap = { sitemap: 'xml', robots: 'txt', schemas: 'html', summary: 'txt', meta: 'txt', geo: 'txt' };
+  const mimeMap = { sitemap: 'application/xml', schemas: 'text/html' };
+  const ext = extMap[currentExportTab] || 'txt';
+  const mime = mimeMap[currentExportTab] || 'text/plain';
   const name = `seo-${currentExportTab}-${(p?.name || 'export').replace(/\s+/g, '-')}.${ext}`;
-  const blob = new Blob([content], { type: 'text/plain' });
+  const blob = new Blob([content], { type: mime });
   downloadBlob(blob, name);
   toast('הקובץ הורד', 'success');
 }
@@ -4966,7 +5610,7 @@ function suggestKeywords() {
   const list = document.getElementById('keyword-suggestions-list');
   container.style.display = 'block';
   list.innerHTML = suggestions.map(([word, count]) =>
-    `<div class="density-item"><span>${escapeHtml(word)} <span style="color:var(--text-muted);font-size:10px;">(${count}x)</span></span><button class="btn btn-sm btn-accent" onclick="addSuggestedKeyword('${escapeHtml(word).replace(/'/g, "\\'")}');this.disabled=true;this.textContent='&#x2713;';" style="padding:2px 10px;font-size:11px;">+ הוסף</button></div>`
+    `<div class="density-item"><span>${escapeHtml(word)} <span style="color:var(--text-muted);font-size:10px;">(${count}x)</span></span><button class="btn btn-sm btn-accent" onclick="addSuggestedKeyword('${escapeAttrJs(word)}');this.disabled=true;this.textContent='&#x2713;';" style="padding:2px 10px;font-size:11px;">+ הוסף</button></div>`
   ).join('');
 }
 
@@ -5167,7 +5811,7 @@ async function submitLead() {
     statusEl.textContent = 'שם ואימייל הם שדות חובה';
     return;
   }
-  if (!email.includes('@') || !email.includes('.')) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     statusEl.style.display = 'block';
     statusEl.style.background = 'var(--red-bg)';
     statusEl.style.color = 'var(--red)';
@@ -5255,6 +5899,7 @@ async function submitLead() {
   try {
     const resp = await fetch(SEO_MAGNET_WEBHOOK, {
       method: 'POST',
+      signal: makeAbortSignal(15000),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name,
