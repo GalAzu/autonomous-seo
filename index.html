@@ -1717,7 +1717,7 @@ function escapeHtml(str) {
 // Escape for use inside JS string literals in onclick/onchange attributes
 function escapeAttrJs(str) {
   if (!str) return '';
-  return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/</g,'\\x3c').replace(/>/g,'\\x3e').replace(/&/g,'\\x26');
+  return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/`/g,'\\`').replace(/\$/g,'\\$').replace(/</g,'\\x3c').replace(/>/g,'\\x3e').replace(/&/g,'\\x26');
 }
 
 const SKIP_EXTENSIONS = /\.(jpg|jpeg|png|gif|svg|webp|avif|pdf|css|js|ico|woff2?|ttf|eot|mp4|mp3|zip|rar|gz|xml|json|txt|map)$/i;
@@ -1795,9 +1795,7 @@ function continueFromMode() {
 
 // ── Site Scanner ──
 const CORS_PROXIES = [
-  url => `/api/proxy?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+  url => `/api/proxy?url=${encodeURIComponent(url)}`
 ];
 
 function scanLog(msg, type = '') {
@@ -3598,7 +3596,7 @@ function renderDashboard() {
   document.getElementById('priority-list').innerHTML = priorities.map(pr => `
     <div class="checklist-item">
       <div class="check-icon ${pr.icon}">${pr.icon === 'done' ? '\u2713' : pr.icon === 'todo' ? '~' : '!'}</div>
-      <div class="checklist-text"><div><strong>${pr.text}</strong></div><div class="sub">${pr.sub}</div>${pr.fix ? `<button class="btn btn-sm btn-accent" onclick="safeClipboard('${escapeAttrJs(pr.fix)}');toast('\u05d4\u05e7\u05d5\u05d3 \u05d4\u05d5\u05e2\u05ea\u05e7','success');" style="margin-top:6px;font-size:11px;">&#x1f4cb; \u05d4\u05e2\u05ea\u05e7 \u05ea\u05d9\u05e7\u05d5\u05df</button>` : ''}</div>
+      <div class="checklist-text"><div><strong>${escapeHtml(pr.text)}</strong></div><div class="sub">${escapeHtml(pr.sub)}</div>${pr.fix ? `<button class="btn btn-sm btn-accent" onclick="safeClipboard('${escapeAttrJs(pr.fix)}');toast('\u05d4\u05e7\u05d5\u05d3 \u05d4\u05d5\u05e2\u05ea\u05e7','success');" style="margin-top:6px;font-size:11px;">&#x1f4cb; \u05d4\u05e2\u05ea\u05e7 \u05ea\u05d9\u05e7\u05d5\u05df</button>` : ''}</div>
     </div>
   `).join('');
 
@@ -3971,7 +3969,7 @@ function addKeywordTag(kw) {
   const tag = document.createElement('span');
   tag.className = 'tag';
   tag.dataset.kw = kw;
-  tag.innerHTML = `${kw} <span class="remove" onclick="event.stopPropagation();this.parentElement.remove();autoSave();">&times;</span>`;
+  tag.innerHTML = `${escapeHtml(kw)} <span class="remove" onclick="event.stopPropagation();this.parentElement.remove();autoSave();">&times;</span>`;
   container.insertBefore(tag, input);
 }
 
@@ -5198,8 +5196,8 @@ function renderProjectsList() {
   el.innerHTML = Object.values(projects).map(pr => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
       <div>
-        <strong>${pr.name}</strong>
-        <span style="font-size:11px;color:var(--text-dim);margin-right:8px;direction:ltr;display:inline-block;">${(pr.url || '').replace('https://', '')}</span>
+        <strong>${escapeHtml(pr.name)}</strong>
+        <span style="font-size:11px;color:var(--text-dim);margin-right:8px;direction:ltr;display:inline-block;">${escapeHtml((pr.url || '').replace('https://', ''))}</span>
         ${pr.id === currentProjectId ? '<span class="badge primary" style="font-size:10px;">נוכחי</span>' : ''}
       </div>
       <div style="display:flex;gap:6px;">
@@ -5758,7 +5756,7 @@ function renderRedirects() {
   tbody.innerHTML = redirects.map((r, i) => `<tr>
     <td style="font-family:monospace;font-size:12px;direction:ltr;">${escapeHtml(r.source)}</td>
     <td style="font-family:monospace;font-size:12px;direction:ltr;">${escapeHtml(r.target)}</td>
-    <td><span class="badge ${r.type === '301' ? 'green' : 'yellow'}">${r.type}</span></td>
+    <td><span class="badge ${r.type === '301' ? 'green' : 'yellow'}">${escapeHtml(r.type)}</span></td>
     <td><span class="badge blue">פעיל</span></td>
     <td><button class="btn btn-sm btn-ghost" onclick="removeRedirect(${i})" style="color:var(--red);">&times;</button></td>
   </tr>`).join('');
@@ -5799,7 +5797,9 @@ function exportRedirects(format) {
   if (!p || !p.redirects || p.redirects.length === 0) { toast('אין ניתובים לייצוא'); return; }
 
   let output = '';
-  const redirects = p.redirects;
+  // Sanitize redirect paths — only allow valid URL path characters
+  const safePath = (s) => (s || '').replace(/[^a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=%\/]/g, '');
+  const redirects = p.redirects.map(r => ({ source: safePath(r.source), target: safePath(r.target), type: r.type === '302' ? '302' : '301' }));
 
   switch (format) {
     case 'htaccess':
