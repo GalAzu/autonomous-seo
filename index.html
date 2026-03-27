@@ -254,6 +254,59 @@
   .insight-card .insight-title { font-family: var(--font-heading); font-size: 15px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
   .insight-card .insight-text { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
 
+  /* === GSC DASHBOARD === */
+  .gsc-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; position: relative; overflow: hidden; transition: var(--transition); }
+  .gsc-stat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .gsc-stat-card .gsc-stat-icon { font-size: 20px; margin-bottom: 8px; }
+  .gsc-stat-card .gsc-stat-value { font-family: var(--font-heading); font-size: 28px; font-weight: 800; direction: ltr; }
+  .gsc-stat-card .gsc-stat-label { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-family: var(--font-heading); letter-spacing: 0.3px; }
+  .gsc-stat-card .gsc-stat-delta { font-size: 11px; font-weight: 700; margin-top: 6px; display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 10px; font-family: var(--font-heading); direction: ltr; }
+  .gsc-stat-card .gsc-stat-delta.up { background: var(--green-bg); color: var(--green); }
+  .gsc-stat-card .gsc-stat-delta.down { background: var(--red-bg); color: var(--red); }
+  .gsc-stat-card .gsc-stat-delta.neutral { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+  .gsc-ctr-gauge { height: 6px; background: var(--surface-3); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+  .gsc-ctr-gauge-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+
+  .gsc-insight-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .gsc-insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: var(--transition); }
+  .gsc-insight-card:hover { border-color: var(--border-hover); }
+  .gsc-insight-card .gsc-insight-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .gsc-insight-card .gsc-insight-header .gsc-insight-icon { font-size: 18px; }
+  .gsc-insight-card .gsc-insight-header .gsc-insight-title { font-family: var(--font-heading); font-size: 14px; font-weight: 700; }
+  .gsc-insight-card .gsc-insight-header .gsc-insight-desc { font-size: 11px; color: var(--text-muted); }
+  .gsc-insight-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--bg); border-radius: var(--radius-xs); margin-bottom: 6px; font-size: 12px; }
+  .gsc-insight-item:last-child { margin-bottom: 0; }
+  .gsc-insight-item .gsc-insight-query { direction: ltr; font-weight: 600; color: var(--text); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+  .gsc-insight-item .gsc-insight-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; color: var(--text-dim); direction: ltr; flex-shrink: 0; }
+
+  .gsc-chip { display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: var(--font-body); cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-dim); transition: var(--transition); }
+  .gsc-chip:hover { border-color: var(--primary); color: var(--text); background: var(--primary-glow); }
+  .gsc-chip.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+  .gsc-bar-cell { display: flex; align-items: center; gap: 8px; }
+  .gsc-bar-track { flex: 1; height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; min-width: 40px; }
+  .gsc-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+  .gsc-bar-value { font-weight: 600; font-size: 12px; min-width: 36px; text-align: left; direction: ltr; }
+
+  .gsc-pos-chart { display: flex; align-items: flex-end; gap: 10px; height: 140px; padding: 16px 0 0; }
+  .gsc-pos-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .gsc-pos-bar { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.5s ease; min-height: 4px; position: relative; }
+  .gsc-pos-bar-count { font-family: var(--font-heading); font-size: 14px; font-weight: 700; }
+  .gsc-pos-bar-label { font-size: 11px; color: var(--text-dim); font-family: var(--font-heading); white-space: nowrap; }
+  .gsc-pos-bar-pct { font-size: 10px; color: var(--text-muted); }
+
+  .gsc-page-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 8px; gap: 12px; font-size: 13px; }
+  .gsc-page-row:hover { background: var(--surface-2); }
+  .gsc-page-url { direction: ltr; color: var(--primary-hover); font-size: 12px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; }
+  .gsc-page-stats { display: flex; gap: 16px; align-items: center; flex-shrink: 0; }
+  .gsc-page-stat { text-align: center; min-width: 60px; }
+  .gsc-page-stat .val { font-family: var(--font-heading); font-weight: 700; font-size: 14px; direction: ltr; }
+  .gsc-page-stat .lbl { font-size: 10px; color: var(--text-muted); }
+
+  @media (max-width: 900px) {
+    .gsc-insight-grid { grid-template-columns: 1fr; }
+  }
+
   .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .status-dot.green { background: var(--green); }
   .status-dot.yellow { background: var(--yellow); }
@@ -1005,82 +1058,115 @@
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div>
             <h2 class="section-title">Google Search Console</h2>
-            <p class="section-desc">ייבוא נתוני GSC וניתוח ביצועים</p>
+            <p class="section-desc">נתוני ביצועים, תובנות ומגמות — הכל במקום אחד</p>
           </div>
-          <a href="https://search.google.com/search-console" target="_blank" class="btn btn-ghost">פתח GSC &#x2197;</a>
+          <a href="https://search.google.com/search-console" target="_blank" class="btn btn-ghost btn-sm">פתח GSC &#x2197;</a>
         </div>
       </div>
 
-      <!-- GSC Data Import -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">&#x1f4e5; ייבוא נתוני ביצועים</div>
-          <div style="display:flex;gap:6px;">
-            <button class="btn btn-sm" id="gsc-tab-paste" onclick="setGscImportTab('paste')" style="background:var(--primary);color:white;">הדבקה</button>
-            <button class="btn btn-sm btn-ghost" id="gsc-tab-upload" onclick="setGscImportTab('upload')">העלאת CSV</button>
+      <!-- Section 1: Import Area -->
+      <div id="gsc-import-card" class="card">
+        <!-- Compact bar (shown when data exists) -->
+        <div id="gsc-import-compact" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:14px;">&#x1f4ca;</span>
+              <span id="gsc-compact-info" style="font-size:13px;color:var(--text-dim);"></span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn btn-sm btn-ghost" onclick="toggleGscImportExpand()" id="gsc-expand-btn">&#x1f504; עדכון נתונים</button>
+              <button class="btn btn-sm btn-ghost" onclick="clearGscData()" style="color:var(--red);font-size:11px;">&#x1f5d1;</button>
+            </div>
           </div>
         </div>
-        <div id="gsc-import-paste">
-          <p style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">גשו ל-GSC &#x2192; Performance &#x2192; Export &#x2192; העתיקו מ-Google Sheets או הדביקו CSV</p>
-          <textarea id="gsc-paste-area" rows="6" placeholder="הדביקו כאן נתונים מ-GSC (שאילתות, עמודים, קליקים, חשיפות, CTR, מיקום)..." style="width:100%;font-family:'SF Mono',monospace;font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;color:var(--text);resize:vertical;direction:ltr;text-align:left;"></textarea>
-          <button class="btn btn-primary" onclick="importGscData()" style="margin-top:10px;">&#x1f4ca; ניתוח נתונים</button>
-        </div>
-        <div id="gsc-import-upload" style="display:none;">
-          <p style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">גשו ל-GSC &#x2192; Performance &#x2192; Export &#x2192; Download CSV</p>
-          <label style="display:flex;align-items:center;justify-content:center;padding:32px;border:2px dashed var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-            <input type="file" accept=".csv,.tsv" onchange="handleGscFile(event)" style="display:none;" />
-            <span style="font-size:13px;color:var(--text-dim);">&#x1f4c1; לחצו לבחירת קובץ CSV</span>
-          </label>
+        <!-- Full import area -->
+        <div id="gsc-import-full">
+          <div class="card-header" style="margin-bottom:12px;">
+            <div class="card-title">&#x1f4e5; ייבוא נתוני ביצועים</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sm" id="gsc-tab-paste" onclick="setGscImportTab('paste')" style="background:var(--primary);color:white;">הדבקה</button>
+              <button class="btn btn-sm btn-ghost" id="gsc-tab-upload" onclick="setGscImportTab('upload')">העלאת CSV</button>
+            </div>
+          </div>
+          <div id="gsc-import-paste">
+            <p style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">GSC &#x2192; Performance &#x2192; Export &#x2192; העתיקו מ-Google Sheets או הדביקו CSV</p>
+            <textarea id="gsc-paste-area" rows="4" placeholder="הדביקו כאן נתונים מ-GSC (שאילתות, עמודים, קליקים, חשיפות, CTR, מיקום)..." style="width:100%;font-family:'SF Mono',monospace;font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;color:var(--text);resize:vertical;direction:ltr;text-align:left;"></textarea>
+            <button class="btn btn-primary btn-sm" onclick="importGscData()" style="margin-top:8px;">&#x1f4ca; ניתוח נתונים</button>
+          </div>
+          <div id="gsc-import-upload" style="display:none;">
+            <p style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">GSC &#x2192; Performance &#x2192; Export &#x2192; Download CSV</p>
+            <label style="display:flex;align-items:center;justify-content:center;padding:28px;border:2px dashed var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+              <input type="file" accept=".csv,.tsv" onchange="handleGscFile(event)" style="display:none;" />
+              <span style="font-size:13px;color:var(--text-dim);">&#x1f4c1; לחצו לבחירת קובץ CSV</span>
+            </label>
+          </div>
         </div>
       </div>
 
-      <!-- GSC Data Dashboard (hidden until import) -->
+      <!-- Section 2-6: GSC Data Dashboard (hidden until import) -->
       <div id="gsc-data-section" style="display:none;">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
-          <button class="btn btn-sm btn-ghost" onclick="clearGscData()" style="color:var(--red);">&#x1f5d1; מחיקת נתוני GSC</button>
-        </div>
-        <div class="grid-4" id="gsc-summary-stats" style="margin-bottom:16px;"></div>
 
+        <!-- Section 2: Performance Overview -->
+        <div class="grid-4" id="gsc-summary-stats" style="margin-bottom:20px;"></div>
+
+        <!-- Section 3: Quick Insights -->
+        <div id="gsc-insights" style="margin-bottom:20px;"></div>
+
+        <!-- Section 4: Query Explorer -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">&#x1f50d; שאילתות מובילות</div>
-            <span class="badge primary" id="gsc-query-count">0</span>
+            <div class="card-title">&#x1f50d; סייר שאילתות</div>
+            <span style="font-size:12px;color:var(--text-dim);" id="gsc-visible-count"></span>
           </div>
-          <div id="gsc-opportunities" style="margin-bottom:16px;"></div>
-          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-            <input type="text" id="gsc-filter-query" placeholder="חפש שאילתה..." oninput="filterGscTable()" style="flex:1;min-width:150px;font-size:12px;padding:6px 10px;direction:ltr;" />
-            <select id="gsc-filter-position" onchange="filterGscTable()" style="font-size:12px;padding:6px 10px;">
-              <option value="">כל המיקומים</option>
-              <option value="1-3">Top 3</option>
-              <option value="1-10">עמוד 1 (1-10)</option>
-              <option value="5-20">Quick Wins (5-20)</option>
-              <option value="20-100">עמוד 2+ (20+)</option>
-            </select>
-            <select id="gsc-filter-ctr" onchange="filterGscTable()" style="font-size:12px;padding:6px 10px;">
-              <option value="">כל CTR</option>
-              <option value="low">CTR נמוך (&lt;2%)</option>
-              <option value="medium">CTR בינוני (2-5%)</option>
-              <option value="high">CTR גבוה (&gt;5%)</option>
-            </select>
-            <span id="gsc-visible-count" style="font-size:11px;color:var(--text-dim);"></span>
+          <!-- Search bar -->
+          <div style="position:relative;margin-bottom:12px;">
+            <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-muted);">&#x1f50e;</span>
+            <input type="text" id="gsc-filter-query" placeholder="חיפוש שאילתה..." oninput="filterGscTable()" style="width:100%;font-size:13px;padding:10px 38px 10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);direction:ltr;text-align:right;" />
           </div>
-          <div class="table-wrapper" style="max-height:400px;overflow-y:auto;">
+          <!-- Filter chips -->
+          <div id="gsc-filter-chips" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+            <button class="gsc-chip active" data-filter="all" onclick="setGscFilterChip('all')">&#x1f30d; הכל</button>
+            <button class="gsc-chip" data-filter="top3" onclick="setGscFilterChip('top3')">&#x1f3c6; Top 3</button>
+            <button class="gsc-chip" data-filter="page1" onclick="setGscFilterChip('page1')">&#x1f4c4; עמוד 1</button>
+            <button class="gsc-chip" data-filter="quickwins" onclick="setGscFilterChip('quickwins')">&#x1f3af; Quick Wins</button>
+            <button class="gsc-chip" data-filter="page2plus" onclick="setGscFilterChip('page2plus')">&#x1f4c3; עמוד 2+</button>
+            <button class="gsc-chip" data-filter="lowctr" onclick="setGscFilterChip('lowctr')">&#x26a0;&#xfe0f; CTR נמוך</button>
+          </div>
+          <!-- Table -->
+          <div class="table-wrapper" style="max-height:500px;overflow-y:auto;">
             <table>
               <thead><tr>
-                <th>שאילתה</th>
-                <th style="width:70px;cursor:pointer;" onclick="sortGscData('clicks')">&#x1f5b1; קליקים</th>
-                <th style="width:80px;cursor:pointer;" onclick="sortGscData('impressions')">&#x1f441; חשיפות</th>
-                <th style="width:60px;cursor:pointer;" onclick="sortGscData('ctr')">CTR</th>
-                <th style="width:65px;cursor:pointer;" onclick="sortGscData('position')">מיקום</th>
-                <th style="width:70px;">סטטוס</th>
+                <th style="cursor:pointer;" onclick="sortGscData('query')">שאילתה</th>
+                <th style="width:120px;cursor:pointer;" onclick="sortGscData('clicks')">קליקים</th>
+                <th style="width:120px;cursor:pointer;" onclick="sortGscData('impressions')">חשיפות</th>
+                <th style="width:80px;cursor:pointer;" onclick="sortGscData('ctr')">CTR</th>
+                <th style="width:90px;cursor:pointer;" onclick="sortGscData('position')">מיקום</th>
+                <th style="width:140px;">עמוד</th>
               </tr></thead>
               <tbody id="gsc-queries-table"></tbody>
             </table>
           </div>
         </div>
+
+        <!-- Section 5: Position Distribution -->
+        <div class="card" id="gsc-position-dist">
+          <div class="card-header">
+            <div class="card-title">&#x1f4ca; התפלגות מיקומים</div>
+          </div>
+          <div id="gsc-position-chart"></div>
+        </div>
+
+        <!-- Section 6: Page Performance -->
+        <div class="card" id="gsc-page-perf" style="display:none;">
+          <div class="card-header">
+            <div class="card-title">&#x1f4c4; ביצועים לפי עמוד</div>
+            <span style="font-size:12px;color:var(--text-dim);" id="gsc-page-count"></span>
+          </div>
+          <div id="gsc-page-table"></div>
+        </div>
       </div>
 
-      <!-- GSC Setup Guide (collapsed) -->
+      <!-- Section 7: Setup Guide (collapsed accordion) -->
       <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
         <div class="accordion-header"><span>&#x1f4d6; מדריך הגדרת GSC</span><span class="accordion-arrow">&#x25BC;</span></div>
         <div class="accordion-body">
@@ -4147,7 +4233,13 @@ function renderGSCGuide() {
     gscRows = p.gscData;
     gscSortField = 'clicks';
     gscSortDir = -1;
+    gscActiveFilter = 'all';
     renderGscData();
+  } else {
+    // No data — show full import area, hide compact bar and dashboard
+    document.getElementById('gsc-import-full').style.display = 'block';
+    document.getElementById('gsc-import-compact').style.display = 'none';
+    document.getElementById('gsc-data-section').style.display = 'none';
   }
 }
 
@@ -4252,6 +4344,8 @@ function handleGscFile(event) {
   reader.readAsText(file);
 }
 
+let gscActiveFilter = 'all';
+
 function clearGscData() {
   if (!confirm('למחוק את כל נתוני GSC? לא ניתן לשחזר.')) return;
   const p = getProject();
@@ -4261,6 +4355,8 @@ function clearGscData() {
   gscRows = [];
   saveProjects();
   document.getElementById('gsc-data-section').style.display = 'none';
+  document.getElementById('gsc-import-compact').style.display = 'none';
+  document.getElementById('gsc-import-full').style.display = 'block';
   document.getElementById('gsc-paste-area').value = '';
   toast('נתוני GSC נמחקו');
 }
@@ -4271,89 +4367,271 @@ function sortGscData(field) {
   renderGscData();
 }
 
+function toggleGscImportExpand() {
+  const full = document.getElementById('gsc-import-full');
+  const isVisible = full.style.display !== 'none';
+  full.style.display = isVisible ? 'none' : 'block';
+}
+
+function setGscFilterChip(filter) {
+  gscActiveFilter = filter;
+  document.querySelectorAll('.gsc-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.filter === filter);
+  });
+  filterGscTable();
+}
+
 function renderGscData() {
   if (gscRows.length === 0) return;
   document.getElementById('gsc-data-section').style.display = 'block';
 
+  // Collapse import area and show compact bar
+  document.getElementById('gsc-import-full').style.display = 'none';
+  document.getElementById('gsc-import-compact').style.display = 'block';
+
   const totalClicks = gscRows.reduce((s, r) => s + r.clicks, 0);
   const totalImpressions = gscRows.reduce((s, r) => s + r.impressions, 0);
-  const avgCtr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : 0;
-  const avgPos = gscRows.length > 0 ? (gscRows.reduce((s, r) => s + r.position, 0) / gscRows.length).toFixed(1) : 0;
+  const avgCtr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100) : 0;
+  const avgPos = gscRows.length > 0 ? (gscRows.reduce((s, r) => s + r.position, 0) / gscRows.length) : 0;
 
   const p = getProject();
-  const historyCount = (p && p.gscHistory) ? p.gscHistory.length : 0;
   const prevData = (p && p.gscHistory && p.gscHistory.length > 0) ? p.gscHistory[p.gscHistory.length - 1].data : null;
-  const lastImportDate = (p && p.gscHistory && p.gscHistory.length > 0) ? p.gscHistory[p.gscHistory.length - 1].date : null;
-  // Build previous position lookup
-  const prevPositions = {};
-  if (prevData) {
-    prevData.forEach(r => { if (r.query) prevPositions[r.query] = r.position; });
+  const lastImportDate = (p && p.gscHistory && p.gscHistory.length > 0) ? p.gscHistory[p.gscHistory.length - 1].date : new Date().toISOString().split('T')[0];
+
+  // Compact info
+  const compactInfo = document.getElementById('gsc-compact-info');
+  if (compactInfo) {
+    compactInfo.innerHTML = `<span class="badge primary" style="margin-left:8px;">${gscRows.length} שאילתות</span> עדכון אחרון: ${lastImportDate}`;
   }
 
+  // Delta calculations from previous import
+  let prevTotalClicks = 0, prevTotalImpressions = 0, prevAvgCtr = 0, prevAvgPos = 0;
+  if (prevData && prevData.length > 0) {
+    prevTotalClicks = prevData.reduce((s, r) => s + (r.clicks || 0), 0);
+    prevTotalImpressions = prevData.reduce((s, r) => s + (r.impressions || 0), 0);
+    prevAvgCtr = prevTotalImpressions > 0 ? ((prevTotalClicks / prevTotalImpressions) * 100) : 0;
+    prevAvgPos = prevData.reduce((s, r) => s + (r.position || 0), 0) / prevData.length;
+  }
+
+  const prevPositions = {};
+  const prevClicks = {};
+  if (prevData) {
+    prevData.forEach(r => {
+      if (r.query) { prevPositions[r.query] = r.position; prevClicks[r.query] = r.clicks; }
+    });
+  }
+
+  function deltaHtml(current, previous, invert) {
+    if (!prevData || previous === 0) return '';
+    const pctChange = ((current - previous) / previous * 100);
+    if (Math.abs(pctChange) < 0.5) return '<span class="gsc-stat-delta neutral">\u2192 0%</span>';
+    const isGood = invert ? pctChange < 0 : pctChange > 0;
+    const arrow = pctChange > 0 ? '\u2191' : '\u2193';
+    const cls = isGood ? 'up' : 'down';
+    return '<span class="gsc-stat-delta ' + cls + '">' + arrow + ' ' + Math.abs(pctChange).toFixed(1) + '%</span>';
+  }
+
+  // CTR gauge color
+  const ctrColor = avgCtr > 5 ? 'var(--green)' : avgCtr >= 2 ? 'var(--yellow)' : 'var(--red)';
+  const ctrPct = Math.min(avgCtr / 10 * 100, 100);
+
+  // Section 2: Performance Overview
   document.getElementById('gsc-summary-stats').innerHTML = `
-    <div class="card stat"><div class="stat-value" style="color:var(--blue)">${totalClicks.toLocaleString()}</div><div class="stat-label">קליקים</div></div>
-    <div class="card stat"><div class="stat-value" style="color:var(--purple)">${totalImpressions.toLocaleString()}</div><div class="stat-label">חשיפות</div></div>
-    <div class="card stat"><div class="stat-value" style="color:var(--green)">${avgCtr}%</div><div class="stat-label">CTR ממוצע</div></div>
-    <div class="card stat">
-      <div class="stat-value" style="color:var(--orange)">${avgPos}</div>
-      <div class="stat-label">מיקום ממוצע ${historyCount > 0 ? '<span class="badge purple" style="margin-right:4px;">' + historyCount + ' ייבואים</span>' + (lastImportDate ? '<br><span style="font-size:10px;color:var(--text-muted);">עדכון אחרון: ' + lastImportDate + '</span>' : '') : ''}</div>
+    <div class="gsc-stat-card">
+      <div class="gsc-stat-icon">&#x1f5b1;</div>
+      <div class="gsc-stat-value" style="color:var(--blue)">${totalClicks.toLocaleString()}</div>
+      <div class="gsc-stat-label">סה"כ קליקים</div>
+      ${deltaHtml(totalClicks, prevTotalClicks, false)}
+    </div>
+    <div class="gsc-stat-card">
+      <div class="gsc-stat-icon">&#x1f441;</div>
+      <div class="gsc-stat-value" style="color:var(--purple)">${totalImpressions.toLocaleString()}</div>
+      <div class="gsc-stat-label">סה"כ חשיפות</div>
+      ${deltaHtml(totalImpressions, prevTotalImpressions, false)}
+    </div>
+    <div class="gsc-stat-card">
+      <div class="gsc-stat-icon">&#x1f4c8;</div>
+      <div class="gsc-stat-value" style="color:${ctrColor}">${avgCtr.toFixed(1)}%</div>
+      <div class="gsc-stat-label">CTR ממוצע</div>
+      <div class="gsc-ctr-gauge"><div class="gsc-ctr-gauge-fill" style="width:${ctrPct}%;background:${ctrColor};"></div></div>
+      ${deltaHtml(avgCtr, prevAvgCtr, false)}
+    </div>
+    <div class="gsc-stat-card">
+      <div class="gsc-stat-icon">&#x1f4cd;</div>
+      <div class="gsc-stat-value" style="color:var(--orange)">${avgPos.toFixed(1)}</div>
+      <div class="gsc-stat-label">מיקום ממוצע</div>
+      ${deltaHtml(avgPos, prevAvgPos, true)}
     </div>
   `;
 
-  // Opportunities
+  // Section 3: Quick Insights
   const lowCtr = gscRows.filter(r => r.impressions > 50 && r.ctr < 3).sort((a, b) => b.impressions - a.impressions).slice(0, 3);
   const quickWins = gscRows.filter(r => r.position >= 5 && r.position <= 20).sort((a, b) => b.impressions - a.impressions).slice(0, 3);
+  const stars = [...gscRows].sort((a, b) => b.clicks - a.clicks).slice(0, 3);
 
-  let opHtml = '';
+  let insightsHtml = '<div class="gsc-insight-grid">';
+
+  // Stars card
+  if (stars.length > 0) {
+    insightsHtml += `<div class="gsc-insight-card" style="border-top:3px solid var(--green);">
+      <div class="gsc-insight-header"><span class="gsc-insight-icon">&#x2b50;</span><div><div class="gsc-insight-title" style="color:var(--green);">כוכבות</div><div class="gsc-insight-desc">השאילתות המובילות שלכם</div></div></div>
+      ${stars.map(r => `<div class="gsc-insight-item"><span class="gsc-insight-query">${escapeHtml(r.query || r.page)}</span><span class="gsc-insight-meta"><span style="color:var(--blue);font-weight:700;">${r.clicks} קליקים</span></span></div>`).join('')}
+    </div>`;
+  }
+
+  // Low CTR card
   if (lowCtr.length > 0) {
-    opHtml += `<div class="insight-card"><div class="insight-title">&#x1f6a8; CTR נמוך + חשיפות גבוהות</div><div class="insight-text">שאילתות עם הרבה חשיפות אבל מעט קליקים — שפרו כותרת ותיאור:<br>${lowCtr.map(r => `<strong>${escapeHtml(r.query)}</strong> (${r.impressions} חשיפות, ${r.ctr}% CTR)`).join('<br>')}</div></div>`;
+    insightsHtml += `<div class="gsc-insight-card" style="border-top:3px solid var(--yellow);">
+      <div class="gsc-insight-header"><span class="gsc-insight-icon">&#x26a0;&#xfe0f;</span><div><div class="gsc-insight-title" style="color:var(--yellow);">שפרו CTR</div><div class="gsc-insight-desc">חשיפות גבוהות, קליקים נמוכים</div></div></div>
+      ${lowCtr.map(r => `<div class="gsc-insight-item"><span class="gsc-insight-query">${escapeHtml(r.query)}</span><span class="gsc-insight-meta"><span>${r.impressions.toLocaleString()} imp</span><span class="badge red" style="font-size:10px;padding:2px 6px;">${r.ctr.toFixed(1)}%</span></span></div>`).join('')}
+    </div>`;
   }
-  if (quickWins.length > 0) {
-    opHtml += `<div class="insight-card"><div class="insight-title">&#x1f3af; Quick Wins — מיקום 5-20</div><div class="insight-text">שאילתות קרובות לעמוד 1 — הוסיפו תוכן ממוקד:<br>${quickWins.map(r => `<strong>${escapeHtml(r.query)}</strong> (מיקום ${r.position.toFixed(1)}, ${r.impressions} חשיפות)`).join('<br>')}</div></div>`;
-  }
-  document.getElementById('gsc-opportunities').innerHTML = opHtml;
-  document.getElementById('gsc-query-count').textContent = gscRows.length;
 
-  // Sort and render table
+  // Quick Wins card
+  if (quickWins.length > 0) {
+    insightsHtml += `<div class="gsc-insight-card" style="border-top:3px solid var(--accent);">
+      <div class="gsc-insight-header"><span class="gsc-insight-icon">&#x1f3af;</span><div><div class="gsc-insight-title" style="color:var(--accent);">Quick Wins</div><div class="gsc-insight-desc">קרובים לעמוד 1 — דחיפה קטנה</div></div></div>
+      ${quickWins.map(r => `<div class="gsc-insight-item"><span class="gsc-insight-query">${escapeHtml(r.query)}</span><span class="gsc-insight-meta"><span>מיקום ${r.position.toFixed(1)}</span><span>${r.impressions.toLocaleString()} imp</span></span></div>`).join('')}
+    </div>`;
+  }
+
+  insightsHtml += '</div>';
+  document.getElementById('gsc-insights').innerHTML = insightsHtml;
+
+  // Section 4: Query Explorer table
+  const maxClicks = Math.max(...gscRows.map(r => r.clicks), 1);
+  const maxImpressions = Math.max(...gscRows.map(r => r.impressions), 1);
+
   const sorted = [...gscRows].sort((a, b) => {
     const av = a[gscSortField] || 0, bv = b[gscSortField] || 0;
     return gscSortDir * (typeof av === 'string' ? av.localeCompare(bv) : av - bv);
   });
 
-  document.getElementById('gsc-queries-table').innerHTML = sorted.slice(0, 200).map(r => {
-    let status = '', statusClass = '';
-    if (r.position <= 3) { status = 'מוביל'; statusClass = 'green'; }
-    else if (r.position <= 10) { status = 'עמוד 1'; statusClass = 'blue'; }
-    else if (r.position <= 20) { status = 'quick win'; statusClass = 'yellow'; }
-    else { status = 'רחוק'; statusClass = 'red'; }
-    // Trend arrow
+  document.getElementById('gsc-queries-table').innerHTML = sorted.map(r => {
+    // CTR badge
+    const ctrVal = r.ctr || 0;
+    const ctrCls = ctrVal > 5 ? 'green' : ctrVal >= 2 ? 'yellow' : 'red';
+    // Position badge + trend
+    const posCls = r.position <= 3 ? 'green' : r.position <= 10 ? 'blue' : r.position <= 20 ? 'yellow' : r.position <= 50 ? 'orange' : 'red';
     let trend = '';
     if (r.query && prevPositions[r.query] !== undefined) {
       const diff = prevPositions[r.query] - r.position;
-      if (diff > 0.5) trend = ' <span style="color:var(--green);" title="שיפור של ' + diff.toFixed(1) + ' מקומות">\u2191</span>';
-      else if (diff < -0.5) trend = ' <span style="color:var(--red);" title="ירידה של ' + Math.abs(diff).toFixed(1) + ' מקומות">\u2193</span>';
+      if (diff > 0.5) trend = ' <span style="color:var(--green);" title="' + diff.toFixed(1) + '+ \u05de\u05e7\u05d5\u05de\u05d5\u05ea">\u2191</span>';
+      else if (diff < -0.5) trend = ' <span style="color:var(--red);" title="' + Math.abs(diff).toFixed(1) + '- \u05de\u05e7\u05d5\u05de\u05d5\u05ea">\u2193</span>';
       else trend = ' <span style="color:var(--text-dim);">\u2192</span>';
     }
+    // Click bar width
+    const clickBarPct = maxClicks > 0 ? (r.clicks / maxClicks * 100) : 0;
+    const impBarPct = maxImpressions > 0 ? (r.impressions / maxImpressions * 100) : 0;
+    // Page URL truncated
+    const pageUrl = r.page ? r.page.replace(/^https?:\/\/[^/]+/, '') || '/' : '';
+    const pageDisplay = pageUrl ? `<span style="font-size:11px;color:var(--text-muted);direction:ltr;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;" title="${escapeHtml(r.page)}">${escapeHtml(pageUrl)}</span>` : '<span style="color:var(--text-muted);font-size:11px;">—</span>';
+
     return `<tr data-query="${escapeHtml(r.query || r.page)}" data-position="${r.position}" data-ctr="${r.ctr}">
-      <td style="font-size:12px;direction:ltr;text-align:right;">${escapeHtml(r.query || r.page)}</td>
-      <td style="font-weight:600;">${r.clicks}</td>
-      <td>${r.impressions.toLocaleString()}</td>
-      <td>${r.ctr > 0 ? r.ctr.toFixed(1) + '%' : '-'}</td>
-      <td>${r.position > 0 ? r.position.toFixed(1) : '-'}${trend}</td>
-      <td><span class="badge ${statusClass}">${status}</span></td>
+      <td style="font-size:13px;direction:ltr;text-align:right;font-weight:600;">${escapeHtml(r.query || r.page)}</td>
+      <td><div class="gsc-bar-cell"><span class="gsc-bar-value" style="color:var(--blue);">${r.clicks}</span><div class="gsc-bar-track"><div class="gsc-bar-fill" style="width:${clickBarPct}%;background:var(--blue);"></div></div></div></td>
+      <td><div class="gsc-bar-cell"><span class="gsc-bar-value" style="color:var(--purple);">${r.impressions.toLocaleString()}</span><div class="gsc-bar-track"><div class="gsc-bar-fill" style="width:${impBarPct}%;background:var(--purple);"></div></div></div></td>
+      <td><span class="badge ${ctrCls}" style="font-size:11px;">${ctrVal > 0 ? ctrVal.toFixed(1) + '%' : '-'}</span></td>
+      <td><span class="badge ${posCls}" style="font-size:11px;">${r.position > 0 ? r.position.toFixed(1) : '-'}</span>${trend}</td>
+      <td>${pageDisplay}</td>
     </tr>`;
   }).join('');
 
-  // Update visible count after render
-  const totalRendered = document.querySelectorAll('#gsc-queries-table tr').length;
+  // Update visible count
+  updateGscVisibleCount();
+
+  // Section 5: Position Distribution Chart
+  renderGscPositionChart();
+
+  // Section 6: Page Performance
+  renderGscPagePerformance();
+
+  // Apply current filter
+  filterGscTable();
+}
+
+function renderGscPositionChart() {
+  const buckets = [
+    { label: 'Top 3', min: 0, max: 3, color: '#16a34a' },
+    { label: '4-10', min: 4, max: 10, color: '#22c55e' },
+    { label: '11-20', min: 11, max: 20, color: '#eab308' },
+    { label: '21-50', min: 21, max: 50, color: '#f97316' },
+    { label: '51-100', min: 51, max: 100, color: '#ef4444' }
+  ];
+
+  buckets.forEach(b => {
+    b.count = gscRows.filter(r => r.position >= b.min && r.position <= b.max).length;
+  });
+
+  const maxCount = Math.max(...buckets.map(b => b.count), 1);
+  const total = gscRows.length || 1;
+
+  document.getElementById('gsc-position-chart').innerHTML = `
+    <div class="gsc-pos-chart">
+      ${buckets.map(b => {
+        const heightPct = (b.count / maxCount * 100);
+        const pct = (b.count / total * 100).toFixed(0);
+        return `<div class="gsc-pos-bar-wrap">
+          <div class="gsc-pos-bar-count">${b.count}</div>
+          <div class="gsc-pos-bar" style="height:${Math.max(heightPct, 3)}%;background:${b.color};"></div>
+          <div class="gsc-pos-bar-label">${b.label}</div>
+          <div class="gsc-pos-bar-pct">${pct}%</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderGscPagePerformance() {
+  const pageMap = {};
+  gscRows.forEach(r => {
+    if (!r.page) return;
+    if (!pageMap[r.page]) pageMap[r.page] = { url: r.page, clicks: 0, impressions: 0, ctrSum: 0, posSum: 0, count: 0 };
+    pageMap[r.page].clicks += r.clicks;
+    pageMap[r.page].impressions += r.impressions;
+    pageMap[r.page].posSum += r.position;
+    pageMap[r.page].count += 1;
+  });
+
+  const pages = Object.values(pageMap).sort((a, b) => b.clicks - a.clicks);
+  const container = document.getElementById('gsc-page-perf');
+  const tableEl = document.getElementById('gsc-page-table');
+  const countEl = document.getElementById('gsc-page-count');
+
+  if (pages.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'block';
+  if (countEl) countEl.textContent = pages.length + ' עמודים';
+
+  tableEl.innerHTML = pages.slice(0, 30).map(pg => {
+    const avgCtr = pg.impressions > 0 ? ((pg.clicks / pg.impressions) * 100).toFixed(1) : '0.0';
+    const avgPos = pg.count > 0 ? (pg.posSum / pg.count).toFixed(1) : '—';
+    const shortUrl = pg.url.replace(/^https?:\/\/[^/]+/, '') || '/';
+    return `<div class="gsc-page-row">
+      <span class="gsc-page-url" title="${escapeHtml(pg.url)}">${escapeHtml(shortUrl)}</span>
+      <div class="gsc-page-stats">
+        <div class="gsc-page-stat"><div class="val" style="color:var(--blue);">${pg.clicks.toLocaleString()}</div><div class="lbl">קליקים</div></div>
+        <div class="gsc-page-stat"><div class="val" style="color:var(--purple);">${pg.impressions.toLocaleString()}</div><div class="lbl">חשיפות</div></div>
+        <div class="gsc-page-stat"><div class="val" style="color:var(--green);">${avgCtr}%</div><div class="lbl">CTR</div></div>
+        <div class="gsc-page-stat"><div class="val" style="color:var(--orange);">${avgPos}</div><div class="lbl">מיקום</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateGscVisibleCount() {
+  const allRows = document.querySelectorAll('#gsc-queries-table tr');
+  const visible = document.querySelectorAll('#gsc-queries-table tr:not([style*="display: none"])').length;
   const countEl = document.getElementById('gsc-visible-count');
-  if (countEl) countEl.textContent = `${totalRendered}/${gscRows.length}`;
+  if (countEl) countEl.textContent = `${visible} \u05de\u05ea\u05d5\u05da ${allRows.length} \u05e9\u05d0\u05d9\u05dc\u05ea\u05d5\u05ea`;
 }
 
 function filterGscTable() {
   const queryFilter = (document.getElementById('gsc-filter-query')?.value || '').toLowerCase();
-  const posFilter = document.getElementById('gsc-filter-position')?.value || '';
-  const ctrFilter = document.getElementById('gsc-filter-ctr')?.value || '';
+  const filter = gscActiveFilter;
 
   const rows = document.querySelectorAll('#gsc-queries-table tr');
   rows.forEach(row => {
@@ -4363,21 +4641,17 @@ function filterGscTable() {
 
     let show = true;
     if (queryFilter && !query.includes(queryFilter)) show = false;
-    if (posFilter) {
-      const [min, max] = posFilter.split('-').map(Number);
-      if (pos < min || pos > max) show = false;
-    }
-    if (ctrFilter === 'low' && ctr >= 2) show = false;
-    if (ctrFilter === 'medium' && (ctr < 2 || ctr > 5)) show = false;
-    if (ctrFilter === 'high' && ctr <= 5) show = false;
+
+    if (filter === 'top3' && pos > 3) show = false;
+    if (filter === 'page1' && (pos < 1 || pos > 10)) show = false;
+    if (filter === 'quickwins' && (pos < 5 || pos > 20)) show = false;
+    if (filter === 'page2plus' && pos <= 10) show = false;
+    if (filter === 'lowctr' && ctr >= 2) show = false;
 
     row.style.display = show ? '' : 'none';
   });
 
-  // Update visible count
-  const visible = document.querySelectorAll('#gsc-queries-table tr:not([style*="display: none"])').length;
-  const countEl2 = document.getElementById('gsc-visible-count');
-  if (countEl2) countEl2.textContent = `${visible}/${rows.length}`;
+  updateGscVisibleCount();
 }
 
 // ═══════════════════════════════════════════════════
