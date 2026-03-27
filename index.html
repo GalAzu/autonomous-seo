@@ -753,6 +753,18 @@
       </div>
       <div class="print-header" id="print-header"></div>
       <div class="print-pages-summary" id="print-pages-summary"></div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; מה מודד הדשבורד?</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; <strong>ציון SEO</strong> — ציון כולל מ-100 המשקלל תוכן, טכני, סכמות, חברתי ותמונות</p>
+            <p>&#x2022; <strong>ציון GEO</strong> — מדד מוכנות למנועי AI (ChatGPT, Gemini, Perplexity)</p>
+            <p>&#x2022; <strong>בריאות</strong> — אחוז עמודים שעומדים בסטנדרטים לכל קטגוריה</p>
+            <p>&#x2022; <strong>עדיפויות</strong> — רשימת שיפורים ממוינת לפי חומרה. טפלו קודם באדומים</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> ציון 80+ = מצוין, 50-79 = דורש עבודה, מתחת ל-50 = דחוף</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ PAGES ═══ -->
@@ -782,6 +794,18 @@
             </tr></thead>
             <tbody id="pages-table"></tbody>
           </table>
+        </div>
+      </div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; ניהול עמודים</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; כל עמוד מייצג URL באתר שלכם עם כל נתוני ה-SEO שלו</p>
+            <p>&#x2022; לחיצה כפולה על שורה פותחת את העורך המלא</p>
+            <p>&#x2022; &#x26a1; כפתור הברק (אם יש PSI Key) — בודק Core Web Vitals של העמוד</p>
+            <p>&#x2022; אורך כותרת אופטימלי: 30-60 תווים | תיאור: 100-160 תווים</p>
+            <p>&#x2022; ירוק = מצוין, צהוב = לשפר, אדום = דחוף</p>
+          </div>
         </div>
       </div>
     </div>
@@ -922,6 +946,21 @@
           <button class="btn btn-ghost btn-sm" onclick="addSchemaTemplate('Custom')">JSON-LD מותאם</button>
         </div>
       </div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; נתונים מובנים (Schema)</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; נתונים מובנים עוזרים לגוגל להבין את התוכן שלכם ומאפשרים Rich Results</p>
+            <p>&#x2022; <strong>LocalBusiness</strong> — עסקים מקומיים (כתובת, טלפון, שעות פתיחה)</p>
+            <p>&#x2022; <strong>FAQPage</strong> — שאלות ותשובות (מופיע ב-AI Overviews!)</p>
+            <p>&#x2022; <strong>Article</strong> — מאמרים ובלוגים (חשוב עם פרטי מחבר ל-E-E-A-T)</p>
+            <p>&#x2022; <strong>HowTo</strong> — מדריכים שלב-אחר-שלב</p>
+            <p>&#x2022; <strong>Product</strong> — מוצרים עם מחיר וזמינות</p>
+            <p>&#x2022; <strong>Organization</strong> — פרטי הארגון (חיוני לאמינות)</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> FAQPage + Article הם הסכמות הכי חשובות ל-AI Overviews ב-2026</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ SITEMAP ═══ -->
@@ -966,6 +1005,18 @@
         <button class="btn btn-primary" onclick="downloadSitemap()">&#x1f4be; הורדת sitemap.xml</button>
         <button class="btn btn-ghost" onclick="copySitemap()">&#x1f4cb; העתקה</button>
         <button class="btn btn-ghost" onclick="syncSitemapFromPages()">&#x1f504; סנכרון מעמודים</button>
+      </div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; מפת אתר (Sitemap)</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; מפת האתר מנחה את גוגל אילו עמודים לסרוק ובאיזו תדירות</p>
+            <p>&#x2022; <strong>Priority:</strong> 1.0 = הכי חשוב (עמוד הבית), 0.5 = בינוני, 0.1 = נמוך</p>
+            <p>&#x2022; <strong>Changefreq:</strong> daily = תוכן משתנה יומי, weekly = שבועי, monthly = חודשי</p>
+            <p>&#x2022; "סנכרן מעמודים" — יוצר רשומות אוטומטית מכל העמודים בפרויקט</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> הגישו את מפת האתר ל-GSC &#x2192; Sitemaps כדי לזרז אינדוקס</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1031,6 +1082,19 @@
         <button class="btn btn-sm btn-ghost" onclick="setKwSubTab('clusters')" id="kw-tab-clusters">אשכולות</button>
       </div>
       <div id="kw-sub-content"></div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; אסטרטגיית מילות מפתח</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; <strong>מפת מילות מפתח</strong> — הקצאת מילות מפתח לעמודים עם סיווג כוונה (מידע/ניווט/עסקה)</p>
+            <p>&#x2022; <strong>T</strong> = מופיע בכותרת, <strong>H1</strong> = בכותרת ראשית, <strong>D</strong> = בתיאור — שלושתם = מצוין</p>
+            <p>&#x2022; <strong>מתחרים</strong> — עקבו אחרי מילות מפתח של מתחרים וזהו הזדמנויות</p>
+            <p>&#x2022; <strong>פערי תוכן</strong> — מילות מפתח שהמתחרים מכסים ואתם לא</p>
+            <p>&#x2022; <strong>אשכולות</strong> — קיבוץ מילות מפתח קשורות לתכנון תוכן</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> מילות מפתח מחולצות אוטומטית מהסריקה — ערכו והוסיפו ידנית</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ GEO ═══ -->
@@ -1041,6 +1105,19 @@
       </div>
       <div id="geo-overview" style="margin-bottom:20px;"></div>
       <div id="geo-pages-analysis"></div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; GEO — אופטימיזציה למנועי AI</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; GEO מודד את מוכנות האתר להופיע ב-ChatGPT, Gemini, Perplexity ו-AI Overviews</p>
+            <p>&#x2022; <strong>E-E-A-T (30%)</strong> — שם מחבר, תפקיד, קישור לפרופיל, תאריך עדכון</p>
+            <p>&#x2022; <strong>תוכן ידידותי ל-AI (30%)</strong> — מבנה Q&amp;A, נתונים סטטיסטיים, עומק תוכן, כותרות H2</p>
+            <p>&#x2022; <strong>סכמות AI (20%)</strong> — FAQPage, Article, HowTo — הסכמות שמנועי AI צורכים</p>
+            <p>&#x2022; <strong>מוכנות לציטוט (20%)</strong> — מקורות חיצוניים, הצהרות ברורות, קישורים אמינים</p>
+            <p>&#x1f4a1; <strong>טיפ 2026:</strong> נסחו H2 כשאלות, הוסיפו תשובות ישירות בפסקה הראשונה, עדכנו תוכן כל 6 חודשים</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ HEADINGS ═══ -->
@@ -1050,6 +1127,18 @@
         <p class="section-desc">היררכיית H1-H6 לכל עמוד — קריטי ל-SEO. כל עמוד צריך בדיוק H1 אחד.</p>
       </div>
       <div id="headings-list"></div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; ניתוח כותרות</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; כל עמוד צריך בדיוק <strong>H1 אחד</strong> — זו הכותרת הראשית שגוגל קורא</p>
+            <p>&#x2022; <strong>H2</strong> — כותרות משנה לחלקים עיקריים (3+ מומלץ)</p>
+            <p>&#x2022; <strong>H3-H6</strong> — כותרות משנה נוספות בהיררכיה</p>
+            <p>&#x2022; &#x26a0; יותר מ-H1 אחד = בעיה | H1 חסר = דחוף</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> נסחו H2 כשאלות לשיפור הופעה ב-AI Overviews</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ GSC GUIDE ═══ -->
@@ -1193,6 +1282,18 @@
         <p class="section-desc">מעקב מלא אחרי מוכנות SEO — סמנו פריטים שהושלמו</p>
       </div>
       <div id="checklist-container"></div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; צ׳קליסט להשקה</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; <strong>&#x2713; אוטומטי</strong> — זוהה מהנתונים שלכם (כותרות, סכמות, HTTPS)</p>
+            <p>&#x2022; <strong>&#x2713; ידני</strong> — דורש סימון שלכם (תוכן, בדיקות חיצוניות)</p>
+            <p>&#x2022; ניתן לדרוס זיהוי אוטומטי — לחצו על פריט אוטומטי לשינוי ידני</p>
+            <p>&#x2022; 6 קטגוריות: SEO על-דף, נתונים מובנים, טכני, אנליטיקס, GEO/AI, מוכנות AI</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> השלימו 100% לפני העלאה. פריטים ב-SEO טכני הם הכי קריטיים</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ REDIRECTS ═══ -->
@@ -1240,6 +1341,17 @@
         <button class="btn btn-accent" onclick="exportRedirects('netlify')">&#x1f4be; _redirects (Netlify)</button>
         <button class="btn btn-ghost" onclick="exportRedirects('vercel')">&#x1f4be; vercel.json</button>
       </div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; ניהול הפניות (Redirects)</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; <strong>301 — הפניה קבועה</strong> — מעבירה כוח SEO לכתובת החדשה. לשימוש במיגרציה או שינוי URL</p>
+            <p>&#x2022; <strong>302 — הפניה זמנית</strong> — לא מעבירה כוח SEO. לשימוש בתחזוקה או A/B testing</p>
+            <p>&#x2022; ייצוא לפי פלטפורמה: Apache (.htaccess), Netlify (_redirects), Vercel (vercel.json)</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> הימנעו משרשרת הפניות (A&#x2192;B&#x2192;C). הפנו ישירות מ-A ל-C</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ IMAGES (Alt Text Manager) ═══ -->
@@ -1270,6 +1382,18 @@
           </table>
         </div>
       </div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; אופטימיזציית תמונות</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; <strong>Alt Text</strong> — תיאור טקסטואלי של התמונה, חיוני לנגישות ו-SEO</p>
+            <p>&#x2022; אורך מומלץ: 5-125 תווים, תיאורי ולא ממולא במילות מפתח</p>
+            <p>&#x2022; תמונות ללא Alt פוגעות בנגישות ובדירוג בחיפוש תמונות</p>
+            <p>&#x2022; הוסיפו width/height לתמונות למניעת CLS (Layout Shift)</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> גוגל Images מביא 20%+ מהתנועה לאתרים רבים</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ LINKS (Internal Linking View) ═══ -->
@@ -1290,6 +1414,18 @@
             </tr></thead>
             <tbody id="links-table"></tbody>
           </table>
+        </div>
+      </div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; ניתוח קישורים פנימיים</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; קישורים פנימיים מחלקים "כוח SEO" בין עמודים ועוזרים לגוגל לסרוק</p>
+            <p>&#x2022; <strong>Orphan (יתום)</strong> — עמוד ללא קישורים נכנסים. גוגל מתקשה למצוא אותו</p>
+            <p>&#x2022; <strong>Hub</strong> — עמוד עם הרבה קישורים יוצאים. טוב לניווט ולחלוקת כוח</p>
+            <p>&#x2022; כל עמוד צריך לפחות 2-3 קישורים נכנסים מעמודים אחרים</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> קשרו עמודים חדשים מ-3 עמודים קיימים לפחות</p>
+          </div>
         </div>
       </div>
     </div>
@@ -1333,6 +1469,18 @@
           <button class="btn btn-sm btn-primary" onclick="copyHreflangOutput()">&#x1f4cb; העתקה</button>
         </div>
         <div id="hreflang-output" class="json-editor" style="max-height:300px;color:var(--green);"></div>
+      </div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; Hreflang — תמיכה רב-לשונית</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; Hreflang מודיע לגוגל שיש גרסאות שפה שונות לאותו עמוד</p>
+            <p>&#x2022; <strong>x-default</strong> — גרסת ברירת מחדל (בדרך כלל אנגלית או השפה הראשית)</p>
+            <p>&#x2022; כל שפה צריכה להצביע חזרה על כל השפות האחרות (דו-כיווני)</p>
+            <p>&#x2022; הוסיפו לפחות 2 שפות כדי להתחיל</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> שימושי רק אם יש לכם תוכן באותו נושא ביותר משפה אחת</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1403,6 +1551,17 @@
       <div class="card" style="border-color:var(--red);">
         <div class="card-header"><div class="card-title" style="color:var(--red);">&#x26a0; אזור מסוכן</div></div>
         <button class="btn btn-danger" onclick="deleteCurrentProject()">מחיקת פרויקט נוכחי</button>
+      </div>
+      <div class="accordion" onclick="toggleAccordion(this)" style="margin-top:16px;">
+        <div class="accordion-header"><span>&#x1f4d6; הגדרות פרויקט</span><span class="accordion-arrow">&#x25BC;</span></div>
+        <div class="accordion-body">
+          <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">
+            <p>&#x2022; <strong>PageSpeed Insights API Key</strong> — מפתח חינמי מ-Google Cloud Console. מאפשר בדיקת Core Web Vitals (LCP, CLS, INP) לכל עמוד</p>
+            <p>&#x2022; <strong>סריקה מחדש</strong> — מעדכן מטא-דאטה, כותרות ותמונות מהאתר. עריכות ידניות (מילות מפתח, תוכן, סכמות) נשמרות</p>
+            <p>&#x2022; <strong>גיבוי</strong> — שמרו עותק JSON של כל נתוני הפרויקט. שחזור מחליף נתונים קיימים</p>
+            <p>&#x1f4a1; <strong>טיפ:</strong> סרקו מחדש פעם בחודש כדי לעדכן נתונים. גבו לפני כל שינוי גדול</p>
+          </div>
+        </div>
       </div>
     </div>
 
