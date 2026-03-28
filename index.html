@@ -68,10 +68,10 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; direction: rtl; font-size: 16px; line-height: 1.7; }
 
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
   /* === LAYOUT === */
   .app { display: flex; min-height: 100vh; }
@@ -191,6 +191,8 @@
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast.success { border-color: rgba(34,197,94,0.3); }
   .toast.success::before { content: '\2713'; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--green-bg); color: var(--green); font-size: 12px; }
+  .toast.error { border-color: rgba(239,68,68,0.3); }
+  .toast.error::before { content: '\2717'; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--red-bg); color: var(--red); font-size: 12px; }
 
   .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px; margin-top: 12px; }
   .serp-preview { font-family: Arial, sans-serif; direction: rtl; }
@@ -517,7 +519,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
           <div class="mode-desc">בניית פרויקט SEO מאפס — הגדירו עמודים, מטא-דאטה ומילות מפתח ידנית</div>
         </div>
       </div>
-      <button class="btn btn-primary btn-lg btn-block" id="mode-continue-btn" onclick="continueFromMode()" style="opacity:0.5;pointer-events:none;">המשך</button>
+      <button class="btn btn-primary btn-lg btn-block" id="mode-continue-btn" onclick="continueFromMode()" disabled>המשך</button>
     </div>
 
     <!-- Step 1: Existing Site — Scan -->
@@ -557,7 +559,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
       </div>
       <div style="display:flex;gap:8px;margin-top:16px;">
         <button class="btn btn-ghost btn-lg" onclick="showSetupStep(0);resetScan();" style="flex:1;">חזרה</button>
-        <button class="btn btn-primary btn-lg" id="scan-next-btn" onclick="scanToSettings()" style="flex:2;opacity:0.5;pointer-events:none;">המשך להגדרות</button>
+        <button class="btn btn-primary btn-lg" id="scan-next-btn" onclick="scanToSettings()" style="flex:2;" disabled>המשך להגדרות</button>
       </div>
     </div>
 
@@ -1223,7 +1225,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
           <div id="gsc-import-upload" style="display:none;">
             <p style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">GSC &#x2192; Performance &#x2192; Export &#x2192; Download CSV</p>
             <label style="display:flex;align-items:center;justify-content:center;padding:28px;border:2px dashed var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-              <input type="file" accept=".csv,.tsv" onchange="handleGscFile(event)" style="display:none;" />
+              <input type="file" accept=".csv,.tsv" onchange="handleGscFile(event)" style="display:none;" aria-label="העלאת קובץ CSV" />
               <span style="font-size:13px;color:var(--text-dim);">&#x1f4c1; לחצו לבחירת קובץ CSV</span>
             </label>
           </div>
@@ -1252,12 +1254,12 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
           </div>
           <!-- Filter chips -->
           <div id="gsc-filter-chips" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
-            <button class="gsc-chip active" data-filter="all" onclick="setGscFilterChip('all')">&#x1f30d; הכל</button>
-            <button class="gsc-chip" data-filter="top3" onclick="setGscFilterChip('top3')">&#x1f3c6; Top 3</button>
-            <button class="gsc-chip" data-filter="page1" onclick="setGscFilterChip('page1')">&#x1f4c4; עמוד 1</button>
-            <button class="gsc-chip" data-filter="quickwins" onclick="setGscFilterChip('quickwins')">&#x1f3af; Quick Wins</button>
-            <button class="gsc-chip" data-filter="page2plus" onclick="setGscFilterChip('page2plus')">&#x1f4c3; עמוד 2+</button>
-            <button class="gsc-chip" data-filter="lowctr" onclick="setGscFilterChip('lowctr')">&#x26a0;&#xfe0f; CTR נמוך</button>
+            <button class="gsc-chip active" data-filter="all" onclick="setGscFilterChip('all')" title="הצג את כל השאילתות">&#x1f30d; הכל</button>
+            <button class="gsc-chip" data-filter="top3" onclick="setGscFilterChip('top3')" title="שאילתות במיקום 1-3">&#x1f3c6; Top 3</button>
+            <button class="gsc-chip" data-filter="page1" onclick="setGscFilterChip('page1')" title="שאילתות במיקום 1-10">&#x1f4c4; עמוד 1</button>
+            <button class="gsc-chip" data-filter="quickwins" onclick="setGscFilterChip('quickwins')" title="שאילתות במיקום 5-20 — קרוב לעמוד 1">&#x1f3af; Quick Wins</button>
+            <button class="gsc-chip" data-filter="page2plus" onclick="setGscFilterChip('page2plus')" title="שאילתות במיקום 20+">&#x1f4c3; עמוד 2+</button>
+            <button class="gsc-chip" data-filter="lowctr" onclick="setGscFilterChip('lowctr')" title="חשיפות גבוהות עם CTR נמוך — שפרו כותרת ותיאור">&#x26a0;&#xfe0f; CTR נמוך</button>
           </div>
           <!-- Table -->
           <div class="table-wrapper" style="max-height:500px;overflow-y:auto;">
@@ -1366,7 +1368,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
         </div>
         <div class="grid-2">
           <div class="field"><label>סוג</label>
-            <select id="new-redirect-type">
+            <select id="new-redirect-type" aria-label="סוג הפניה">
               <option value="301">301 (קבוע)</option>
               <option value="302">302 (זמני)</option>
             </select>
@@ -1818,10 +1820,10 @@ function saveProjects() {
       // Trim GSC history to free space
       Object.values(projects).forEach(p => { if (p.gscHistory && p.gscHistory.length > 3) p.gscHistory = p.gscHistory.slice(-3); });
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); }
-      catch (e2) { toast('אחסון מלא — מחקו פרויקטים ישנים או ייצאו גיבוי'); }
+      catch (e2) { toast('אחסון מלא — מחקו פרויקטים ישנים או ייצאו גיבוי', 'error'); }
     } else {
       console.error('Save error:', e);
-      toast('שגיאה בשמירה — בדקו הגדרות דפדפן');
+      toast('שגיאה בשמירה — בדקו הגדרות דפדפן', 'error');
     }
   }
 }
@@ -1849,8 +1851,7 @@ function selectMode(mode) {
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('mode-' + mode).classList.add('selected');
   const btn = document.getElementById('mode-continue-btn');
-  btn.style.opacity = '1';
-  btn.style.pointerEvents = 'auto';
+  btn.disabled = false;
 }
 
 function continueFromMode() {
@@ -1884,8 +1885,7 @@ function resetScan() {
   document.getElementById('scan-idle').style.display = 'block';
   document.getElementById('scan-log').innerHTML = '';
   const btn = document.getElementById('scan-next-btn');
-  btn.style.opacity = '0.5';
-  btn.style.pointerEvents = 'none';
+  btn.disabled = true;
 }
 
 function makeAbortSignal(ms) {
@@ -2192,14 +2192,14 @@ async function startScan() {
     scanLog(`\u2717 Unexpected error: ${err.message}`, 'err');
     document.getElementById('scan-running').style.display = 'none';
     document.getElementById('scan-idle').style.display = 'block';
-    toast('שגיאה בסריקה — נסו שוב');
+    toast('שגיאה בסריקה — נסו שוב', 'error');
   }
 }
 
 async function _doScan(rawUrl, name) {
 
   const baseUrl = normalizeUrl(rawUrl);
-  if (!baseUrl) { toast('כתובת לא תקינה'); return; }
+  if (!baseUrl) { toast('כתובת לא תקינה', 'error'); return; }
   // Update input with normalized URL
   document.getElementById('scan-url').value = baseUrl;
   document.getElementById('scan-idle').style.display = 'none';
@@ -2221,7 +2221,7 @@ async function _doScan(rawUrl, name) {
     scanLog('  • שרת ה-proxy אינו זמין כרגע', 'warn');
     document.getElementById('scan-running').style.display = 'none';
     document.getElementById('scan-idle').style.display = 'block';
-    toast('לא ניתן להתחבר לאתר — בדקו שהכתובת תקינה');
+    toast('לא ניתן להתחבר לאתר — בדקו שהכתובת תקינה', 'error');
     return;
   }
 
@@ -2388,8 +2388,7 @@ async function _doScan(rawUrl, name) {
   document.getElementById('scan-summary-text').textContent = `\u05E0\u05DE\u05E6\u05D0\u05D5 ${discoveredPages.length} \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD, ${scannedData.schemas.length} \u05E1\u05DB\u05DE\u05D5\u05EA, ${sitemapUrls.length > 0 ? sitemapUrls.length + ' \u05DB\u05EA\u05D5\u05D1\u05D5\u05EA \u05D1\u05DE\u05E4\u05EA \u05D0\u05EA\u05E8' : '\u05DC\u05DC\u05D0 \u05DE\u05E4\u05EA \u05D0\u05EA\u05E8'}`;
 
   const btn = document.getElementById('scan-next-btn');
-  btn.style.opacity = '1';
-  btn.style.pointerEvents = 'auto';
+  btn.disabled = false;
 }
 
 function scanToSettings() {
@@ -2638,8 +2637,7 @@ function startNewProject() {
   setupMode = null;
   resetScan();
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('mode-continue-btn').style.opacity = '0.5';
-  document.getElementById('mode-continue-btn').style.pointerEvents = 'none';
+  document.getElementById('mode-continue-btn').disabled = true;
   showSetupStep(0);
   document.getElementById('app-screen').style.display = 'none';
   document.getElementById('onboarding-screen').style.display = 'flex';
@@ -3841,7 +3839,7 @@ async function testPageSpeed(pageId) {
     toast(`${pg.name}: ציון ${score}/100 | LCP ${pg.psiData.lcp} | CLS ${cls}`, score >= 90 ? 'success' : '');
   } catch (e) {
     console.error('PSI error:', e);
-    toast('שגיאת PSI: ' + e.message);
+    toast('שגיאת PSI: ' + e.message, 'error');
     if (btn) { btn.disabled = false; btn.innerHTML = '&#x26a1;'; }
   }
 }
@@ -4108,7 +4106,7 @@ function renderSchemas() {
   const aiSchemaBtn = document.getElementById('ai-schema-btn');
   if (aiSchemaBtn) aiSchemaBtn.style.display = p.openaiKey ? 'inline-flex' : 'none';
   const el = document.getElementById('schema-list');
-  if (!p.schemas || p.schemas.length === 0) { el.innerHTML = ''; return; }
+  if (!p.schemas || p.schemas.length === 0) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">אין סכמות. בחרו תבנית מלמעלה להוספת נתונים מובנים.</div>'; return; }
 
   el.innerHTML = p.schemas.map((s, i) => `
     <div class="card">
@@ -4138,7 +4136,7 @@ function saveSchemaEdit(i) {
     saveProjects();
     toast('הסכמה נשמרה', 'success');
   } catch (e) {
-    toast('JSON לא תקין — בדקו את התחביר');
+    toast('JSON לא תקין — בדקו את התחביר', 'error');
   }
 }
 
@@ -4671,6 +4669,10 @@ function renderHeadings() {
   const p = getProject();
   if (!p) return;
   const el = document.getElementById('headings-list');
+  if (p.pages.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">אין כותרות. סרקו את האתר או הוסיפו כותרות בעורך העמודים.</div>';
+    return;
+  }
   el.innerHTML = p.pages.map(pg => {
     const headings = pg.headings || [];
     const h1Count = headings.filter(h => h.startsWith('H1')).length;
@@ -5354,7 +5356,7 @@ async function rescanProject() {
     statusText.textContent = 'מתחבר לאתר...';
     const homeHtml = await fetchWithProxy(p.url);
     if (!homeHtml) {
-      toast('לא ניתן לסרוק את האתר — ייתכן שהאתר חוסם גישה חיצונית, דורש JavaScript, או שה-proxy אינו זמין');
+      toast('לא ניתן לסרוק את האתר — ייתכן שהאתר חוסם גישה חיצונית, דורש JavaScript, או שה-proxy אינו זמין', 'error');
       return;
     }
 
@@ -5514,7 +5516,7 @@ async function rescanProject() {
 
   } catch (err) {
     console.error('Rescan error:', err);
-    toast('שגיאה בסריקה — נסו שוב');
+    toast('שגיאה בסריקה — נסו שוב', 'error');
   } finally {
     btn.disabled = false;
     btn.style.opacity = '1';
@@ -5550,7 +5552,7 @@ function importProjectBackup(event) {
     try {
       const data = JSON.parse(e.target.result);
       if (!data.projects || data._format !== 'autonomous-seo-backup') {
-        toast('קובץ לא תקין — נדרש קובץ גיבוי של Autonomous SEO');
+        toast('קובץ לא תקין — נדרש קובץ גיבוי של Autonomous SEO', 'error');
         return;
       }
       // Sanitize all string fields in imported projects to prevent XSS
@@ -5579,7 +5581,7 @@ function importProjectBackup(event) {
       enterApp();
       toast(`${imported} פרויקטים יובאו בהצלחה`, 'success');
     } catch (err) {
-      toast('שגיאה בקריאת הקובץ — וודאו שהוא JSON תקין');
+      toast('שגיאה בקריאת הקובץ — וודאו שהוא JSON תקין', 'error');
     }
   };
   reader.readAsText(file);
@@ -5725,7 +5727,7 @@ function toast(msg, type) {
   clearTimeout(toastTimer);
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = 'toast show' + (type === 'success' ? ' success' : '');
+  el.className = 'toast show' + (type === 'success' ? ' success' : type === 'error' ? ' error' : '');
   toastTimer = setTimeout(() => el.className = 'toast', 2800);
 }
 
@@ -6319,6 +6321,8 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+    const reveal = document.getElementById('score-reveal-overlay');
+    if (reveal && reveal.style.display !== 'none') skipGate();
     closeMobileMenu();
   }
 });
@@ -6941,6 +6945,7 @@ function unlockDashboard() {
   var email = document.getElementById('gate-email').value.trim();
   var phone = document.getElementById('gate-phone').value.trim();
 
+  const unlockBtn = document.querySelector('#score-reveal-overlay .btn-primary');
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     toast('\u05d4\u05d6\u05d9\u05e0\u05d5 \u05db\u05ea\u05d5\u05d1\u05ea \u05d0\u05d9\u05de\u05d9\u05d9\u05dc \u05ea\u05e7\u05d9\u05e0\u05d4');
     return;
@@ -6949,6 +6954,8 @@ function unlockDashboard() {
     toast('\u05d4\u05d6\u05d9\u05e0\u05d5 \u05d0\u05ea \u05e9\u05de\u05db\u05dd');
     return;
   }
+
+  if (unlockBtn) { unlockBtn.disabled = true; unlockBtn.textContent = 'פותח...'; }
 
   // Mark as fully unlocked
   isUnlocked = true;
@@ -7161,6 +7168,7 @@ async function submitLead() {
       statusEl.style.color = 'var(--green)';
       statusEl.textContent = '\u2705 קיבלנו את המידע שלכם, צוות המומחים שלנו יחזור אליכם עם ניתוח והמלצות בהקדם.';
       btn.textContent = '\u2713 נשלח!';
+      toast('\u2713 הפרטים נשלחו בהצלחה!', 'success');
       if (typeof fbq === 'function' && META_PIXEL_ID) fbq('track', 'Lead', { content_name: 'SEO Audit Lead Modal', value: projectScore ? projectScore.score : 0 });
       setTimeout(() => closeModal('lead-modal'), 3000);
     } else {
