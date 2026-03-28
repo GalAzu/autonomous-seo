@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   const origin = req.headers.origin || '';
-  const allowed = ['https://autonomous-seo.vercel.app', 'http://localhost:3000'];
+  const allowed = ['https://autobiz.digital', 'http://localhost:3000'];
   res.setHeader('Access-Control-Allow-Origin', allowed.includes(origin) ? origin : allowed[0]);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'X-API-Key');
