@@ -463,17 +463,36 @@
   .btn:focus-visible, .nav-item:focus-visible, .mode-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   .nav-item.active { border-right: 3px solid var(--accent); }
 
+  /* ── Mobile: 640px ── */
+  @media (max-width: 640px) {
+    .geo-score-grid { grid-template-columns: repeat(2, 1fr); }
+    .kw-detail-row { grid-template-columns: 1fr 60px 60px 60px; }
+    .cta-banner { flex-direction: column; align-items: stretch; text-align: center; }
+    .cta-banner .btn-cta { width: 100%; }
+  }
+
+  /* ── Mobile: 480px ── */
   @media (max-width: 480px) {
+    .gate-form-grid, .mobile-stack-grid { grid-template-columns: 1fr !important; }
+    .gate-form-grid [style*="grid-column:span 2"] { grid-column: span 1 !important; }
     #score-reveal-overlay > div { padding: 24px 16px !important; }
     #score-reveal-overlay > div > div:nth-child(2) { grid-template-columns: 1fr !important; }
     #score-reveal-overlay .btn { font-size: 14px !important; padding: 12px !important; }
     .modal { padding: 20px !important; width: 96% !important; }
+    .main { padding: 12px 14px !important; padding-top: 70px !important; }
+    .onboarding-card { padding: 24px 16px !important; }
+    .geo-score-grid { grid-template-columns: 1fr; }
+    .geo-section-row { grid-template-columns: 1fr; }
+    .kw-detail-row { grid-template-columns: 1fr; gap: 4px; }
+    .card { padding: 16px; }
   }
 
+  /* ── Mobile: 768px ── */
   @media (max-width: 768px) {
     .btn { min-height: 44px; }
     .nav-item { min-height: 44px; }
     #pages-table th, #pages-table td { padding: 6px 4px; font-size: 11px; }
+    .geo-section-row { grid-template-columns: 1fr 1fr; }
   }
 </style>
 <!-- Meta Pixel Code -->
@@ -1094,7 +1113,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
         </div>
         <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">
           <p style="margin-bottom:8px;"><strong>אסטרטגיה מומלצת:</strong> חסמו בוטים שמשתמשים בתוכן לאימון AI, אפשרו בוטים שמציגים את האתר בתוצאות חיפוש AI.</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="mobile-stack-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
               <div style="color:var(--green);font-weight:600;margin-bottom:4px;">&#x2713; לאפשר (הופעה בחיפוש AI)</div>
               <code style="display:block;font-size:11px;line-height:1.6;">User-agent: ChatGPT-User<br/>Allow: /<br/><br/>User-agent: OAI-SearchBot<br/>Allow: /<br/><br/>User-agent: PerplexityBot<br/>Allow: /</code>
@@ -1636,7 +1655,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
     </div>
 
     <!-- Score + Issues side by side -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;">
+    <div class="mobile-stack-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;">
       <div id="reveal-score-ring" style="text-align:center;"></div>
       <div id="reveal-issues" style="text-align:right;"></div>
     </div>
@@ -1647,7 +1666,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
         <div style="font-size:22px;font-weight:800;font-family:var(--font-heading);margin-bottom:6px;">&#x1f513; גישה מלאה לדשבורד</div>
         <p style="font-size:14px;color:var(--text-dim);">ניתוח מלא, המלצות AI, קוד מוכן להעתקה, דוח PDF, ו-GEO scoring</p>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:500px;margin:0 auto;">
+      <div class="gate-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:500px;margin:0 auto;">
         <div style="grid-column:span 2;">
           <input type="text" id="gate-name" placeholder="השם שלכם" aria-label="שם מלא" style="width:100%;padding:14px 16px;font-size:15px;border-radius:10px;" />
         </div>
@@ -1725,7 +1744,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
       <div class="modal-title" style="font-size:22px;margin-bottom:6px;">ניתוח עמוק והמלצות בחינם</div>
       <p style="font-size:14px;color:var(--text-dim);">צוות המומחים שלנו יחזור אליכם עם ניתוח מקצועי, תוכנית יישום והמלצות מותאמות</p>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="mobile-stack-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="field" style="grid-column:span 2;"><label>שם מלא</label><input type="text" id="lead-name" placeholder="השם שלכם" style="padding:13px 14px;font-size:15px;" /></div>
       <div class="field"><label>אימייל</label><input type="email" id="lead-email" placeholder="your@email.com" style="direction:ltr;text-align:left;padding:13px 14px;font-size:15px;" /></div>
       <div class="field"><label>טלפון <span style="color:var(--text-muted);font-weight:400;">(רשות)</span></label><input type="tel" id="lead-phone" placeholder="050-0000000" style="direction:ltr;text-align:left;padding:13px 14px;font-size:15px;" /></div>
