@@ -195,7 +195,7 @@
   .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px; margin-top: 12px; }
   .serp-preview { font-family: Arial, sans-serif; direction: rtl; }
   .serp-title { color: #8ab4f8; font-size: 18px; line-height: 1.3; cursor: pointer; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .serp-url { color: #bdc1c6; font-size: 12px; margin-bottom: 4px; direction: ltr; text-align: right; }
+  .serp-url { color: #bdc1c6; font-size: 12px; margin-bottom: 4px; direction: ltr; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .serp-desc { color: #bdc1c6; font-size: 13px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
   .accordion { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; transition: var(--transition); }
@@ -455,6 +455,24 @@
   .gap-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface-2); border-radius: var(--radius-xs); margin-bottom: 6px; }
   .citation-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
   .citation-row input { flex: 1; font-size: 12px; padding: 6px 10px; }
+
+  /* UX fixes: disabled, focus, mobile */
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+  .btn:focus-visible, .nav-item:focus-visible, .mode-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .nav-item.active { border-right: 3px solid var(--accent); }
+
+  @media (max-width: 480px) {
+    #score-reveal-overlay > div { padding: 24px 16px !important; }
+    #score-reveal-overlay > div > div:nth-child(2) { grid-template-columns: 1fr !important; }
+    #score-reveal-overlay .btn { font-size: 14px !important; padding: 12px !important; }
+    .modal { padding: 20px !important; width: 96% !important; }
+  }
+
+  @media (max-width: 768px) {
+    .btn { min-height: 44px; }
+    .nav-item { min-height: 44px; }
+    #pages-table th, #pages-table td { padding: 6px 4px; font-size: 11px; }
+  }
 </style>
 <!-- Meta Pixel Code -->
 <script>
@@ -834,7 +852,10 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
       </div>
       <div class="field" style="margin-bottom:20px;">
         <label>בחרו עמוד לעריכה</label>
-        <select id="page-selector" onchange="loadPageEditor(this.value)" style="font-size:14px;padding:13px;"></select>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="page-selector" onchange="loadPageEditor(this.value)" style="font-size:14px;padding:13px;flex:1;"></select>
+          <button class="btn btn-sm btn-ghost" onclick="document.getElementById('editor-panel').style.display='none';document.getElementById('page-selector').value='';" title="סגור עורך" style="white-space:nowrap;">&#x2715; חזרה</button>
+        </div>
       </div>
       <div id="editor-panel" style="display:none;">
         <div class="grid-2">
@@ -1626,10 +1647,10 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:500px;margin:0 auto;">
         <div style="grid-column:span 2;">
-          <input type="text" id="gate-name" placeholder="השם שלכם" style="width:100%;padding:14px 16px;font-size:15px;border-radius:10px;" />
+          <input type="text" id="gate-name" placeholder="השם שלכם" aria-label="שם מלא" style="width:100%;padding:14px 16px;font-size:15px;border-radius:10px;" />
         </div>
-        <input type="email" id="gate-email" placeholder="your@email.com" style="padding:14px 16px;font-size:15px;direction:ltr;text-align:left;border-radius:10px;" />
-        <input type="tel" id="gate-phone" placeholder="050-0000000 (רשות)" style="padding:14px 16px;font-size:15px;direction:ltr;text-align:left;border-radius:10px;" />
+        <input type="email" id="gate-email" placeholder="your@email.com" aria-label="אימייל" style="padding:14px 16px;font-size:15px;direction:ltr;text-align:left;border-radius:10px;" />
+        <input type="tel" id="gate-phone" placeholder="050-0000000 (רשות)" aria-label="טלפון" style="padding:14px 16px;font-size:15px;direction:ltr;text-align:left;border-radius:10px;" />
         <div style="grid-column:span 2;">
           <button class="btn btn-primary btn-block" onclick="unlockDashboard()" style="font-size:17px;padding:16px;border-radius:10px;font-weight:700;">&#x1f680; פתחו את הדשבורד המלא</button>
         </div>
@@ -1648,7 +1669,10 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
 <!-- ═══ ADD PAGE MODAL ═══ -->
 <div class="modal-overlay" id="add-page-modal">
   <div class="modal" style="max-width:500px;">
-    <div class="modal-title">+ הוספת עמוד חדש</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div class="modal-title" style="margin-bottom:0;">+ הוספת עמוד חדש</div>
+      <button class="btn btn-sm btn-ghost" onclick="closeModal('add-page-modal')" style="font-size:18px;padding:4px 8px;">&#x2715;</button>
+    </div>
     <div class="field"><label>שם העמוד</label><input type="text" id="modal-page-name" placeholder="למשל: אודות" /></div>
     <div class="field"><label>נתיב</label><input type="text" id="modal-page-path" placeholder="/about/" style="direction:ltr;text-align:left;" /></div>
     <div class="field"><label>כותרת</label><input type="text" id="modal-page-title" placeholder="כותרת העמוד | שם האתר" /></div>
@@ -1663,8 +1687,11 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
 
 <!-- ═══ EXPORT MODAL ═══ -->
 <div class="modal-overlay" id="export-modal">
-  <div class="modal">
-    <div class="modal-title">&#x1f4e6; ייצוא שינויים</div>
+  <div class="modal" style="position:relative;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div class="modal-title" style="margin-bottom:0;">&#x1f4e6; ייצוא שינויים</div>
+      <button class="btn btn-sm btn-ghost" onclick="closeModal('export-modal')" style="font-size:18px;padding:4px 8px;">&#x2715;</button>
+    </div>
     <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">סיכום כל הנתונים והשינויים. העתיקו או הורידו.</p>
     <div style="display:flex;gap:8px;margin-bottom:16px;">
       <button class="btn btn-sm" onclick="setExportTab('summary')" id="exp-tab-summary" style="background:var(--primary);color:white;">סיכום</button>
@@ -1689,7 +1716,8 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
 
 <!-- ═══ LEAD CAPTURE MODAL ═══ -->
 <div class="modal-overlay" id="lead-modal">
-  <div class="modal" style="max-width:520px;padding:36px;">
+  <div class="modal" style="max-width:520px;padding:36px;position:relative;">
+    <button class="btn btn-sm btn-ghost" onclick="closeModal('lead-modal')" style="position:absolute;top:16px;left:16px;font-size:18px;padding:4px 8px;color:var(--text-muted);">&#x2715;</button>
     <div style="text-align:center;margin-bottom:24px;">
       <div style="font-size:40px;margin-bottom:8px;">&#x1f4e9;</div>
       <div class="modal-title" style="font-size:22px;margin-bottom:6px;">ניתוח עמוק והמלצות בחינם</div>
@@ -3707,6 +3735,10 @@ function renderPagesTable() {
   const p = getProject();
   if (!p) return;
   const tbody = document.getElementById('pages-table');
+  if (p.pages.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px;">\u05D0\u05D9\u05DF \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD. <button class="btn btn-sm btn-primary" onclick="openAddPageModal()">+ \u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05E2\u05DE\u05D5\u05D3</button></td></tr>';
+    return;
+  }
   tbody.innerHTML = p.pages.map(pg => {
     const tl = (pg.title || '').length;
     const dl = (pg.description || '').length;
@@ -3722,7 +3754,7 @@ function renderPagesTable() {
     const hasNoContent = pgManualWords === 0 && pgScannedWords === 0;
     const partialIndicator = hasNoContent ? ' <span title="ציון חלקי — תוכן העמוד לא נסרק" style="cursor:help;">&#x26A0;</span>' : '';
     return `<tr class="page-row" ondblclick="editPage('${pg.id}')">
-      <td><strong>${escapeHtml(pg.name)}</strong><br><span style="font-size:11px;color:var(--text-dim);direction:ltr;display:inline-block;">${escapeHtml(pg.path)}</span></td>
+      <td style="max-width:200px;"><strong style="display:block;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(pg.name)}">${escapeHtml(pg.name)}</strong><br><span style="font-size:11px;color:var(--text-dim);direction:ltr;display:inline-block;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(pg.path)}</span></td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(pg.title)}">${pg.title ? escapeHtml(pg.title) : '<span style="color:var(--text-muted)">לא הוגדר</span>'}</td>
       <td>${tl} ${tb}</td><td>${dl} ${db}</td>
       <td style="font-family:monospace;font-size:11px;direction:ltr;">${escapeHtml(pg.canonical) || '-'}</td>
@@ -4136,6 +4168,10 @@ function renderSitemap() {
   const p = getProject();
   if (!p) return;
   const tbody = document.getElementById('sitemap-table');
+  if (!p.sitemap || p.sitemap.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">\u05DE\u05E4\u05EA \u05D0\u05EA\u05E8 \u05E8\u05D9\u05E7\u05D4. <button class="btn btn-sm btn-primary" onclick="syncSitemapFromPages()">\u05E1\u05E0\u05DB\u05E8\u05DF \u05DE\u05E2\u05DE\u05D5\u05D3\u05D9\u05DD</button></td></tr>';
+    return;
+  }
   tbody.innerHTML = p.sitemap.map((item, i) => `<tr>
     <td style="font-family:monospace;font-size:12px;direction:ltr;">${p.url}${item.url}</td>
     <td><input type="number" value="${item.priority}" min="0" max="1" step="0.1" style="width:60px;padding:5px 6px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:12px;direction:ltr;" onchange="updateSitemap(${i},'priority',this.value)" /></td>
@@ -4301,6 +4337,11 @@ function renderKeywords() {
 function renderKeywordMap(p, el) {
   const pagesWithKw = p.pages.filter(pg => pg.keywords && pg.keywords.length > 0);
   const pagesWithoutKw = p.pages.filter(pg => !pg.keywords || pg.keywords.length === 0);
+
+  if (pagesWithKw.length === 0 && pagesWithoutKw.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px;">&#x1f50d; \u05D0\u05D9\u05DF \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7. \u05E2\u05E8\u05DB\u05D5 \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD \u05D5\u05D4\u05D5\u05E1\u05D9\u05E4\u05D5 \u05DE\u05D9\u05DC\u05D5\u05EA \u05DE\u05E4\u05EA\u05D7, \u05D0\u05D5 \u05E1\u05E8\u05E7\u05D5 \u05D0\u05EA \u05D4\u05D0\u05EA\u05E8 \u05DE\u05D7\u05D3\u05E9.</div>';
+    return;
+  }
 
   let html = pagesWithKw.map(pg => {
     // Ensure keywordData is synced with keywords
