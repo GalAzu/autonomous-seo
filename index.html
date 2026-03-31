@@ -1681,9 +1681,7 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
       </div>
     </div>
 
-    <div style="text-align:center;">
-      <button class="btn btn-ghost btn-sm" onclick="skipGate()" style="font-size:12px;color:var(--text-muted);">צפייה בדשבורד בלבד (מוגבל) &#x2192;</button>
-    </div>
+    <!-- Skip gate removed — full unlock or nothing -->
   </div>
 </div>
 
@@ -2811,10 +2809,6 @@ function renderTabContent(tabId) {
 }
 
 function showTab(tabId, el) {
-  if (isUnlocked === 'limited' && tabId !== 'dashboard') {
-    showScoreReveal();
-    return;
-  }
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const tab = document.getElementById('tab-' + tabId);
@@ -6341,7 +6335,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
     const reveal = document.getElementById('score-reveal-overlay');
-    if (reveal && reveal.style.display !== 'none') skipGate();
+    if (reveal && reveal.style.display !== 'none') {
+      reveal.style.opacity = '0';
+      reveal.style.transition = 'opacity 0.3s';
+      setTimeout(() => { reveal.style.display = 'none'; reveal.style.opacity = '1'; }, 300);
+    }
     closeMobileMenu();
   }
 });
@@ -6980,11 +6978,6 @@ function unlockDashboard() {
   isUnlocked = true;
   localStorage.setItem('seo-tool-unlocked', 'true');
 
-  // Remove limited mode restrictions if they were active
-  document.querySelectorAll('.nav-item').forEach(item => { item.style.opacity = ''; item.style.pointerEvents = ''; });
-  const limitedBanner = document.getElementById('limited-mode-banner');
-  if (limitedBanner) limitedBanner.remove();
-
   // Close overlay with animation
   var overlay = document.getElementById('score-reveal-overlay');
   overlay.style.opacity = '0';
@@ -7017,38 +7010,7 @@ function unlockDashboard() {
   toast('\u05d4\u05d3\u05e9\u05d1\u05d5\u05e8\u05d3 \u05e0\u05e4\u05ea\u05d7! \ud83c\udf89', 'success');
 }
 
-function skipGate() {
-  isUnlocked = 'limited';
-  var overlay = document.getElementById('score-reveal-overlay');
-  overlay.style.opacity = '0';
-  overlay.style.transition = 'opacity 0.3s';
-  setTimeout(function() { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 300);
-  applyLimitedMode();
-}
-
-function applyLimitedMode() {
-  // Hide sidebar nav items except dashboard
-  document.querySelectorAll('.nav-item').forEach(item => {
-    const onclick = item.getAttribute('onclick') || '';
-    if (!onclick.includes("'dashboard'")) {
-      item.style.opacity = '0.4';
-      item.style.pointerEvents = 'none';
-    }
-  });
-  // Add unlock banner to dashboard
-  const statsEl = document.getElementById('dashboard-stats');
-  if (statsEl && !document.getElementById('limited-mode-banner')) {
-    statsEl.insertAdjacentHTML('afterend', `
-      <div id="limited-mode-banner" style="background:linear-gradient(135deg, var(--primary-glow), var(--accent-glow));border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div>
-          <div style="font-size:14px;font-weight:700;">&#x1f512; מצב מוגבל — רק דשבורד</div>
-          <div style="font-size:12px;color:var(--text-dim);">השאירו פרטים לגישה מלאה: עורך עמודים, מילות מפתח, GEO, סכמות, ייצוא ועוד</div>
-        </div>
-        <button class="btn btn-primary" onclick="showScoreReveal()" style="white-space:nowrap;">&#x1f513; פתחו גישה מלאה</button>
-      </div>
-    `);
-  }
-}
+// skipGate and applyLimitedMode removed — gate is now full-unlock only
 
 function openLeadModal() {
   document.getElementById('lead-name').value = '';
@@ -7211,6 +7173,35 @@ document.addEventListener('DOMContentLoaded', () => {
     enterApp();
   }
   // else onboarding is visible by default
+
+  // Auto-scan: detect ?url=...&name=...&autostart=true from SEO Magnet landing page
+  const params = new URLSearchParams(window.location.search);
+  const autoUrl = params.get('url');
+  const autoName = params.get('name');
+  const autostart = params.get('autostart');
+  const refSource = params.get('ref');
+
+  // Auto-unlock for users coming from the landing page — they already gave us their details
+  if (refSource === 'seo-magnet') {
+    isUnlocked = true;
+    localStorage.setItem('seo-tool-unlocked', 'true');
+  }
+
+  if (autoUrl && autostart === 'true') {
+    // Populate the scan form fields
+    const urlInput = document.getElementById('scan-url');
+    const nameInput = document.getElementById('scan-name');
+    if (urlInput) urlInput.value = autoUrl;
+    // Fallback name: use domain from URL if no name provided
+    const fallbackName = autoName || autoUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    if (nameInput) nameInput.value = fallbackName;
+
+    // Clean URL params so refresh doesn't re-trigger
+    window.history.replaceState({}, '', window.location.pathname);
+
+    // Auto-trigger scan with a small delay to let UI settle
+    setTimeout(() => { startScan(); }, 300);
+  }
 });
 </script>
 </body>
