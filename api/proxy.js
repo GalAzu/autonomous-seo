@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
   // Restrict CORS to our domain
   const origin = req.headers.origin || '';
-  const allowedOrigins = ['https://autobiz.digital', 'http://localhost:3000'];
+  const allowedOrigins = ['https://autobiz.digital', 'https://autonomous-seo.vercel.app', 'http://localhost:3000'];
   res.setHeader('Access-Control-Allow-Origin', allowedOrigins.includes(origin) ? origin : allowedOrigins[0]);
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Cache-Control', 'public, max-age=300');
