@@ -6895,6 +6895,49 @@ h1,h2,h3{font-family:'Rubik',sans-serif;}
 const SEO_MAGNET_WEBHOOK = 'https://autonomous.n8n888.cloud/webhook/seo-magnet';
 const WEBHOOK_SECRET = 'autonomous-seo-2026';
 
+// Attribution: capture UTM/referrer on first touch, persist 30 days, reuse across gate + modal.
+function captureAttribution() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+    const data = {};
+    let hasUTM = false;
+    utmKeys.forEach(k => { const v = params.get(k); if (v) { data[k] = v.slice(0, 200); hasUTM = true; } });
+    const existing = localStorage.getItem('seo-attribution');
+    if (hasUTM) {
+      data.referrer = (document.referrer || '').slice(0, 500);
+      data.landing_page = (window.location.pathname + window.location.search).slice(0, 500);
+      data.captured_at = Date.now();
+      localStorage.setItem('seo-attribution', JSON.stringify(data));
+    } else if (!existing && document.referrer) {
+      localStorage.setItem('seo-attribution', JSON.stringify({
+        referrer: document.referrer.slice(0, 500),
+        landing_page: (window.location.pathname + window.location.search).slice(0, 500),
+        captured_at: Date.now()
+      }));
+    }
+  } catch (e) {}
+}
+
+function getAttribution() {
+  try {
+    const raw = localStorage.getItem('seo-attribution');
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    if (data.captured_at && (Date.now() - data.captured_at) > 30 * 24 * 60 * 60 * 1000) {
+      localStorage.removeItem('seo-attribution');
+      return {};
+    }
+    const out = {};
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referrer', 'landing_page'].forEach(k => {
+      if (data[k]) out[k] = data[k];
+    });
+    return out;
+  } catch (e) { return {}; }
+}
+
+captureAttribution();
+
 async function generateWebhookSignature(payload) {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey('raw', encoder.encode(WEBHOOK_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -6995,7 +7038,9 @@ function unlockDashboard() {
     seoScore: String(projectScore ? projectScore.score : ''),
     geoScore: String(geoResult ? geoResult.score : ''),
     pageCount: p ? String(p.pages.length) : '0',
-    page: 'autobiz.digital/seo', source: 'score-reveal-gate'
+    page: 'autobiz.digital/seo', source: 'score-reveal-gate',
+    campaign: 'SEO Magnet',
+    ...getAttribution()
   };
   generateWebhookSignature(gatePayload).then(sig => {
     fetch(SEO_MAGNET_WEBHOOK, {
@@ -7133,6 +7178,9 @@ async function submitLead() {
       geoScore: String(geoResult ? geoResult.score : ''),
       pageCount: p ? String(p.pages.length) : '0',
       page: 'autobiz.digital/seo',
+      source: 'lead-modal',
+      campaign: 'SEO Magnet',
+      ...getAttribution(),
       audit: auditData
     };
     const leadSig = await generateWebhookSignature(leadPayload);
