@@ -85,11 +85,33 @@ Extracts: title, description, canonical, OG tags, headings, internal links, JSON
 
 ## n8n Workflow (dd4JRXBccw8iVPe9)
 **Name:** [Autonomous] SEO Tool — Lead Capture
-**Flow:** Webhook → Verify HMAC Signature (Code node) → Format Lead Data → Respond OK + Save to Airtable → Gmail Notify Gal
-- Source tracking: `score-reveal-gate` vs `lead-modal`
-- HMAC validation: checks `X-Webhook-Signature` header
-- Airtable: Lead Management → Leads (appK1434KA6V9eJ8B / tblSOxHfMQ5klKXhl)
-- Gmail: branded HTML email with scores, page breakdown, audit summary
+**Status:** ✅ LIVE as of 2026-04-12 (reactivated + fixed + end-to-end verified, execution 157375)
+**Archive:** `/Users/galazulay/Documents/Autonomous/n8n-workflows/seo-magnet-lead-capture.json`
+**Health check:** `./scripts/health-check.sh` (see `HEALTH-CHECK.md`)
+
+**Flow (actual, verified Apr 12):**
+```
+Webhook (POST /seo-magnet)
+  ├→ Respond OK (immediate 200 to client)
+  └→ Verify Origin (code node — origin header or shared token, NOT real HMAC)
+       └→ Skip Health Checks (IF: source != "health-monitor")
+            └→ Format Lead Data
+                 ├→ Save to Airtable (Lead Management → Leads)
+                 │    └→ Gmail Notify Gal (galazu@gmail.com + galazu@autobiz.digital)
+                 └→ Build AI Prompt
+                      └→ Generate AI Action Plan (langchain chainLlm + Gemini SEO Analyst)
+                           └→ Format Report Email (code node → branded RTL HTML)
+                                └→ Send Report to Lead (Gmail OAuth2 "autonomous")
+```
+
+**Downstream details:**
+- Source tracking: `seo-magnet` | `score-reveal-gate` | `lead-modal` — different email subject emoji (🟣/🟢/🔵)
+- Origin check: `https://autobiz.digital` or `https://autonomous-seo.vercel.app`, OR shared token `autonomous-seo-2026` in `x-webhook-token` header
+- Airtable: `appK1434KA6V9eJ8B` / `tblSOxHfMQ5klKXhl`
+- LLM: **Google Gemini** (not GPT — old docs were wrong)
+- Lead email: **Gmail OAuth2** sender "Autonomous SEO" (not Resend — old docs were wrong)
+- CTA in lead email: `https://calendly.com/autonomous-il/seo-strategy`
+- Health monitor filter: `source: "health-monitor"` bypasses lead flow — used by `scripts/health-check.sh`
 
 ## Reports
 - **PDF Report** — branded print-ready page: score rings, stats grid, full page table, issues list, CTA. Opens in new window with print dialog

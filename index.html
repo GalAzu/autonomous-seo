@@ -747,6 +747,12 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
         <span class="icon">&#x2699;</span> הגדרות
       </div>
     </div>
+    <div style="padding:12px;margin-top:auto;">
+      <a href="https://weekly-scheduler-five.vercel.app/booking" target="_blank" style="display:block;text-decoration:none;background:linear-gradient(135deg, var(--primary), var(--accent));border-radius:var(--radius-sm);padding:14px 16px;text-align:center;transition:var(--transition);opacity:0.9;" onmouseover="this.style.opacity='1';this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='0.9';this.style.transform='none'">
+        <div style="font-size:13px;font-weight:700;color:white;font-family:var(--font-heading);">רוצים פתרון מותאם?</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">שיחת ייעוץ חינמית &larr;</div>
+      </a>
+    </div>
     <div class="sidebar-footer">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <img src="logo.png" alt="Autonomous" style="width:22px;height:22px;object-fit:contain;">
@@ -1727,8 +1733,8 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
       <button class="btn btn-ghost" onclick="closeModal('export-modal')">סגירה</button>
     </div>
     <div style="margin-top:16px;padding:14px 18px;background:linear-gradient(135deg,var(--primary-glow),var(--accent-glow));border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span style="font-size:13px;color:var(--text-dim);">רוצים שניישם את השינויים עבורכם?</span>
-      <a href="#" onclick="event.preventDefault();closeModal('export-modal');openLeadModal();" style="font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;text-decoration:none;">דברו איתנו &#x2192;</a>
+      <span style="font-size:13px;color:var(--text-dim);">רוצים יישום מקצועי והתאמה אישית לעסק שלכם?</span>
+      <a href="#" onclick="event.preventDefault();closeModal('export-modal');openLeadModal();" style="font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;text-decoration:none;">צרו קשר לייעוץ חינמי &#x2192;</a>
     </div>
   </div>
 </div>
@@ -1739,8 +1745,8 @@ if (META_PIXEL_ID) { fbq('init', META_PIXEL_ID); fbq('track', 'PageView'); }
     <button class="btn btn-sm btn-ghost" onclick="closeModal('lead-modal')" style="position:absolute;top:16px;left:16px;font-size:18px;padding:4px 8px;color:var(--text-muted);">&#x2715;</button>
     <div style="text-align:center;margin-bottom:24px;">
       <div style="font-size:40px;margin-bottom:8px;">&#x1f4e9;</div>
-      <div class="modal-title" style="font-size:22px;margin-bottom:6px;">ניתוח עמוק והמלצות בחינם</div>
-      <p style="font-size:14px;color:var(--text-dim);">צוות המומחים שלנו יחזור אליכם עם ניתוח מקצועי, תוכנית יישום והמלצות מותאמות</p>
+      <div class="modal-title" style="font-size:22px;margin-bottom:6px;">התאמה אישית ופתרונות לעסק שלכם</div>
+      <p style="font-size:14px;color:var(--text-dim);">צוות המומחים שלנו ייצור קשר עם ניתוח מקצועי, תוכנית יישום מותאמת ואוטומציות שיעבדו בשבילכם</p>
     </div>
     <div class="mobile-stack-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="field" style="grid-column:span 2;"><label>שם מלא</label><input type="text" id="lead-name" placeholder="השם שלכם" style="padding:13px 14px;font-size:15px;" /></div>
@@ -1795,7 +1801,7 @@ if (!currentProjectId || currentProjectId === 'null' || currentProjectId === 'un
 let currentPage = null;
 let currentExportTab = 'summary';
 let toastTimer = null;
-let isUnlocked = localStorage.getItem('seo-tool-unlocked') === 'true';
+let isUnlocked = true; // Always unlocked — lead capture happens on the website
 let autoSaveTimer = null;
 
 // ═══════════════════════════════════════════════════
@@ -2623,10 +2629,7 @@ function finishSetup() {
   setupMode = null;
   enterApp();
 
-  // Show score reveal gate for scanned projects (if not already unlocked)
-  if (wasScanned && !isUnlocked) {
-    setTimeout(() => showScoreReveal(), 300);
-  }
+  // Gate removed — tool is fully open, lead capture on website only
 
   // Initial score snapshot
   const pInit = getProject();
@@ -3683,22 +3686,22 @@ function renderDashboard() {
     </div>
   `).join('');
 
-  // Booking CTA
+  // Services CTA
   const bookingHtml = `
-    <div class="card" style="background:linear-gradient(135deg, var(--primary-glow), var(--accent-glow));border:1px solid var(--primary);margin-top:16px;">
+    <div class="card" style="background:linear-gradient(135deg, var(--primary-glow), var(--accent-glow));border:2px solid var(--primary);margin-top:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
         <div>
-          <div style="font-size:15px;font-weight:700;">&#x1f4de; רוצים שניישם את השינויים?</div>
-          <p style="font-size:13px;color:var(--text-dim);margin-top:4px;">שיחת אסטרטגיה חינמית — 30 דקות, ללא התחייבות</p>
+          <div style="font-size:16px;font-weight:800;font-family:var(--font-heading);">&#x1f680; רוצים תוצאות אמיתיות? בואו נעשה את זה ביחד</div>
+          <p style="font-size:13px;color:var(--text-dim);margin-top:4px;">התאמה אישית, יישום מקצועי, ואוטומציות שעובדות בשבילכם — צרו קשר לשיחת ייעוץ חינמית</p>
         </div>
-        <a href="https://calendly.com/autonomous-il/seo-strategy" target="_blank" class="btn btn-primary" style="white-space:nowrap;">&#x1f4c5; קבעו שיחה</a>
+        <a href="https://weekly-scheduler-five.vercel.app/booking" target="_blank" class="btn btn-primary" style="white-space:nowrap;font-size:14px;padding:12px 20px;">&#x1f4c5; קבעו שיחת ייעוץ</a>
       </div>
     </div>
   `;
   document.getElementById('dashboard-priorities').insertAdjacentHTML('afterend', bookingHtml);
 
-  // AI Insights — only for unlocked users with Gemini key
-  if (isUnlocked === true && p.openaiKey) {
+  // AI Insights — available for users with Gemini key
+  if (p.openaiKey) {
     const aiInsightsEl = document.getElementById('dashboard-insights');
     if (aiInsightsEl && !aiInsightsEl.dataset.loaded) {
       aiInsightsEl.innerHTML = `
@@ -5605,12 +5608,6 @@ function importProjectBackup(event) {
 // EXPORT
 // ═══════════════════════════════════════════════════
 function exportAll() {
-  if (!isUnlocked) {
-    if (confirm('\u05d9\u05d9\u05e6\u05d5\u05d0 \u05d4\u05e0\u05ea\u05d5\u05e0\u05d9\u05dd \u05d6\u05de\u05d9\u05df \u05dc\u05d0\u05d7\u05e8 \u05d4\u05e8\u05e9\u05de\u05d4 \u05d7\u05d9\u05e0\u05de\u05d9\u05ea. \u05dc\u05d4\u05d9\u05e8\u05e9\u05dd \u05e2\u05db\u05e9\u05d9\u05d5?')) {
-      showScoreReveal();
-    }
-    return;
-  }
   currentExportTab = 'summary';
   renderExport();
   document.getElementById('export-modal').classList.add('show');
@@ -6507,7 +6504,7 @@ async function callGemini(prompt, apiKey) {
 async function generateAiInsights() {
   const p = getProject();
   if (!p || !p.openaiKey) { toast('הזינו Gemini API Key בהגדרות'); return; }
-  if (isUnlocked !== true) { showScoreReveal(); return; }
+  // Gate removed — all features open
 
   const btn = document.getElementById('ai-insights-btn');
   const contentEl = document.getElementById('ai-insights-content');
@@ -7229,11 +7226,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const autostart = params.get('autostart');
   const refSource = params.get('ref');
 
-  // Auto-unlock for users coming from the landing page — they already gave us their details
-  if (refSource === 'seo-magnet') {
-    isUnlocked = true;
-    localStorage.setItem('seo-tool-unlocked', 'true');
-  }
+  // Tool is fully open — no gating needed (lead capture on website)
 
   if (autoUrl && autostart === 'true') {
     // Populate the scan form fields
