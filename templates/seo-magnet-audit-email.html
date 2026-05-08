@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>תוכנית הפעולה שלך מוכנה — Autonomous SEO</title>
+<!--
+  SEO Magnet — Automated Audit Email Template
+  Version: as of workflow dd4JRXBccw8iVPe9 (exported 2026-04-12)
+  Generated dynamically in n8n's "Format Report Email" code node
+  Rendered in: Gmail OAuth2 sender "Autonomous SEO" <galazu@autobiz.digital>
+  Subject: תוכנית הפעולה ל-{{ website }} מוכנה — Autonomous SEO
+
+  This is the TEMPLATE SOURCE — the n8n jsCode node generates this with live data.
+  Any edits here should also be updated in n8n workflow dd4JRXBccw8iVPe9 → Format Report Email node.
+
+  VARIABLES:
+  - {{ website }}       — lead's submitted website URL
+  - {{ seoScore }}      — SEO score 0-100
+  - {{ geoScore }}      — GEO/AI search score 0-100
+  - {{ ai.greeting }}   — 1 sentence greeting by name
+  - {{ ai.scoreSummary }} — 2-3 sentence SEO health summary
+  - {{ ai.priorities[] }} — array of 3 items (title, why, impact, action)
+  - {{ ai.ignoreList[] }} — optional array of what NOT to do
+  - {{ ai.bottomLine }}   — bold summary sentence
+-->
+</head>
+<body style="margin:0;padding:0;background:#f5f6fa;">
+
+<div dir="rtl" style="font-family:Assistant,Rubik,Arial,sans-serif;max-width:600px;margin:0 auto;padding:0;background:#ffffff;">
+
+  <!-- HERO -->
+  <div style="background:linear-gradient(135deg,#2f55c7,#1aa2b0);padding:32px 24px;border-radius:0 0 24px 24px;text-align:center;">
+    <h1 style="color:#ffffff;margin:0 0 8px;font-size:24px;font-weight:800;">תוכנית הפעולה שלכם מוכנה</h1>
+    <p style="color:rgba(255,255,255,0.85);margin:0;font-size:14px;">ניתוח SEO אישי עבור {{ website }}</p>
+
+    <div style="margin-top:20px;display:inline-flex;gap:24px;">
+      <div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:12px 24px;">
+        <div style="font-size:32px;font-weight:800;color:#ffffff;">{{ seoScore }}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);">SEO</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:12px 24px;">
+        <div style="font-size:32px;font-weight:800;color:#ffffff;">{{ geoScore }}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);">GEO</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div style="padding:24px;">
+
+    <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">{{ ai.greeting }}</p>
+    <p style="font-size:14px;color:#666;line-height:1.7;margin:0 0 24px;">{{ ai.scoreSummary }}</p>
+
+    <h2 style="font-size:18px;color:#2f55c7;margin:0 0 16px;border-bottom:2px solid #eef;padding-bottom:8px;">
+      3 הפעולות הקריטיות שלכם
+    </h2>
+
+    <!-- PRIORITY 1 (high impact example) -->
+    <div style="margin-bottom:16px;padding:16px;border-radius:12px;border:1px solid #eef;background:#fafbff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <strong style="font-size:16px;color:#2f55c7;">1. {{ ai.priorities[0].title }}</strong>
+        <span style="font-size:11px;padding:3px 10px;border-radius:20px;background:#e74c3c15;color:#e74c3c;font-weight:600;">
+          השפעה גבוהה
+        </span>
+      </div>
+      <p style="margin:0 0 6px;color:#555;font-size:14px;">{{ ai.priorities[0].why }}</p>
+      <p style="margin:0;color:#333;font-size:14px;font-weight:600;">→ {{ ai.priorities[0].action }}</p>
+    </div>
+
+    <!-- PRIORITY 2 (medium impact example) -->
+    <div style="margin-bottom:16px;padding:16px;border-radius:12px;border:1px solid #eef;background:#fafbff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <strong style="font-size:16px;color:#2f55c7;">2. {{ ai.priorities[1].title }}</strong>
+        <span style="font-size:11px;padding:3px 10px;border-radius:20px;background:#f39c1215;color:#f39c12;font-weight:600;">
+          השפעה בינונית
+        </span>
+      </div>
+      <p style="margin:0 0 6px;color:#555;font-size:14px;">{{ ai.priorities[1].why }}</p>
+      <p style="margin:0;color:#333;font-size:14px;font-weight:600;">→ {{ ai.priorities[1].action }}</p>
+    </div>
+
+    <!-- PRIORITY 3 (low impact example) -->
+    <div style="margin-bottom:16px;padding:16px;border-radius:12px;border:1px solid #eef;background:#fafbff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <strong style="font-size:16px;color:#2f55c7;">3. {{ ai.priorities[2].title }}</strong>
+        <span style="font-size:11px;padding:3px 10px;border-radius:20px;background:#27ae6015;color:#27ae60;font-weight:600;">
+          השפעה נמוכה
+        </span>
+      </div>
+      <p style="margin:0 0 6px;color:#555;font-size:14px;">{{ ai.priorities[2].why }}</p>
+      <p style="margin:0;color:#333;font-size:14px;font-weight:600;">→ {{ ai.priorities[2].action }}</p>
+    </div>
+
+    <!-- IGNORE LIST (optional) -->
+    <div style="margin-top:20px;padding:14px;border-radius:10px;background:#f8f8f8;">
+      <h3 style="font-size:14px;color:#999;margin:0 0 8px;">מה לא לעשות עכשיו:</h3>
+      <ul style="margin:0;padding:0 16px;">
+        <!-- {{ ai.ignoreList }} rendered as <li> items -->
+        <li style="color:#888;font-size:13px;margin-bottom:4px;">{{ ai.ignoreList[0] }}</li>
+      </ul>
+    </div>
+
+    <!-- BOTTOM LINE PULLQUOTE -->
+    <div style="margin-top:24px;padding:16px;border-radius:12px;background:#f0f4ff;border-right:4px solid #2f55c7;">
+      <p style="margin:0;font-size:15px;color:#2f55c7;font-weight:700;">{{ ai.bottomLine }}</p>
+    </div>
+
+    <!-- PRIMARY CTA — STRATEGY CALL -->
+    <div style="margin-top:32px;text-align:center;">
+      <a href="https://calendly.com/autonomous-il/seo-strategy"
+         style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#2f55c7,#1f3ba6);color:#ffffff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;">
+        רוצים שנטפל בזה? קבעו שיחה חינם ←
+      </a>
+      <p style="margin:12px 0 0;font-size:12px;color:#999;">45 דקות, בלי התחייבות</p>
+    </div>
+
+    <!-- SECONDARY CTA — TOOL RESCAN -->
+    <div style="margin-top:24px;text-align:center;">
+      <a href="https://autonomous-seo.vercel.app"
+         style="display:inline-block;padding:10px 24px;background:#1aa2b0;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:13px;">
+        סרקו שוב בכלי SEO ←
+      </a>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div style="padding:16px 24px;border-top:1px solid #eee;text-align:center;">
+    <p style="margin:0;font-size:11px;color:#bbb;">Autonomous — Building Systems, Creating Habits</p>
+    <p style="margin:4px 0 0;font-size:11px;color:#bbb;">autobiz.digital</p>
+  </div>
+
+</div>
+
+</body>
+</html>
