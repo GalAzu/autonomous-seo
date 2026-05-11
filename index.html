@@ -1819,6 +1819,61 @@ function escapeAttrJs(str) {
 
 const SKIP_EXTENSIONS = /\.(jpg|jpeg|png|gif|svg|webp|avif|pdf|css|js|ico|woff2?|ttf|eot|mp4|mp3|zip|rar|gz|xml|json|txt|map)$/i;
 
+// Fetch sitemap paths for crawl seeding. Handles <urlset> and <sitemapindex>
+// (Wix, Yoast, RankMath nest sub-sitemaps). Filters to baseHost. Returns
+// { paths: [normalized paths], entries: [for scannedData.sitemap] }.
+async function fetchSitemapPaths(baseUrl, log) {
+  const baseHost = new URL(baseUrl).hostname;
+  const entries = [];
+  const paths = new Set();
+  const parseUrlset = (xml) => {
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    doc.querySelectorAll('url').forEach(u => {
+      const loc = u.querySelector('loc')?.textContent?.trim() || '';
+      if (!loc) return;
+      try {
+        const parsed = new URL(loc);
+        if (parsed.hostname !== baseHost) return;
+        const path = normalizePath(parsed.pathname);
+        paths.add(path);
+        entries.push({
+          url: path.endsWith('/') ? path : path + '/',
+          priority: u.querySelector('priority')?.textContent || '0.7',
+          changefreq: u.querySelector('changefreq')?.textContent || 'monthly',
+          lastmod: (u.querySelector('lastmod')?.textContent || new Date().toISOString()).split('T')[0]
+        });
+      } catch (e) {}
+    });
+  };
+  const parseIndex = async (xml) => {
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const childUrls = [];
+    doc.querySelectorAll('sitemap > loc').forEach(l => {
+      const u = l.textContent?.trim();
+      if (u) childUrls.push(u);
+    });
+    // Cap child sitemaps to avoid pathological blowup
+    for (const childUrl of childUrls.slice(0, 5)) {
+      const childXml = await fetchWithProxy(childUrl);
+      if (childXml && childXml.includes('<urlset')) parseUrlset(childXml);
+    }
+  };
+  for (const candidate of ['/sitemap.xml', '/sitemap_index.xml']) {
+    const xml = await fetchWithProxy(baseUrl + candidate);
+    if (!xml) continue;
+    if (xml.includes('<sitemapindex')) {
+      if (log) log(`  ✓ sitemap index found at ${candidate}`, 'ok');
+      await parseIndex(xml);
+      break;
+    } else if (xml.includes('<urlset')) {
+      if (log) log(`  ✓ ${candidate} found`, 'ok');
+      parseUrlset(xml);
+      break;
+    }
+  }
+  return { paths: [...paths], entries };
+}
+
 function safeClipboard(text) {
   try { navigator.clipboard.writeText(text); }
   catch (e) {
@@ -2270,11 +2325,24 @@ async function _doScan(rawUrl, name) {
 
   document.getElementById('scan-status').textContent = '\u05E1\u05D5\u05E8\u05E7 \u05E2\u05DE\u05D5\u05D3\u05D9\u05DD \u05E4\u05E0\u05D9\u05DE\u05D9\u05D9\u05DD...';
 
-  // 2. Crawl discovered pages (up to 20)
+  // 2. Fetch sitemap upfront so we can seed crawl from it (critical for
+  // JS-rendered sites like Wix where homepage HTML has no <a> links).
+  scanLog('\u25B6 Checking sitemap.xml...', 'info');
+  const { paths: sitemapPaths, entries: sitemapUrls } = await fetchSitemapPaths(baseUrl, scanLog);
+  if (sitemapUrls.length > 0) {
+    scanLog(`  \u2713 sitemap parsed \u2014 ${sitemapUrls.length} URLs available for discovery`, 'ok');
+  } else {
+    scanLog('  \u26A0 No sitemap found', 'warn');
+  }
+
+  if (homeData.links.length === 0 && sitemapPaths.length === 0) {
+    scanLog('  \u26A0 No internal links in homepage HTML and no sitemap \u2014 site may be JavaScript-rendered (Wix/SPA). Scan limited to homepage.', 'warn');
+  }
+
+  // 3. Crawl discovered pages (up to 20 seeds, cap at 30 total)
   const discoveredPages = [{ path: '/', title: homeData.title, description: homeData.metaDesc, canonical: homeData.canonical, ogTitle: homeData.ogTitle, ogDesc: homeData.ogDesc, ogImage: homeData.ogImage || '', headings: homeData.headings, schemas: homeData.schemas.map(s => s['@type'] || 'Unknown'), keywords: homeData.extractedKeywords || [], images: homeData.images || [], outgoingLinks: homeData.links.length, linkPaths: homeData.links.map(l => normalizePath(l)), noindex: homeData.noindex || false, geoSignals: homeData.geoSignals || null, techSignals: homeData.techSignals || null, scanStatus: 'success' }];
   const visited = new Set(['/']);
-  const toVisit = homeData.links
-    .map(l => normalizePath(l))
+  const toVisit = [...homeData.links.map(l => normalizePath(l)), ...sitemapPaths]
     .filter(l => l !== '/' && !l.includes('?') && !SKIP_EXTENSIONS.test(l) && !visited.has(l))
     .filter((v, i, a) => a.indexOf(v) === i) // dedupe
     .slice(0, 20);
@@ -2343,31 +2411,7 @@ async function _doScan(rawUrl, name) {
     });
   }
 
-  // 3. Try fetching sitemap
-  scanLog('\u25B6 Checking sitemap.xml...', 'info');
-  const sitemapHtml = await fetchWithProxy(baseUrl + '/sitemap.xml');
-  let sitemapUrls = [];
-  if (sitemapHtml && sitemapHtml.includes('<urlset')) {
-    const sParser = new DOMParser();
-    const sDoc = sParser.parseFromString(sitemapHtml, 'text/xml');
-    sDoc.querySelectorAll('url').forEach(u => {
-      const loc = u.querySelector('loc')?.textContent || '';
-      const priority = u.querySelector('priority')?.textContent || '0.7';
-      const changefreq = u.querySelector('changefreq')?.textContent || 'monthly';
-      const lastmod = u.querySelector('lastmod')?.textContent || new Date().toISOString().split('T')[0];
-      if (loc) {
-        try {
-          const path = new URL(loc).pathname.replace(/\/+$/, '') || '/';
-          sitemapUrls.push({ url: path.endsWith('/') ? path : path + '/', priority, changefreq, lastmod: lastmod.split('T')[0] });
-        } catch (e) {}
-      }
-    });
-    scanLog(`  \u2713 sitemap.xml found with ${sitemapUrls.length} URLs`, 'ok');
-  } else {
-    scanLog('  \u26A0 No sitemap.xml found', 'warn');
-  }
-
-  // 4. Try fetching robots.txt
+  // 4. Try fetching robots.txt (sitemap already fetched in step 2)
   scanLog('\u25B6 Checking robots.txt...', 'info');
   const robotsTxt = await fetchWithProxy(baseUrl + '/robots.txt');
   let robots = '';
@@ -5379,8 +5423,12 @@ async function rescanProject() {
     const homeData = extractFromHTML(homeHtml, p.url);
     const scannedPages = [{ path: '/', ...homeData, links: homeData.links.map(l => normalizePath(l)) }];
 
+    // Fetch sitemap upfront to seed crawl (handles JS-rendered sites like Wix)
+    statusText.textContent = 'בודק sitemap...';
+    const { paths: sitemapPaths, entries: sitemapEntries } = await fetchSitemapPaths(p.url, null);
+
     const visited = new Set(['/']);
-    const toVisit = homeData.links.map(l => normalizePath(l))
+    const toVisit = [...homeData.links.map(l => normalizePath(l)), ...sitemapPaths]
       .filter(l => l !== '/' && !l.includes('?') && !SKIP_EXTENSIONS.test(l) && !visited.has(l))
       .filter((v, i, a) => a.indexOf(v) === i).slice(0, 20);
 
@@ -5489,29 +5537,8 @@ async function rescanProject() {
       }
     });
 
-    // Update sitemap.xml if found
-    statusText.textContent = 'בודק sitemap...';
-    const sitemapHtml = await fetchWithProxy(p.url + '/sitemap.xml');
-    if (sitemapHtml && sitemapHtml.includes('<urlset')) {
-      const sParser = new DOMParser();
-      const sDoc = sParser.parseFromString(sitemapHtml, 'text/xml');
-      const newSitemap = [];
-      sDoc.querySelectorAll('url').forEach(u => {
-        const loc = u.querySelector('loc')?.textContent || '';
-        if (loc) {
-          try {
-            const path = new URL(loc).pathname.replace(/\/+$/, '') || '/';
-            newSitemap.push({
-              url: path.endsWith('/') ? path : path + '/',
-              priority: u.querySelector('priority')?.textContent || '0.7',
-              changefreq: u.querySelector('changefreq')?.textContent || 'monthly',
-              lastmod: (u.querySelector('lastmod')?.textContent || new Date().toISOString()).split('T')[0]
-            });
-          } catch (e) {}
-        }
-      });
-      if (newSitemap.length > 0) p.sitemap = newSitemap;
-    }
+    // Update sitemap from already-fetched entries (sitemap fetched upfront for crawl seeding)
+    if (sitemapEntries.length > 0) p.sitemap = sitemapEntries;
 
     // Update robots.txt
     const robotsTxt = await fetchWithProxy(p.url + '/robots.txt');
