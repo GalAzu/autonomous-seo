@@ -1819,6 +1819,13 @@ function escapeAttrJs(str) {
 
 const SKIP_EXTENSIONS = /\.(jpg|jpeg|png|gif|svg|webp|avif|pdf|css|js|ico|woff2?|ttf|eot|mp4|mp3|zip|rar|gz|xml|json|txt|map)$/i;
 
+// Treat apex and www. as the same site. Fixes scans where user enters
+// `example.com` but the canonical host (and sitemap entries) use `www.example.com`.
+function hostsMatch(a, b) {
+  const strip = h => (h || '').toLowerCase().replace(/^www\./, '');
+  return strip(a) === strip(b);
+}
+
 // Fetch sitemap paths for crawl seeding. Handles <urlset> and <sitemapindex>
 // (Wix, Yoast, RankMath nest sub-sitemaps). Filters to baseHost. Returns
 // { paths: [normalized paths], entries: [for scannedData.sitemap] }.
@@ -1833,7 +1840,7 @@ async function fetchSitemapPaths(baseUrl, log) {
       if (!loc) return;
       try {
         const parsed = new URL(loc);
-        if (parsed.hostname !== baseHost) return;
+        if (!hostsMatch(parsed.hostname, baseHost)) return;
         const path = normalizePath(parsed.pathname);
         paths.add(path);
         entries.push({
@@ -2020,7 +2027,7 @@ function extractFromHTML(html, baseUrl) {
       let resolved;
       if (href.startsWith('http')) { resolved = new URL(href); }
       else { resolved = new URL(href, baseUrl); }
-      if (resolved.hostname === baseHost) {
+      if (hostsMatch(resolved.hostname, baseHost)) {
         const path = normalizePath(resolved.pathname);
         links.add(path);
       }
